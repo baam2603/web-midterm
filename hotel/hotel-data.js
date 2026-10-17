@@ -7,12 +7,12 @@
 const CITIES = {
   dalat: {
     name: "Đà Lạt",
-    listHref: "dalat.html",
+    listHref: "destinations/dalat.html",
     theme: "dalat",
   },
   vungtau: {
     name: "Vũng Tàu",
-    listHref: "vungtau.html",
+    listHref: "destinations/vungtau.html",
     theme: "vungtau",
   },
 };

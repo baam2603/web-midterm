@@ -54,8 +54,8 @@
   /* ---------- Render ---------- */
   root.innerHTML = `
     <nav class="breadcrumb" aria-label="Điều hướng">
-      <a href="index1.html">Trang chủ</a>${icon("chevron_right")}
-      <a href="${city.listHref}">${esc(city.name)}</a>${icon("chevron_right")}
+      <a href="../index1.html">Trang chủ</a>${icon("chevron_right")}
+      <a href="../${city.listHref}">${esc(city.name)}</a>${icon("chevron_right")}
       <span class="current">${esc(hotel.name)}</span>
     </nav>
 
