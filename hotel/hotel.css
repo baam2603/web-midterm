@@ -14,7 +14,7 @@ body[data-city="dalat"] {
 body[data-city="vungtau"] {
   --c-deep: #1d3f66;
   --c-mid: #4f86c2;
-  --c-mist: #eef6f4;
+  --c-mist: #dfe4d5;
   --c-accent: #d7b56d;
   --c-on-accent: #1d2a3a;
 }
@@ -276,41 +276,350 @@ a {
   text-decoration: underline;
 }
 
-.book-card {
+/* ---------- Loại phòng ---------- */
+.rooms-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.rooms-head h2 {
+  margin-bottom: 0 !important;
+}
+.rooms-nav {
+  display: flex;
+  gap: 8px;
+}
+.rooms-nav[hidden] {
+  display: none;
+}
+.rooms-nav button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--c-deep);
+  cursor: pointer;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+.rooms-nav button:hover:not(:disabled) {
+  background: var(--c-deep);
+  color: #fff;
+}
+.rooms-nav button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+/* Danh sách phòng: hàng ngang, lướt được */
+.rooms {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+.rooms::-webkit-scrollbar {
+  display: none;
+}
+.rooms > .room {
+  flex: 0 0 calc((100% - 40px) / 3);
+  min-width: 270px;
+  scroll-snap-align: start;
+}
+.room {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.room:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(23, 38, 28, 0.14);
+}
+.room__photo {
+  position: relative;
+  height: 180px;
+  background: linear-gradient(165deg, var(--c-mid) 0%, var(--c-deep) 100%);
+}
+.room:nth-child(even) .room__photo {
+  background: linear-gradient(165deg, var(--c-mist) 0%, var(--c-mid) 100%);
+}
+.room__photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.room__badge {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(20, 32, 24, 0.72);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+.room__badge--warn {
+  left: auto;
+  right: 10px;
+  background: #9c2b1f;
+}
+.room__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: 16px;
 }
-.book-card__price small {
-  display: block;
-  font-size: 0.75rem;
-  color: rgba(28, 26, 22, 0.6);
-}
-.book-card__price strong {
-  font-family: "Fraunces", serif;
-  font-size: 1.5rem;
-  color: var(--c-deep);
+.room__body h3 {
+  font-size: 1.1rem;
   font-weight: 560;
+  color: var(--c-deep);
+  line-height: 1.3;
+  margin-bottom: 10px;
 }
-.book-card__price span {
-  font-size: 0.8rem;
-  color: rgba(28, 26, 22, 0.6);
+.room__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: rgba(28, 26, 22, 0.75);
 }
-.btn-book {
-  width: 100%;
-  margin-top: 12px;
-  padding: 13px 18px;
+.room__meta .material-symbols-rounded {
+  color: var(--c-mid);
+  font-size: 1.15rem;
+}
+.room__features {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0;
+  padding: 0;
+}
+.room__features li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--c-mist);
+  color: var(--c-deep);
+  font-size: 0.78rem;
+}
+.room__features .material-symbols-rounded {
+  color: var(--c-mid);
+  font-size: 0.95rem;
+}
+.room__perks {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 12px 0 0;
+  border-top: 1px dashed var(--line-strong);
+}
+.room__perks li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+.room__perks .is-yes {
+  color: #2f7a43;
+  font-weight: 500;
+}
+.room__perks .is-no {
+  color: rgba(28, 26, 22, 0.5);
+}
+.room__foot {
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.room__price s {
+  display: block;
+  font-size: 0.78rem;
+  color: rgba(28, 26, 22, 0.5);
+}
+.room__price strong {
+  display: block;
+  font-family: "Fraunces", serif;
+  font-size: 1.3rem;
+  font-weight: 560;
+  color: var(--c-deep);
+}
+.room__price span {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(28, 26, 22, 0.55);
+}
+.room__btn {
+  flex-shrink: 0;
+  padding: 10px 18px;
   border: none;
   border-radius: var(--radius-sm);
   background: var(--c-accent);
   color: var(--c-on-accent);
   font-family: "Be Vietnam Pro", sans-serif;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: filter 0.2s var(--ease), transform 0.2s var(--ease);
+  transition: filter 0.2s var(--ease);
 }
-.btn-book:hover {
+.room__btn:hover {
   filter: brightness(0.92);
-  transform: translateY(-1px);
+}
+.room__detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin: -6px 0 16px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--c-deep);
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.room__detail:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Khối tiện nghi nổi bật (aside) ---------- */
+.highlight-card {
+  padding: 16px;
+}
+.highlight-card h3 {
+  font-size: 1rem;
+  font-weight: 560;
+  color: var(--c-deep);
+  margin-bottom: 12px;
+}
+.highlight-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.highlight-card li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+}
+.nearby__dist {
+  margin-left: auto;
+  padding-left: 8px;
+  flex-shrink: 0;
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--c-deep);
+  white-space: nowrap;
+}
+.highlight-card .material-symbols-rounded {
+  color: var(--c-mid);
+  font-size: 1.2rem;
+}
+
+/* ---------- Popup chi tiết phòng ---------- */
+.room-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(14, 22, 17, 0.7);
+}
+.room-modal[hidden] {
+  display: none;
+}
+.room-modal__box {
+  position: relative;
+  width: min(640px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--paper);
+  border-radius: var(--radius-md);
+}
+.room-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(20, 32, 24, 0.7);
+  color: #fff;
+  cursor: pointer;
+}
+.room-modal__photo {
+  position: relative;
+  height: 260px;
+  background: linear-gradient(165deg, var(--c-mid) 0%, var(--c-deep) 100%);
+}
+.room-modal__photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.room-modal__body {
+  padding: 22px 24px 24px;
+}
+.room-modal__body h3 {
+  font-size: 1.35rem;
+  font-weight: 560;
+  color: var(--c-deep);
+  margin-bottom: 14px;
+}
+.room-modal__body h4 {
+  margin: 18px 0 10px;
+  font-size: 0.95rem;
+  color: var(--c-deep);
+}
+.room-modal__desc {
+  margin: 16px 0 0;
+  line-height: 1.7;
+  font-size: 0.92rem;
+  color: rgba(28, 26, 22, 0.82);
+}
+.room-modal__body .room__perks {
+  margin-top: 14px;
+}
+@media (max-width: 700px) {
+  .rooms > .room {
+    flex-basis: 82%;
+  }
 }
 
 /* ---------- Khối mô tả / thông số ---------- */
@@ -477,7 +786,7 @@ a {
   .aside {
     position: static;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 @media (max-width: 700px) {

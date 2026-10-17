@@ -51,6 +51,38 @@
   const mapEmbed = `https://www.google.com/maps?q=${mapQuery}&output=embed`;
   const mapLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
 
+  /* ---------- Loại phòng ---------- */
+  const rooms = hotel.rooms || [];
+  const roomCard = (r) => `
+    <article class="room">
+      <div class="room__photo">
+        ${r.image ? `<img src="${esc(r.image)}" alt="${esc(r.name)}" loading="lazy" onerror="this.remove()" />` : ""}
+        <span class="room__badge">${icon("square_foot")} ${r.area} m²</span>
+        ${r.left ? `<span class="room__badge room__badge--warn">Chỉ còn ${r.left} phòng</span>` : ""}
+      </div>
+      <div class="room__body">
+        <h3>${esc(r.name)}</h3>
+        <p class="room__meta">${icon("bed")} ${esc(r.bed)}</p>
+        <p class="room__meta">${icon("group")} Tối đa ${r.guests} khách</p>
+        <ul class="room__features">
+          ${r.features.map((f) => `<li>${icon(f.icon)} ${esc(f.label)}</li>`).join("")}
+        </ul>
+        <ul class="room__perks">
+          <li class="${r.breakfast ? "is-yes" : "is-no"}">${icon(r.breakfast ? "free_breakfast" : "no_meals")} ${r.breakfast ? "Gồm bữa sáng" : "Không gồm bữa sáng"}</li>
+          <li class="${r.refundable ? "is-yes" : "is-no"}">${icon(r.refundable ? "event_available" : "event_busy")} ${r.refundable ? "Hủy miễn phí" : "Không hoàn tiền"}</li>
+        </ul>
+        <button type="button" class="room__detail" data-detail="${esc(r.id)}">${icon("info")} Chi tiết phòng</button>
+        <div class="room__foot">
+          <div class="room__price">
+            ${r.oldPrice ? `<s>${money(r.oldPrice)}</s>` : ""}
+            <strong>${money(r.price)}</strong>
+            <span>/ đêm · chưa gồm thuế phí</span>
+          </div>
+          <button type="button" class="room__btn" data-room="${esc(r.id)}">Chọn phòng</button>
+        </div>
+      </div>
+    </article>`;
+
   /* ---------- Render ---------- */
   root.innerHTML = `
     <nav class="breadcrumb" aria-label="Điều hướng">
@@ -96,13 +128,14 @@
           <a class="rating-card__link" href="#reviews">Xem tất cả đánh giá ${icon("arrow_forward")}</a>
         </div>
 
-        <div class="card book-card">
-          <div class="book-card__price">
-            <small>Chỉ từ</small>
-            <strong>${money(hotel.priceFrom)}</strong> <span>/ đêm</span>
-          </div>
-          <button type="button" class="btn-book" id="bookNow">Đặt ngay</button>
-        </div>
+        ${(hotel.nearby || []).length
+          ? `<div class="card highlight-card">
+          <h3>Địa điểm lân cận</h3>
+          <ul>
+            ${hotel.nearby.slice(0, 4).map((p) => `<li>${icon(p.icon)} <span>${esc(p.name)}</span><b class="nearby__dist">${esc(p.distance)}</b></li>`).join("")}
+          </ul>
+        </div>`
+          : ""}
       </aside>
     </section>
 
@@ -133,6 +166,17 @@
         <ul class="rules">${hotel.rules.map((r) => `<li>${esc(r)}</li>`).join("")}</ul>
       </div>
 
+      <div class="desc-section" id="rooms">
+        <div class="rooms-head">
+          <h2>Chọn loại phòng</h2>
+          <div class="rooms-nav" hidden>
+            <button type="button" id="roomsPrev" aria-label="Phòng trước">${icon("chevron_left")}</button>
+            <button type="button" id="roomsNext" aria-label="Phòng sau">${icon("chevron_right")}</button>
+          </div>
+        </div>
+        ${rooms.length ? `<div class="rooms" id="roomsTrack">${rooms.map(roomCard).join("")}</div>` : `<p>Hiện chưa có thông tin phòng.</p>`}
+      </div>
+
       <div class="desc-section" id="reviews">
         <h2>Đánh giá của khách</h2>
         <p>Khu vực đánh giá sẽ hiển thị tại đây khi có dữ liệu.</p>
@@ -140,10 +184,96 @@
     </section>
   `;
 
-  /* ---------- Nút Đặt ngay ---------- */
-  document.getElementById("bookNow").addEventListener("click", () => {
+  /* ---------- Chọn phòng ---------- */
+  function goBooking(roomId) {
     // TODO: đổi sang trang đặt phòng thật của bạn
-    location.href = `booking.html?city=${encodeURIComponent(cityKey)}&id=${encodeURIComponent(hotelId)}`;
+    location.href = `booking.html?city=${encodeURIComponent(cityKey)}&id=${encodeURIComponent(hotelId)}&room=${encodeURIComponent(roomId)}`;
+  }
+
+  /* ---------- Carousel loại phòng (mũi tên hiện khi phòng bị tràn) ---------- */
+  const track = document.getElementById("roomsTrack");
+  if (track) {
+    const prevBtn = document.getElementById("roomsPrev");
+    const nextBtn = document.getElementById("roomsNext");
+    const nav = prevBtn.parentElement;
+    const step = () => {
+      const card = track.querySelector(".room");
+      return card ? card.offsetWidth + 20 : 300;
+    };
+    const updateArrows = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      nav.hidden = max <= 4;
+      prevBtn.disabled = track.scrollLeft <= 4;
+      nextBtn.disabled = track.scrollLeft >= max - 4;
+    };
+    prevBtn.addEventListener("click", () => track.scrollBy({ left: -step(), behavior: "smooth" }));
+    nextBtn.addEventListener("click", () => track.scrollBy({ left: step(), behavior: "smooth" }));
+    track.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", updateArrows);
+    updateArrows();
+  }
+
+  /* ---------- Popup chi tiết phòng ---------- */
+  const modal = document.createElement("div");
+  modal.className = "room-modal";
+  modal.hidden = true;
+  document.body.appendChild(modal);
+
+  function openRoom(id) {
+    const r = rooms.find((x) => x.id === id);
+    if (!r) return;
+    modal.innerHTML = `
+      <div class="room-modal__box" role="dialog" aria-modal="true" aria-label="${esc(r.name)}">
+        <button type="button" class="room-modal__close" aria-label="Đóng">${icon("close")}</button>
+        <div class="room-modal__photo">
+          ${r.image ? `<img src="${esc(r.image)}" alt="${esc(r.name)}" onerror="this.remove()" />` : ""}
+        </div>
+        <div class="room-modal__body">
+          <h3>${esc(r.name)}</h3>
+          <div class="facts">
+            <div class="fact">${icon("square_foot")}<div><span class="fact__label">Diện tích</span><span class="fact__value">${r.area} m²</span></div></div>
+            <div class="fact">${icon("bed")}<div><span class="fact__label">Giường</span><span class="fact__value">${esc(r.bed)}</span></div></div>
+            <div class="fact">${icon("group")}<div><span class="fact__label">Sức chứa</span><span class="fact__value">Tối đa ${r.guests} khách</span></div></div>
+          </div>
+          ${r.desc ? `<p class="room-modal__desc">${esc(r.desc)}</p>` : ""}
+          <h4>Tiện nghi trong phòng</h4>
+          <ul class="room__features">${r.features.map((f) => `<li>${icon(f.icon)} ${esc(f.label)}</li>`).join("")}</ul>
+          <ul class="room__perks">
+            <li class="${r.breakfast ? "is-yes" : "is-no"}">${icon(r.breakfast ? "free_breakfast" : "no_meals")} ${r.breakfast ? "Gồm bữa sáng" : "Không gồm bữa sáng"}</li>
+            <li class="${r.refundable ? "is-yes" : "is-no"}">${icon(r.refundable ? "event_available" : "event_busy")} ${r.refundable ? "Hủy miễn phí" : "Không hoàn tiền"}</li>
+          </ul>
+          <div class="room__foot">
+            <div class="room__price">
+              ${r.oldPrice ? `<s>${money(r.oldPrice)}</s>` : ""}
+              <strong>${money(r.price)}</strong>
+              <span>/ đêm · chưa gồm thuế phí</span>
+            </div>
+            <button type="button" class="room__btn" data-room="${esc(r.id)}">Chọn phòng</button>
+          </div>
+        </div>
+      </div>`;
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function closeRoom() {
+    modal.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal || e.target.closest(".room-modal__close")) return closeRoom();
+    const pick = e.target.closest("[data-room]");
+    if (pick) goBooking(pick.dataset.room);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.hidden) closeRoom();
+  });
+
+  root.addEventListener("click", (e) => {
+    const detail = e.target.closest(".room__detail");
+    if (detail) return openRoom(detail.dataset.detail);
+    const pick = e.target.closest(".room__btn");
+    if (pick) goBooking(pick.dataset.room);
   });
 
   /* ---------- Lightbox ---------- */
