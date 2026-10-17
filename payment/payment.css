@@ -1,0 +1,181 @@
+
+Payment · CSS
+/* =====================================================================
+   payment.css — chỉ phần bổ sung; nền tảng nằm ở booking.css
+   ===================================================================== */
+ 
+/* ---------- Thời gian giữ phòng ---------- */
+.hold {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  border: 1px solid var(--line-strong);
+  border-left: 4px solid var(--c-accent);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 0.9rem;
+}
+.hold .material-symbols-rounded {
+  color: var(--c-accent);
+  font-size: 1.3rem;
+}
+.hold b {
+  font-variant-numeric: tabular-nums;
+  color: var(--c-deep);
+}
+.hold.is-low {
+  border-left-color: var(--danger);
+}
+.hold.is-low b,
+.hold.is-low .material-symbols-rounded {
+  color: var(--danger);
+}
+ 
+/* ---------- Thẻ xem trước ---------- */
+.cc {
+  display: grid;
+  gap: 22px;
+  max-width: 380px;
+  margin-bottom: 20px;
+  padding: 20px 22px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(150deg, var(--c-mid) 0%, var(--c-deep) 78%);
+  color: #fff;
+  box-shadow: 0 10px 24px -12px var(--c-deep);
+}
+.cc__chip {
+  width: 38px;
+  height: 28px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, var(--c-accent), #e9d29b);
+}
+.cc__num {
+  font-family: "Fraunces", serif;
+  font-size: 1.35rem;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+.cc__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+.cc__row span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cc .is-empty {
+  opacity: 0.55;
+}
+ 
+/* ---------- Chuyển khoản ---------- */
+.bank-list {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+.bank-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  font-size: 0.9rem;
+}
+.bank-list li + li {
+  border-top: 1px solid var(--line);
+}
+.bank-list span {
+  flex: 1;
+  color: rgba(28, 26, 22, 0.65);
+}
+.bank-list b {
+  font-weight: 600;
+  text-align: right;
+}
+.copy {
+  display: inline-flex;
+  padding: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--c-deep);
+  cursor: pointer;
+}
+.copy.is-copied {
+  background: var(--c-deep);
+  color: #fff;
+}
+ 
+/* ---------- Ví điện tử ---------- */
+.wallets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.wallet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.wallet input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.wallet .material-symbols-rounded {
+  color: var(--c-mid);
+  font-size: 1.5rem;
+}
+.wallet:has(input:checked) {
+  border-color: var(--c-deep);
+  box-shadow: 0 0 0 1px var(--c-deep);
+}
+.wallet:has(input:focus-visible) {
+  outline: 2px solid var(--c-mid);
+  outline-offset: 2px;
+}
+ 
+/* ---------- Khác ---------- */
+.secure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(28, 26, 22, 0.6);
+}
+.done__icon.is-warn {
+  background: var(--danger);
+}
+ 
+@media (max-width: 700px) {
+  .wallets {
+    grid-template-columns: 1fr;
+  }
+  .wallet {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 12px 14px;
+  }
+  .cc__num {
+    font-size: 1.1rem;
+  }
+}
+ 

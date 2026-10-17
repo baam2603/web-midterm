@@ -39,11 +39,22 @@
 
   /* ---------- Helpers ---------- */
   const esc = (s) =>
-    String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    String(s).replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
   const money = (n) => Math.round(n).toLocaleString("vi-VN") + "₫";
   const icon = (name) => `<i class="material-symbols-rounded">${name}</i>`;
   const pad = (n) => String(n).padStart(2, "0");
-  const toISO = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const toISO = (d) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const fromISO = (s) => {
     const [y, m, d] = s.split("-").map(Number);
     return new Date(y, m - 1, d);
@@ -54,7 +65,12 @@
     return x;
   };
   const fmtDate = (s) =>
-    fromISO(s).toLocaleDateString("vi-VN", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" });
+    fromISO(s).toLocaleDateString("vi-VN", {
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   const validISO = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s || "");
 
   const today = new Date();
@@ -82,16 +98,44 @@
     guests: 1,
     note: "",
     promo: true,
-    checkin: validISO(params.get("checkin")) ? params.get("checkin") : toISO(addDays(today, 1)),
-    checkout: validISO(params.get("checkout")) ? params.get("checkout") : toISO(addDays(today, 2)),
+    checkin: validISO(params.get("checkin"))
+      ? params.get("checkin")
+      : toISO(addDays(today, 1)),
+    checkout: validISO(params.get("checkout"))
+      ? params.get("checkout")
+      : toISO(addDays(today, 2)),
     coupon: null, // { code, ...rule }
     pay: "card",
     card: { name: "", number: "", exp: "", cvv: "" },
     code: "",
   };
-  if (fromISO(state.checkout) <= fromISO(state.checkin)) state.checkout = toISO(addDays(fromISO(state.checkin), 1));
+  if (fromISO(state.checkout) <= fromISO(state.checkin))
+    state.checkout = toISO(addDays(fromISO(state.checkin), 1));
 
-  const getNights = () => Math.round((fromISO(state.checkout) - fromISO(state.checkin)) / 864e5);
+  // Quay lại từ payment.html: điền sẵn thông tin đã nhập
+  try {
+    const d = JSON.parse(sessionStorage.getItem("threek_checkout") || "null");
+    if (d && d.hotelId === hotelId && d.roomId === roomId) {
+      [
+        "lastName",
+        "firstName",
+        "email",
+        "phone",
+        "guests",
+        "note",
+        "checkin",
+        "checkout",
+        "pay",
+      ].forEach((k) => {
+        if (d[k] !== undefined && d[k] !== null) state[k] = d[k];
+      });
+      if (d.coupon && COUPONS[d.coupon])
+        state.coupon = { code: d.coupon, ...COUPONS[d.coupon] };
+    }
+  } catch (_) {}
+
+  const getNights = () =>
+    Math.round((fromISO(state.checkout) - fromISO(state.checkin)) / 864e5);
 
   function calc() {
     const nights = Math.max(getNights(), 0);
@@ -99,7 +143,9 @@
     let discount = 0;
     if (state.coupon) {
       discount =
-        state.coupon.type === "percent" ? Math.round((base * state.coupon.value) / 100) : Math.min(state.coupon.value, base);
+        state.coupon.type === "percent"
+          ? Math.round((base * state.coupon.value) / 100)
+          : Math.min(state.coupon.value, base);
     }
     const taxable = base - discount;
     const tax = Math.round(taxable * TAX_RATE);
@@ -127,11 +173,16 @@
   const elLeft = $("#bkLeft");
 
   /* ---------- Stepper ---------- */
-  const STEPS = ["Thông tin khách hàng", "Chi tiết thanh toán", "Đã xác nhận đặt chỗ!"];
+  const STEPS = [
+    "Thông tin khách hàng",
+    "Chi tiết thanh toán",
+    "Đã xác nhận đặt chỗ!",
+  ];
   function renderStepper() {
     $("#bkStepper").innerHTML = STEPS.map((t, i) => {
       const n = i + 1;
-      const cls = n < state.step ? "is-done" : n === state.step ? "is-active" : "";
+      const cls =
+        n < state.step ? "is-done" : n === state.step ? "is-active" : "";
       return `<li class="${cls}" ${n < state.step && state.step < 3 ? `data-goto="${n}"` : ""}>
         <span class="stepper__dot">${n < state.step ? icon("check") : n}</span>
         <span class="stepper__label">${t}</span></li>`;
@@ -187,7 +238,19 @@
   }
 
   /* ---------- Form helpers ---------- */
-  const field = (label, key, { type = "text", ph = "", value = "", scope = "f", full = false, req = true, attrs = "" } = {}) => `
+  const field = (
+    label,
+    key,
+    {
+      type = "text",
+      ph = "",
+      value = "",
+      scope = "f",
+      full = false,
+      req = true,
+      attrs = "",
+    } = {},
+  ) => `
     <label class="field ${full ? "full" : ""}">
       <span>${label}${req ? " <b>*</b>" : ""}</span>
       <input type="${type}" data-${scope}="${key}" placeholder="${esc(ph)}" value="${esc(value)}" ${attrs} />
@@ -209,7 +272,10 @@
   /* ---------- Bước 1 ---------- */
   function step1HTML() {
     const guestOpts = Array.from({ length: room.guests }, (_, i) => i + 1)
-      .map((n) => `<option value="${n}" ${n === state.guests ? "selected" : ""}>${n} khách</option>`)
+      .map(
+        (n) =>
+          `<option value="${n}" ${n === state.guests ? "selected" : ""}>${n} khách</option>`,
+      )
       .join("");
     return `
       <div class="card">
@@ -260,13 +326,7 @@
       </label>`;
     let detail = "";
     if (state.pay === "card") {
-      detail = `
-        <div class="form-grid">
-          ${field("Tên chủ thẻ", "name", { scope: "c", ph: "NGUYEN VAN A", value: state.card.name, full: true, attrs: 'autocomplete="cc-name"' })}
-          ${field("Số thẻ", "number", { scope: "c", ph: "0000 0000 0000 0000", value: state.card.number, full: true, attrs: 'inputmode="numeric" autocomplete="cc-number" maxlength="23"' })}
-          ${field("Ngày hết hạn", "exp", { scope: "c", ph: "MM/YY", value: state.card.exp, attrs: 'inputmode="numeric" autocomplete="cc-exp" maxlength="5"' })}
-          ${field("CVV", "cvv", { scope: "c", ph: "123", value: state.card.cvv, attrs: 'inputmode="numeric" autocomplete="cc-csc" maxlength="4"' })}
-        </div>`;
+      detail = `<div class="pay-note">Bạn sẽ nhập thông tin thẻ ở trang thanh toán bảo mật ở bước tiếp theo.</div>`;
     } else if (state.pay === "bank") {
       detail = `<div class="pay-note">Sau khi xác nhận, bạn sẽ nhận hướng dẫn chuyển khoản qua email. Đơn đặt phòng được giữ trong 24 giờ chờ thanh toán.</div>`;
     } else {
@@ -287,7 +347,7 @@
 
       <div class="actions">
         <button type="button" class="btn btn--ghost" data-back>${icon("arrow_back")} Quay lại</button>
-        <button type="button" class="btn btn--primary" data-next>${icon("lock")} Xác nhận &amp; thanh toán</button>
+        <button type="button" class="btn btn--primary" data-next>${icon("lock")} Tiếp tục thanh toán</button>
       </div>`;
   }
 
@@ -311,7 +371,12 @@
   }
 
   function renderLeft() {
-    elLeft.innerHTML = state.step === 1 ? step1HTML() : state.step === 2 ? step2HTML() : step3HTML();
+    elLeft.innerHTML =
+      state.step === 1
+        ? step1HTML()
+        : state.step === 2
+          ? step2HTML()
+          : step3HTML();
     renderStepper();
     renderPrice();
     renderSummary();
@@ -337,10 +402,14 @@
     const e = {};
     if (!state.lastName.trim()) e.lastName = "Vui lòng nhập họ.";
     if (!state.firstName.trim()) e.firstName = "Vui lòng nhập tên.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email.trim())) e.email = "Email không hợp lệ.";
-    if (!/^(0|\+84)\d{9,10}$/.test(state.phone.replace(/[\s.\-]/g, ""))) e.phone = "Số điện thoại không hợp lệ.";
-    if (fromISO(state.checkin) < today) e.checkin = "Ngày nhận phòng không được ở quá khứ.";
-    if (getNights() < 1) e.checkout = "Ngày trả phòng phải sau ngày nhận phòng.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email.trim()))
+      e.email = "Email không hợp lệ.";
+    if (!/^(0|\+84)\d{9,10}$/.test(state.phone.replace(/[\s.\-]/g, "")))
+      e.phone = "Số điện thoại không hợp lệ.";
+    if (fromISO(state.checkin) < today)
+      e.checkin = "Ngày nhận phòng không được ở quá khứ.";
+    if (getNights() < 1)
+      e.checkout = "Ngày trả phòng phải sau ngày nhận phòng.";
     return e;
   }
 
@@ -350,7 +419,8 @@
     const { name, number, exp, cvv } = state.card;
     const digits = number.replace(/\D/g, "");
     if (!name.trim()) e.name = "Vui lòng nhập tên chủ thẻ.";
-    if (digits.length < 13 || digits.length > 19 || !luhn(digits)) e.number = "Số thẻ không hợp lệ.";
+    if (digits.length < 13 || digits.length > 19 || !luhn(digits))
+      e.number = "Số thẻ không hợp lệ.";
     const m = /^(\d{2})\/(\d{2})$/.exec(exp);
     if (!m || Number(m[1]) < 1 || Number(m[1]) > 12) {
       e.exp = "Dùng định dạng MM/YY.";
@@ -363,8 +433,12 @@
   }
 
   function showErrors(errs) {
-    elLeft.querySelectorAll(".field").forEach((f) => f.classList.remove("is-invalid"));
-    elLeft.querySelectorAll("[data-err]").forEach((em) => (em.textContent = ""));
+    elLeft
+      .querySelectorAll(".field")
+      .forEach((f) => f.classList.remove("is-invalid"));
+    elLeft
+      .querySelectorAll("[data-err]")
+      .forEach((em) => (em.textContent = ""));
     const keys = Object.keys(errs);
     keys.forEach((k) => {
       const em = elLeft.querySelector(`[data-err="${k}"]`);
@@ -416,13 +490,40 @@
     }
   }
 
+  function goCheckout() {
+    const draft = {
+      city: cityKey,
+      hotelId,
+      roomId: room.id,
+      checkin: state.checkin,
+      checkout: state.checkout,
+      guests: state.guests,
+      lastName: state.lastName,
+      firstName: state.firstName,
+      email: state.email,
+      phone: state.phone,
+      note: state.note,
+      coupon: state.coupon ? state.coupon.code : null,
+      pay: state.pay,
+      back: location.href,
+    };
+    try {
+      sessionStorage.setItem("threek_checkout", JSON.stringify(draft));
+    } catch (_) {}
+    location.href = "payment.html";
+  }
+
   /* ---------- Sự kiện ---------- */
   elLeft.addEventListener("input", (e) => {
     const t = e.target;
     if (t.dataset.c) {
       let v = t.value;
       if (t.dataset.c === "number") {
-        v = v.replace(/\D/g, "").slice(0, 19).replace(/(.{4})/g, "$1 ").trim();
+        v = v
+          .replace(/\D/g, "")
+          .slice(0, 19)
+          .replace(/(.{4})/g, "$1 ")
+          .trim();
       } else if (t.dataset.c === "exp") {
         v = v.replace(/\D/g, "").slice(0, 4);
         if (v.length > 2) v = v.slice(0, 2) + "/" + v.slice(2);
@@ -441,7 +542,10 @@
 
     if (k === "checkin" || k === "checkout") {
       if (validISO(state.checkin) && validISO(state.checkout)) {
-        if (k === "checkin" && fromISO(state.checkout) <= fromISO(state.checkin)) {
+        if (
+          k === "checkin" &&
+          fromISO(state.checkout) <= fromISO(state.checkin)
+        ) {
           state.checkout = toISO(addDays(fromISO(state.checkin), 1));
           const out = elLeft.querySelector('[data-f="checkout"]');
           if (out) out.value = state.checkout;
@@ -449,7 +553,11 @@
         const out = elLeft.querySelector('[data-f="checkout"]');
         if (out) out.min = toISO(addDays(fromISO(state.checkin), 1));
         const note = $("#nightsNote");
-        if (note) note.textContent = getNights() >= 1 ? `Tổng cộng ${getNights()} đêm.` : "Ngày trả phòng phải sau ngày nhận phòng.";
+        if (note)
+          note.textContent =
+            getNights() >= 1
+              ? `Tổng cộng ${getNights()} đêm.`
+              : "Ngày trả phòng phải sau ngày nhận phòng.";
         renderPrice();
         renderSummary();
       }
@@ -472,15 +580,7 @@
     if (state.step === 1) {
       if (showErrors(validate1())) goStep(2);
     } else if (state.step === 2) {
-      if (!showErrors(validate2())) return;
-      const btn = e.target.closest("[data-next]");
-      btn.disabled = true;
-      btn.textContent = "Đang xử lý...";
-      setTimeout(() => {
-        state.code = "TK" + Date.now().toString(36).toUpperCase().slice(-6);
-        saveBooking();
-        goStep(3);
-      }, 900);
+      goCheckout();
     }
   });
 
