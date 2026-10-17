@@ -1,0 +1,583 @@
+/* =====================================================================
+   booking.css — trang đặt phòng (dùng chung Đà Lạt / Vũng Tàu)
+   ===================================================================== */
+
+body[data-city="dalat"] {
+  --c-deep: #294534;
+  --c-mid: #4c7350;
+  --c-mist: #dfe4d5;
+  --c-accent: #b6862f;
+  --c-on-accent: #22331d;
+}
+body[data-city="vungtau"] {
+  --c-deep: #1d3f66;
+  --c-mid: #4f86c2;
+  --c-mist: #dfe4d5;
+  --c-accent: #d7b56d;
+  --c-on-accent: #1d2a3a;
+}
+
+:root {
+  --line: rgba(28, 26, 22, 0.16);
+  --line-strong: rgba(28, 26, 22, 0.32);
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --danger: #b3261e;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: "Be Vietnam Pro", sans-serif;
+  background: var(--c-mist);
+  color: var(--ink, #1c1a16);
+}
+h1,
+h2,
+h3 {
+  font-family: "Fraunces", serif;
+  margin: 0;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+.material-symbols-rounded {
+  font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24;
+  line-height: 1;
+  vertical-align: -0.15em;
+  user-select: none;
+}
+
+/* ---------- Khung trang ---------- */
+.booking-page {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 24px 32px 80px;
+}
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: rgba(28, 26, 22, 0.6);
+  margin-bottom: 14px;
+}
+.breadcrumb a:hover {
+  color: var(--ink, #1c1a16);
+}
+.breadcrumb .current {
+  color: var(--ink, #1c1a16);
+  font-weight: 500;
+}
+.breadcrumb .material-symbols-rounded {
+  font-size: 1.1rem;
+}
+.booking-title {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 560;
+  color: var(--c-deep);
+  margin-bottom: 22px;
+}
+
+/* ---------- Stepper ---------- */
+.stepper {
+  list-style: none;
+  display: flex;
+  margin: 0 0 26px;
+  padding: 0;
+}
+.stepper li {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: rgba(28, 26, 22, 0.55);
+  text-align: center;
+}
+.stepper li::after {
+  content: "";
+  position: absolute;
+  top: 13px;
+  left: calc(50% + 22px);
+  right: calc(-50% + 22px);
+  height: 3px;
+  border-radius: 2px;
+  background: var(--line);
+}
+.stepper li:last-child::after {
+  display: none;
+}
+.stepper li.is-done::after {
+  background: var(--c-deep);
+}
+.stepper__dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(28, 26, 22, 0.55);
+}
+.stepper__dot .material-symbols-rounded {
+  font-size: 1rem;
+}
+.stepper li.is-active .stepper__dot,
+.stepper li.is-done .stepper__dot {
+  background: var(--c-deep);
+  border-color: var(--c-deep);
+  color: #fff;
+}
+.stepper li.is-active,
+.stepper li.is-done {
+  color: var(--c-deep);
+  font-weight: 600;
+}
+.stepper li.is-done {
+  cursor: pointer;
+}
+
+/* ---------- Lưới chính ---------- */
+.booking-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+}
+.booking-left {
+  display: grid;
+  gap: 20px;
+}
+.booking-aside {
+  position: sticky;
+  top: 16px;
+  display: grid;
+  gap: 16px;
+}
+.card {
+  background: var(--paper, #f4f1e8);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+.card > h2 {
+  font-size: 1.3rem;
+  font-weight: 560;
+  color: var(--c-deep);
+  margin-bottom: 18px;
+}
+
+/* ---------- Form ---------- */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.form-grid .full {
+  grid-column: 1 / -1;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field > span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(28, 26, 22, 0.85);
+}
+.field > span b {
+  color: var(--danger);
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.92rem;
+  color: var(--ink, #1c1a16);
+}
+.field textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: 2px solid var(--c-mid);
+  outline-offset: 1px;
+  border-color: var(--c-mid);
+}
+.field__err {
+  display: none;
+  font-style: normal;
+  font-size: 0.78rem;
+  color: var(--danger);
+}
+.field.is-invalid input,
+.field.is-invalid select {
+  border-color: var(--danger);
+}
+.field.is-invalid .field__err {
+  display: block;
+}
+.field__hint {
+  font-size: 0.8rem;
+  color: rgba(28, 26, 22, 0.65);
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+.check input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--c-deep);
+}
+
+/* ---------- Phương thức thanh toán ---------- */
+.pay-options {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.pay-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.92rem;
+}
+.pay-opt input {
+  accent-color: var(--c-deep);
+}
+.pay-opt .material-symbols-rounded {
+  color: var(--c-mid);
+  font-size: 1.4rem;
+}
+.pay-opt small {
+  display: block;
+  color: rgba(28, 26, 22, 0.6);
+  font-size: 0.78rem;
+}
+.pay-opt:has(input:checked) {
+  border-color: var(--c-deep);
+  box-shadow: 0 0 0 1px var(--c-deep);
+}
+.pay-note {
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--c-mist);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+/* ---------- Chính sách hủy ---------- */
+.policy p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: rgba(28, 26, 22, 0.82);
+}
+.policy .tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+.policy .tag.is-yes {
+  color: #2f7a43;
+}
+.policy .tag.is-no {
+  color: var(--danger);
+}
+
+/* ---------- Nút ---------- */
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.btn--primary {
+  margin-left: auto;
+  background: var(--c-accent);
+  color: var(--c-on-accent);
+}
+.btn--ghost {
+  background: #fff;
+  color: var(--c-deep);
+  border: 1px solid var(--line-strong);
+}
+.btn:hover:not(:disabled) {
+  filter: brightness(0.93);
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ---------- Chi tiết giá ---------- */
+.price-card h2 {
+  font-size: 1.15rem;
+}
+.coupon {
+  display: flex;
+  gap: 8px;
+}
+.coupon input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.88rem;
+  text-transform: uppercase;
+}
+.coupon button {
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--c-deep);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.coupon-msg {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+}
+.coupon-msg.is-ok {
+  color: #2f7a43;
+}
+.coupon-msg.is-bad {
+  color: var(--danger);
+}
+.price-lines {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.price-lines li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+.price-lines small {
+  display: block;
+  color: rgba(28, 26, 22, 0.6);
+  font-size: 0.78rem;
+}
+.price-lines .is-discount {
+  color: #2f7a43;
+}
+.price-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-strong);
+  font-weight: 600;
+}
+.price-total strong {
+  font-family: "Fraunces", serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--c-deep);
+}
+.price-sub {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: rgba(28, 26, 22, 0.55);
+}
+
+/* ---------- Tóm tắt khách sạn ---------- */
+.summary-card {
+  padding: 0;
+  overflow: hidden;
+}
+.summary-card__photo {
+  position: relative;
+  height: 170px;
+  background: linear-gradient(165deg, var(--c-mid) 0%, var(--c-deep) 100%);
+}
+.summary-card__photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.summary-card__body {
+  padding: 18px 20px 20px;
+}
+.summary-card h3 {
+  font-size: 1.05rem;
+  font-weight: 560;
+  color: var(--c-deep);
+  margin-bottom: 12px;
+}
+.summary-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.summary-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.86rem;
+}
+.summary-list .material-symbols-rounded {
+  color: var(--c-mid);
+  font-size: 1.15rem;
+}
+.summary-list em {
+  display: block;
+  font-style: normal;
+  font-size: 0.74rem;
+  color: rgba(28, 26, 22, 0.6);
+}
+.summary-list span {
+  flex: 1;
+}
+.summary-list b {
+  font-weight: 600;
+  text-align: right;
+}
+
+/* ---------- Bước 3: xác nhận ---------- */
+.done {
+  text-align: center;
+}
+.done__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--c-deep);
+  color: #fff;
+  font-size: 2.2rem;
+  margin-bottom: 14px;
+}
+.done h2 {
+  margin-bottom: 8px !important;
+}
+.done p {
+  margin: 0 auto;
+  max-width: 460px;
+  line-height: 1.7;
+  font-size: 0.92rem;
+  color: rgba(28, 26, 22, 0.8);
+}
+.done__code {
+  display: inline-block;
+  margin: 18px 0;
+  padding: 10px 22px;
+  border: 2px dashed var(--c-mid);
+  border-radius: var(--radius-sm);
+  font-family: "Fraunces", serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.08em;
+  color: var(--c-deep);
+}
+.done__actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+.done__actions .btn--primary {
+  margin-left: 0;
+}
+
+.not-found {
+  text-align: center;
+  padding: 80px 16px;
+}
+.not-found h1 {
+  color: var(--c-deep);
+  margin-bottom: 12px;
+}
+.not-found a {
+  color: var(--c-deep);
+  text-decoration: underline;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px) {
+  .booking-grid {
+    grid-template-columns: 1fr;
+  }
+  .booking-aside {
+    position: static;
+  }
+}
+@media (max-width: 700px) {
+  .booking-page {
+    padding: 16px 16px 56px;
+  }
+  .card {
+    padding: 18px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .stepper li {
+    font-size: 0.74rem;
+  }
+}
