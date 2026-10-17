@@ -1,0 +1,20 @@
+{
+  "name": "dalat_main",
+  "version": "1.0.0",
+  "description": "",
+  "main": "header.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.duthu.net/S52400283/3kbooking.git"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.2"
+  }
+}

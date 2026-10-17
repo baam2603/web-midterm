@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>THREEK.COM — Bạn muốn đi đâu?</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style1.css" />
+    <link rel="stylesheet" href="header.css">
+  </head>
+  <body>
+    <div class="page">
+      <header id="site-header"></header>
+
+      <main class="split" id="split">
+        <section
+          class="panel panel--dalat"
+          data-dest="Đà Lạt"
+          tabindex="0"
+          role="button"
+          aria-label="Chọn Đà Lạt"
+        >
+          <div class="scenery">
+            <img
+              class="scenery-img"
+              src="sources/dalat3.jpg"
+              alt="Đà Lạt"
+              onerror="this.style.display = 'none'"
+            />
+          </div>
+          <div class="panel-content">
+            <h2>Đà Lạt</h2>
+            <p class="tagline">
+              Sương sớm len qua rừng thông, tách cà phê ấm tay giữa se lạnh phố
+              núi rừng bạt ngàn.
+            </p>
+            <button
+              class="cta"
+              type="button"
+              onclick="location.href = 'dalat.html'"
+            >
+              Tìm phòng Đà Lạt <i class="ri-arrow-right-line"></i>
+            </button>
+          </div>
+        </section>
+
+        <section
+          class="panel panel--vungtau"
+          data-dest="Vũng Tàu"
+          tabindex="0"
+          role="button"
+          aria-label="Chọn Vũng Tàu"
+        >
+          <div class="scenery">
+            <img
+              class="scenery-img"
+              src="sources/vungtau5.jpg"
+              alt="Vũng Tàu"
+              onerror="this.style.display = 'none'"
+            />
+          </div>
+          <div class="panel-content">
+            <h2>Vũng Tàu</h2>
+            <p class="tagline">
+              Gió lộng vị muối, nắng trải dài trên cát, tối đến ngồi ăn hải sản
+              nhìn ra khơi xa mênh mông.
+            </p>
+
+            <button
+              class="cta"
+              type="button"
+              onclick="location.href = 'vungtau.html'"
+            >
+              Tìm phòng Vũng Tàu <i class="ri-arrow-right-line"></i>
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="header.js"></script>
+    <script>
+      mountHeader('site-header', {
+        logoHref: 'index1.html'
+      });
+    </script>
+    <script src="auth-service.js"></script>
+    <script src="script1.js"></script>
+  </body>
+</html>

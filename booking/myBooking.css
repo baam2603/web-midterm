@@ -1,0 +1,352 @@
+:root {
+  --ink: #1c1a16;
+  --paper: #f3f0e7;
+  --dl-deep: #f0b350;
+  --dl-mid: #5f8a5b;
+  --dl-mist: #e9ecdf;
+  --dl-gold: #d7b56d;
+  --line: rgba(28, 26, 22, 0.12);
+  --shadow: 0 10px 26px rgba(23, 38, 28, 0.12);
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@keyframes contentIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Nền chung — giống index1 (style1.css) ---------- */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: "Be Vietnam Pro", sans-serif;
+  background: var(--dl-mist);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+h1,
+h2,
+h3 {
+  font-family: "Fraunces", serif;
+  margin: 0;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Khung trang: nền xanh thông như .auth-main ---------- */
+.bookings {
+  flex: 1;
+  padding: clamp(28px, 5vw, 56px) 20px 72px;
+  background: var(--dl-mist);
+}
+.bookings__inner {
+  max-width: 860px;
+  margin: 0 auto;
+  animation: contentIn 0.6s var(--ease) both;
+}
+.bookings h1 {
+  font-size: clamp(1.8rem, 3vw + 0.8rem, 2.6rem);
+  font-weight: 560;
+  color: var(black);
+}
+.bookings__sub {
+  margin: 8px 0 28px;
+  color: rgba(28, 26, 22, 0.65);
+  line-height: 1.55;
+}
+
+/* ---------- Tabs ---------- */
+.tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 22px;
+}
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin-bottom: -1px;
+  font:
+    500 0.95rem "Be Vietnam Pro",
+    sans-serif;
+  color: rgba(28, 26, 22, 0.6);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+.tab:hover {
+  color: var(--ink);
+}
+.tab.is-active {
+  color: var(--dl-deep);
+  border-bottom-color: var(--dl-deep);
+}
+.tab:focus-visible {
+  outline: 2px solid var(--dl-deep);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.tab__count {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+/* ---------- Thẻ đặt phòng (giữ nền paper, chữ ink) ---------- */
+.booking-card {
+  display: flex;
+  gap: 18px;
+  padding: 14px;
+  margin-bottom: 16px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.booking-card__photo {
+  flex: 0 0 150px;
+  min-height: 130px;
+  border-radius: 12px;
+}
+.photo--pine {
+  background: #5f8a5b;
+}
+.photo--mist {
+  background: #cdd6c2;
+}
+.photo--valley {
+  background: var(--dl-gold);
+}
+.photo--sea {
+  background: #a7c6ec;
+}
+
+.booking-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.booking-card__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+.booking-card__top h3 {
+  font-size: 1.1rem;
+}
+.booking-card__addr {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: rgba(28, 26, 22, 0.6);
+}
+
+.badge {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.badge--confirmed {
+  background: #9eecb9;
+  color: #0e2b19;
+}
+.badge--pending {
+  background: #fdf0cf;
+  color: #7a5a10;
+}
+.badge--completed {
+  background: var(--dl-mist);
+  color: var(--dl-deep);
+  border: 1px solid var(--line);
+}
+.badge--cancelled {
+  background: #fbe6e2;
+  color: #9c2b1f;
+}
+
+.booking-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  font-size: 0.85rem;
+  color: rgba(28, 26, 22, 0.75);
+}
+.booking-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.booking-card__meta i {
+  color: var(--dl-mid);
+}
+
+.booking-card__bottom {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.booking-card__code {
+  font-size: 0.78rem;
+  color: rgba(28, 26, 22, 0.55);
+}
+.booking-card__price {
+  font:
+    560 1.15rem "Fraunces",
+    serif;
+  color: var(--dl-deep);
+}
+.booking-card__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-ghost,
+.btn-solid,
+.btn-danger {
+  font:
+    500 0.85rem "Be Vietnam Pro",
+    sans-serif;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    transform 0.2s var(--ease),
+    background 0.2s var(--ease),
+    color 0.2s var(--ease);
+}
+.btn-solid {
+  background: var(--dl-deep);
+  border-color: var(--dl-deep);
+  color: var(--paper);
+}
+.btn-danger {
+  border-color: #9c2b1f;
+  color: #9c2b1f;
+}
+.btn-danger:hover {
+  background: #9c2b1f;
+  color: #fff;
+}
+.btn-ghost:hover,
+.btn-solid:hover {
+  transform: translateY(-2px);
+}
+.booking-card.is-cancelled .booking-card__photo {
+  filter: grayscale(0.8);
+  opacity: 0.7;
+}
+
+/* ---------- Trạng thái rỗng ---------- */
+.empty {
+  text-align: center;
+  padding: 48px 20px;
+  border-radius: 16px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.empty i {
+  font-size: 2rem;
+  color: var(--dl-mid);
+}
+.empty h3 {
+  margin: 10px 0 6px;
+  font-size: 1.15rem;
+}
+.empty p {
+  margin: 0 0 18px;
+  color: rgba(28, 26, 22, 0.6);
+  font-size: 0.9rem;
+}
+.empty .btn-solid {
+  display: inline-block;
+}
+
+/* ---------- Toast (giống index) ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 34px;
+  transform: translate(-50%, 20px);
+  max-width: min(90vw, 420px);
+  text-align: center;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.3s var(--ease),
+    transform 0.3s var(--ease);
+  z-index: 50;
+}
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 600px) {
+  .booking-card {
+    flex-direction: column;
+  }
+  .booking-card__photo {
+    flex-basis: 120px;
+    width: 100%;
+  }
+  .booking-card__actions {
+    width: 100%;
+  }
+  .booking-card__actions button {
+    flex: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -1,0 +1,402 @@
+:root {
+  --ink: #1c1a16;
+  --paper: #f3f0e7;
+  --header-bg: #f3f0e7;
+
+  --dl-deep: white;
+  --dl-mid: #5f8a5b;
+  --dl-mist: #e9ecdf;
+  --dl-gold: #d7b56d;
+
+  --shadow: 0 10px 26px rgba(23, 38, 28, 0.12);
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@keyframes contentIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: "Be Vietnam Pro", sans-serif;
+  background: var(--ink);
+  color: var(--paper);
+}
+h1,
+h2,
+h3 {
+  font-family: "Fraunces", serif;
+  margin: 0;
+}
+
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Khung trang tài khoản ---------- */
+.profile-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  background: var(--dl-deep);
+}
+
+.profile-container {
+  width: 100%;
+  max-width: 520px;
+  background: var(--dl-deep);
+  color: var(--paper);
+  border-radius: 16px;
+  padding: clamp(28px, 4vw, 40px);
+  animation: contentIn 0.6s var(--ease) both;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+.auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  color: rgba(28, 26, 22, 0.65);
+  text-decoration: none;
+}
+.auth-back:hover {
+  color: var(--ink);
+}
+.auth-back .material-symbols-rounded {
+  font-size: 1.1rem;
+}
+
+/* ---------- Header của khối thông tin (avatar + tên) ---------- */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.profile-avatar-lg {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--dl-gold);
+  color: #22331d;
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.profile-header h1 {
+  font-size: clamp(1.4rem, 1.6vw + 1rem, 1.7rem);
+  font-weight: 560;
+}
+.profile-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.88rem;
+  color: rgba(28, 26, 22, 0.6);
+}
+
+/* ---------- Thông báo lỗi (ẩn mặc định, bật bằng class .show) ---------- */
+.profile-error {
+  display: none;
+  font-size: 0.85rem;
+  color: #9c2b1f;
+  background: #fbe6e2;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 18px;
+}
+.profile-error.show {
+  display: block;
+}
+
+/* ---------- Form thông tin cá nhân ---------- */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 32px;
+}
+.profile-field label {
+  color: var(--ink);
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.profile-field input {
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 0.95rem;
+  font-family: "Be Vietnam Pro", sans-serif;
+  border: 1px solid rgba(28, 26, 22, 0.25);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s var(--ease);
+}
+.profile-field input:focus {
+  border-color: var(--ink);
+}
+.profile-field input[readonly] {
+  background: rgba(28, 26, 22, 0.05);
+  color: rgba(28, 26, 22, 0.6);
+  cursor: not-allowed;
+}
+.profile-field__hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: rgba(247, 181, 51, 1);
+}
+.profile-field__row {
+  display: flex;
+  gap: 10px;
+}
+.profile-field__row input {
+  flex: 1;
+  min-width: 0;
+}
+.profile-field__row .btn-ghost {
+  flex-shrink: 0;
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: "Be Vietnam Pro", sans-serif;
+  border: none;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease);
+}
+.auth-submit:hover {
+  transform: translateY(-2px);
+}
+
+/* ---------- Khu vực nguy hiểm: xóa tài khoản ---------- */
+.profile-danger {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(28, 26, 22, 0.12);
+}
+.profile-danger h3 {
+  font-size: 1rem;
+  font-weight: 560;
+  color: #cc3e2e;
+}
+.profile-danger p {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: rgba(28, 26, 22, 0.6);
+  line-height: 1.5;
+}
+.auth-logout {
+  width: 100%;
+  padding: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-family: "Be Vietnam Pro", sans-serif;
+  border: 1px solid #cc3e2e;
+  border-radius: 999px;
+  background: transparent;
+  color: #cc3e2e;
+  cursor: pointer;
+  transition:
+    background 0.2s var(--ease),
+    color 0.2s var(--ease);
+}
+.auth-logout:hover {
+  background: #cc3e2e;
+  color: #fff;
+}
+
+/* ---------- Toast thông báo ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 34px;
+  transform: translate(-50%, 20px);
+  max-width: min(90vw, 420px);
+  text-align: center;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.3s var(--ease),
+    transform 0.3s var(--ease);
+  z-index: 50;
+}
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 420px) {
+  .profile-container {
+    border-radius: 12px;
+  }
+  .profile-header {
+    gap: 12px;
+  }
+  .profile-field__row {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-container,
+  .auth-submit,
+  .auth-logout,
+  .toast {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ---------- Liên kết tài khoản (giống Agoda) ---------- */
+.profile-link {
+  margin-bottom: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(28, 26, 22, 0.12);
+  color: var(--ink);
+}
+.profile-link__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.profile-link__head h2 {
+  font-size: 1.25rem;
+  font-weight: 560;
+}
+.profile-link__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #e6f4ea;
+  color: #166534;
+}
+.profile-link__desc {
+  margin: 8px 0 14px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(28, 26, 22, 0.6);
+}
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(28, 26, 22, 0.12);
+}
+.link-row__icon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background: var(--dl-mist);
+}
+.link-row__info {
+  flex: 1;
+  min-width: 0;
+}
+.link-row__name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.link-row__status {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: rgba(28, 26, 22, 0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.link-row.is-linked .link-row__status {
+  color: #166534;
+}
+.link-btn {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  font:
+    500 0.85rem "Be Vietnam Pro",
+    sans-serif;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease);
+}
+.link-btn:hover {
+  transform: translateY(-1px);
+}
+.link-btn--outline {
+  background: transparent;
+  color: var(--ink);
+}
+.link-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+  transform: none;
+}
+
+/* ---------- Bổ sung: nút lưu đặt sau khối liên kết ---------- */
+.auth-submit {
+  margin-bottom: 32px;
+}
+.link-row__icon svg {
+  width: 20px;
+  height: 20px;
+}
+.link-row__icon--fb {
+  background: #e7f0ff;
+}
+.profile-field__hint--info {
+  color: rgba(28, 26, 22, 0.55);
+}

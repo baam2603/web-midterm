@@ -1,0 +1,283 @@
+:root {
+  /* THREEK core tokens */
+  --ink: #1c1a16;
+  --paper: #f3f0e7;
+  --dl-gold: #d7b56d;
+  --vt-mid: #a7c6ec;
+  --vt-foam: #eef6f4;
+  --shadow: 0 10px 26px rgba(23, 38, 28, 0.12);
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@keyframes headerIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.site-header {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+  padding: clamp(12px, 2vw, 18px) clamp(16px, 4vw, 32px);
+  background: var(--paper);
+  color: var(--ink);
+  animation: headerIn 0.7s var(--ease) both;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1.2vw, 10px);
+  font-family: "Fraunces", serif;
+  font-weight: 560;
+  font-size: clamp(1.05rem, 1.6vw + 0.5rem, 1.7rem);
+  letter-spacing: 0.01em;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+}
+.brand i {
+  display: inline-flex;
+  align-items: center;
+  font-size: clamp(1.1rem, 1.3vw + 0.5rem, 1.5rem);
+}
+.img-logo {
+  width: clamp(26px, 4vw, 40px);
+  height: auto;
+  border-radius: 6px;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.btn-ghost-header,
+.btn-solid-header {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: clamp(1rem, 0.3vw + 0.72rem, 0.9rem);
+  padding: clamp(7px, 1vw, 9px) clamp(12px, 2vw, 18px);
+  border-radius: 999px;
+  border: 1px var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    transform 0.25s var(--ease),
+    background 0.25s var(--ease),
+    color 0.25s var(--ease);
+}
+.btn-ghost-header:hover,
+.btn-solid-header:hover {
+  transform: translateY(-2px);
+}
+
+.btn-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: clamp(0.82rem, 0.3vw + 0.75rem, 0.9rem);
+  padding: 6px 16px 6px 6px;
+  width: auto;
+  height: auto;
+  border-radius: 999px;
+  border: 1px var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    transform 0.25s var(--ease),
+    background 0.25s var(--ease);
+}
+.btn-profile:hover {
+  transform: translateY(-2px);
+  background: rgba(28, 26, 22, 0.06);
+}
+.btn-profile .avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--dl-gold);
+  color: #22331d;
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+/* ---------- Dropdown menu tài khoản ---------- */
+.user-menu {
+  position: relative;
+}
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 240px;
+  background: var(--paper);
+  border: 1px solid rgba(28, 26, 22, 0.12);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 8px;
+  z-index: 50;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition:
+    opacity 0.18s var(--ease),
+    transform 0.18s var(--ease),
+    visibility 0.18s;
+}
+.dropdown-menu.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.dropdown-item {
+    text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+.dropdown-item i {
+  font-size: 1rem;
+  color: var(--dl-mid);
+}
+.dropdown-item:hover {
+  background: var(--dl-mist);
+}
+.dropdown-item--danger {
+  color: #9c2b1f;
+}
+.dropdown-item--danger i {
+  color: #9c2b1f;
+}
+.dropdown-divider {
+  height: 1px;
+  background: rgba(28, 26, 22, 0.12);
+  margin: 6px 4px;
+}
+
+/* ---------- Breadcrumb (trang con) ---------- */
+.crumb {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: rgba(28, 26, 22, 0.6);
+}
+.crumb a:hover {
+  color: var(--ink);
+}
+.crumb span {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ---------- Chữ "Booking" giữa header (trang splash) ---------- */
+.text-booking {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: "Fraunces", serif;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  font-size: clamp(0.85rem, 3vw, 1.5rem);
+  max-width: clamp(160px, 42vw, 560px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) and (min-width: 641px) {
+  .site-header {
+    justify-content: center;
+    row-gap: 12px;
+  }
+  .brand {
+    flex: 1 1 auto;
+  }
+  .header-actions {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+}
+@media (max-width: 760px) {
+  .site-header {
+    padding: 14px 18px;
+    justify-content: center;
+    row-gap: 10px;
+  }
+  .brand {
+    flex: 1 1 auto;
+  }
+  .header-actions {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+}
+@media (max-width: 1024px), (max-width: 640px) {
+  .text-booking {
+    display: none;
+  }
+}
+@media (max-width: 420px) {
+  .brand {
+    font-size: 1.05rem;
+  }
+  .btn-solid {
+    padding: 8px 14px;
+  }
+}
+@media (max-width: 340px) {
+  .header-actions {
+    gap: 6px;
+  }
+  .btn-ghost,
+  .btn-solid {
+    padding: 7px 12px;
+  }
+  .btn-profile {
+    width: 34px;
+    height: 34px;
+  }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  .site-header {
+    padding: 8px 16px;
+  }
+  .text-booking {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header {
+    animation: none !important;
+  }
+}

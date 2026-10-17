@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đặt phòng của tôi — THREEK.COM</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="header.css" />
+    <link rel="stylesheet" href="myBooking.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header id="site-header"></header>
+
+      <main class="bookings">
+        <div class="bookings__inner">
+          <h1>Đặt phòng của tôi</h1>
+          <p class="bookings__sub">
+            Theo dõi chuyến đi sắp tới và xem lại những lần bạn đã lưu trú.
+          </p>
+
+          <div class="tabs" role="tablist" aria-label="Danh sách đặt phòng">
+            <button
+              class="tab is-active"
+              role="tab"
+              id="tab-upcoming"
+              aria-selected="true"
+              aria-controls="booking-list"
+              data-tab="upcoming"
+            >
+              Sắp tới <span class="tab__count" id="count-upcoming">0</span>
+            </button>
+            <button
+              class="tab"
+              role="tab"
+              id="tab-history"
+              aria-selected="false"
+              aria-controls="booking-list"
+              data-tab="history"
+            >
+              Lịch sử <span class="tab__count" id="count-history">0</span>
+            </button>
+          </div>
+
+          <section
+            id="booking-list"
+            class="booking-list"
+            role="tabpanel"
+            aria-live="polite"
+          ></section>
+        </div>
+      </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="header.js"></script>
+    <script>
+      mountHeader("site-header", { logoHref: "index1.html" });
+    </script>
+    <script src="auth-service.js"></script>
+    <script src="myBooking.js"></script>
+  </body>
+</html>

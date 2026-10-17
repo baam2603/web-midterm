@@ -1,0 +1,191 @@
+.pwm {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: "Be Vietnam Pro", sans-serif;
+}
+.pwm[hidden] {
+  display: none;
+}
+.pwm *,
+.pwm *::before,
+.pwm *::after {
+  box-sizing: border-box;
+}
+
+.pwm__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+.pwm__dialog {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: 92vh;
+  max-height: 92dvh;
+  overflow-y: auto;
+  background: #fff;
+  color: #1c1a16;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  animation: pwmIn 0.3s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+@keyframes pwmIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pwm__title {
+  margin: 0;
+  font-family: "Fraunces", serif;
+  font-size: 1.35rem;
+  font-weight: 560;
+}
+.pwm__desc {
+  margin: 6px 0 18px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(28, 26, 22, 0.6);
+}
+
+/* Thông báo lỗi */
+.pwm__error {
+  display: none;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #9c2b1f;
+  background: #fbe6e2;
+}
+.pwm__error.show {
+  display: block;
+}
+
+/* Form */
+.pwm__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.pwm__field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.pwm__wrap {
+  position: relative;
+}
+.pwm__wrap input {
+  width: 100%;
+  padding: 11px 64px 11px 14px;
+  font-size: 0.95rem;
+  font-family: "Be Vietnam Pro", sans-serif;
+  color: #1c1a16;
+  background: #fff;
+  border: 1px solid rgba(28, 26, 22, 0.25);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.pwm__wrap input:focus {
+  border-color: #1c1a16;
+}
+.pwm__toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  padding: 4px 6px;
+  border: none;
+  background: transparent;
+  font: 500 0.8rem "Be Vietnam Pro", sans-serif;
+  color: rgba(28, 26, 22, 0.65);
+  cursor: pointer;
+}
+.pwm__toggle:hover {
+  color: #1c1a16;
+}
+
+/* Thanh đo độ mạnh */
+.pwm__meter {
+  height: 4px;
+  margin-top: 8px;
+  border-radius: 4px;
+  background: rgba(28, 26, 22, 0.1);
+  overflow: hidden;
+}
+.pwm__meter span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: 4px;
+  background: #cc3e2e;
+  transition: width 0.25s, background 0.25s;
+}
+.pwm__meter span[data-level="2"] {
+  background: #e0a526;
+}
+.pwm__meter span[data-level="3"] {
+  background: #2f9e55;
+}
+.pwm__hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: rgba(28, 26, 22, 0.55);
+}
+
+/* Nút */
+.pwm__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.pwm__btn {
+  padding: 12px 22px;
+  font: 500 0.95rem "Be Vietnam Pro", sans-serif;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.pwm__btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.pwm__btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.pwm__btn--cancel {
+  border: 1px solid #1c1a16;
+  background: transparent;
+  color: #1c1a16;
+}
+.pwm__btn--submit {
+  flex: 1;
+  border: none;
+  background: #1c1a16;
+  color: #f3f0e7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pwm__dialog,
+  .pwm__btn,
+  .pwm__meter span {
+    animation: none !important;
+    transition: none !important;
+  }
+}

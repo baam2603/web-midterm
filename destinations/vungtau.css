@@ -1,0 +1,598 @@
+:root {
+ 
+
+  /* Vũng Tàu — biển, nắng, cát, hoàng hôn */
+  --vt-deep: #0f4c6b;
+  --vt-mid: #3e93a8;
+  --vt-mist: #dfe4d5;
+  --vt-gold: #f0b350;
+  --vt-clay: #3e93a8;
+
+  --line: rgba(23, 35, 43, 0.16);
+  --line-strong: rgba(23, 35, 43, 0.32);
+  --shadow: 0 10px 26px rgba(15, 55, 70, 0.16);
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --radius-sm: 4px;
+  --radius-md: 10px;
+
+  
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: "Be Vietnam Pro", sans-serif;
+  background: var(--vt-mist);
+  color: var(--ink);
+}
+h1,
+h2,
+h3 {
+  font-family: "Fraunces", serif;
+  margin: 0;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---------- Material Symbols (Rounded, đậm khối) — dùng chung toàn trang ---------- */
+.material-symbols-rounded {
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 500,
+    "GRAD" 0,
+    "opsz" 24;
+  line-height: 1;
+  vertical-align: -0.15em;
+  user-select: none;
+}
+
+/* ---------- Hero + search ---------- */
+.hero {
+  height: 400px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--vt-deep) 0%, #07202c 100%);
+  color: var(--paper);
+  padding: 46px 32px 0;
+}
+
+.background-hero {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* sáng ở giữa để đọc chữ rõ, tối dần lệch về phía dưới thay vì phủ đều hai đầu */
+  background: linear-gradient(
+    195deg,
+    rgba(9, 32, 43, 0.4) 0%,
+    rgba(9, 32, 43, 0.08) 42%,
+    rgba(9, 32, 43, 0.82) 100%
+  );
+  z-index: 1;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: clamp(3.4rem, 6vw, 5.2rem);
+  font-weight: 680;
+  letter-spacing: -0.01em;
+}
+.hero h1::after {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 3px;
+  margin: 16px auto 0;
+  background: var(--vt-gold);
+}
+.hero p {
+  margin: 16px auto 0;
+  max-width: 44ch;
+  line-height: 1.6;
+  color: rgba(245, 244, 238, 0.82);
+}
+
+.search-bar {
+  position: relative;
+  z-index: 2;
+  max-width: 980px;
+  margin: 30px auto 0;
+  transform: translateY(50%);
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  box-shadow: 0 16px 32px rgba(9, 32, 43, 0.22);
+  display: flex;
+  align-items: stretch;
+  padding: 6px 6px 6px 18px;
+  gap: 4px;
+  overflow: hidden;
+}
+.search-bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+ 
+}
+.field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 18px;
+  min-width: 0;
+}
+.field label {
+  font-size: 0.72rem;
+  color: rgba(23, 35, 43, 0.55);
+  margin-bottom: 4px;
+}
+.field input {
+  border: none;
+  background: transparent;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.95rem;
+  color: var(--ink);
+  outline: none;
+  width: 100%;
+}
+.field input::placeholder {
+  color: rgba(23, 35, 43, 0.4);
+}
+.field-divider {
+  width: 1px;
+  margin: 10px 0;
+  background: var(--line);
+}
+.search-submit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0 26px;
+  background: var(--vt-gold);
+  color: #22331d;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s var(--ease);
+}
+.search-submit:hover {
+  background: #d99735;
+}
+
+/* ---------- Content layout ---------- */
+.content {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 96px 32px 80px;
+  display: grid;
+  grid-template-columns: 272px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+/* ---------- Sidebar: một bảng liền mạch, chia bằng đường kẻ ---------- */
+.sidebar {
+  position: sticky;
+  top: 24px;
+}
+.sidebar-panel {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.panel-section {
+  padding: 18px 16px;
+}
+.panel-section + .panel-section {
+  border-top: 1px solid var(--line);
+}
+.panel-section__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--vt-deep);
+}
+.panel-section__head i {
+  font-size: 1.05rem;
+}
+.panel-section__head h3 {
+  font-size: 1rem;
+  font-weight: 560;
+}
+
+.map-canvas {
+  position: relative;
+  height: 130px;
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(135deg, var(--vt-mist) 25%, transparent 25%) -8px 0/16px
+      16px,
+    linear-gradient(225deg, var(--vt-mist) 25%, transparent 25%) -8px 0/16px
+      16px,
+    var(--vt-mid);
+  overflow: hidden;
+}
+.map-pin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  color: var(--vt-deep);
+  font-size: 1.6rem;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+.weather-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.weather-icon {
+  font-size: 2rem;
+  color: var(--vt-gold);
+}
+.weather-temp {
+  font-family: "Fraunces", serif;
+  font-size: 1.6rem;
+}
+.weather-desc {
+  font-size: 0.82rem;
+  color: rgba(23, 35, 43, 0.6);
+  flex-basis: 100%;
+}
+
+.filter-group + .filter-group {
+  margin-top: 18px;
+}
+.filter-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.price-range {
+  width: 100%;
+  accent-color: var(--vt-deep);
+}
+.price-range__scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: rgba(23, 35, 43, 0.55);
+  margin-top: 2px;
+}
+.star-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.star-filters label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.star-filters i {
+  font-size: 0.75rem;
+  color: var(--vt-gold);
+}
+.star-filters input {
+  accent-color: var(--vt-deep);
+}
+
+/* Loại chỗ ở / Vị trí & không khí — icon checklist */
+.check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.check-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--ink);
+}
+.check-list i {
+  font-size: 0.95rem;
+  color: var(--vt-mid);
+  flex-shrink: 0;
+}
+.check-list input {
+  accent-color: var(--vt-deep);
+}
+
+/* Tiện nghi nổi bật — tag viền mảnh, không fill pill */
+.chip-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  padding: 7px 12px 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: transparent;
+  color: rgba(23, 35, 43, 0.7);
+  cursor: pointer;
+  transition:
+    background 0.2s var(--ease),
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+.chip i {
+  font-size: 0.85rem;
+  color: var(--vt-clay);
+}
+.chip:has(input:checked) i {
+  color: var(--vt-clay);
+}
+.chip input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.chip:has(input:checked) {
+  background: rgba(217, 122, 85, 0.1);
+  border-color: var(--vt-clay);
+  color: var(--vt-clay);
+}
+
+/* ---------- Results ---------- */
+.results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-strong);
+  font-size: 0.92rem;
+}
+.sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(23, 35, 43, 0.6);
+}
+.sort select {
+  font-family: "Be Vietnam Pro", sans-serif;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* Danh sách khách sạn: hàng phân cách bằng đường kẻ, không phải thẻ nổi */
+.hotel-card {
+  display: flex;
+  gap: 20px;
+  padding: 22px 4px;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.2s var(--ease);
+}
+.hotel-card:first-child {
+  padding-top: 4px;
+}
+.hotel-card:hover {
+  background: rgba(15, 76, 107, 0.04);
+}
+.hotel-card__photo {
+  position: relative;
+  flex: 0 0 220px;
+  border-radius: var(--radius-md);
+  min-height: 160px;
+  overflow: hidden;
+}
+.hotel-card__photo::after {
+  /* dải nắng/sương mờ dưới chân ảnh */
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 38%;
+  background: linear-gradient(0deg, rgba(9, 32, 43, 0.35), transparent);
+}
+.hotel-card__photo--sea {
+  background: linear-gradient(165deg, #1c7a9c 0%, #0a3549 100%);
+}
+.hotel-card__photo--sand {
+  background: linear-gradient(165deg, #f2e4c8 0%, var(--vt-mid) 100%);
+}
+.hotel-card__photo--sunset {
+  background: linear-gradient(165deg, var(--vt-gold) 0%, #d97a55 100%);
+}
+
+.hotel-card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.hotel-card__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.hotel-card__top h3 {
+  font-size: 1.15rem;
+}
+.hotel-card__addr {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: rgba(23, 35, 43, 0.6);
+}
+.hotel-card__rating {
+  text-align: right;
+  flex-shrink: 0;
+}
+.hotel-card__rating .score {
+  display: inline-block;
+  background: var(--vt-deep);
+  color: var(--paper);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: 3px 9px;
+  font-size: 0.95rem;
+}
+.hotel-card__rating .score-label {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(23, 35, 43, 0.55);
+  margin-top: 4px;
+}
+
+.hotel-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.hotel-card__tags span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: var(--vt-deep);
+  background: var(--vt-mist);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+}
+.hotel-card__tags i {
+  color: var(--vt-clay);
+}
+
+.hotel-card__bottom {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.btn-solid {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: clamp(0.82rem, 0.3vw + 0.75rem, 0.9rem);
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.2s var(--ease),
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+.btn-solid {
+  background: var(--vt-deep);
+  border-color: var(--vt-deep);
+  color: var(--paper);
+}
+.btn-solid:hover {
+  background: var(--vt-clay);
+  border-color: var(--vt-clay);
+}
+.price__from {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(23, 35, 43, 0.55);
+}
+.price__value {
+  font-family: "Fraunces", serif;
+  font-size: 1.25rem;
+  color: var(--vt-deep);
+}
+.price__unit {
+  font-size: 0.78rem;
+  color: rgba(23, 35, 43, 0.55);
+}
+.btn-view {
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+  }
+  .search-bar {
+    flex-direction: column;
+    transform: none;
+    margin-top: 20px;
+    padding-left: 6px;
+  }
+  .search-bar::before {
+    top: 0;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 5px;
+  }
+  .field-divider {
+    display: none;
+  }
+  .hero {
+    padding-bottom: 24px;
+  }
+  .content {
+    padding-top: 32px;
+  }
+}
+@media (max-width: 600px) {
+  .hotel-card {
+    flex-direction: column;
+  }
+  .hotel-card__photo {
+    flex-basis: 160px;
+    width: 100%;
+  }
+}

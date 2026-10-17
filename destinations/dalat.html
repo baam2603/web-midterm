@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đà Lạt — Khách sạn | THREEK.COM</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="dalat.css" />
+    <link rel="stylesheet" href="header.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <!-- ================= HEADER ================= -->
+    <header id="site-header"></header>
+    <!-- ================= HERO + SEARCH ================= -->
+    <section class="hero">
+      <img class="background-hero" src="sources/dalatlake.jpg" alt="" />
+      <div class="hero-inner">
+        <h1>Đà Lạt</h1>
+        <p>
+          Hãy khám phá những khách sạn tốt nhất tại Đà Lạt, để bắt đầu chuyến
+          hành trình kì diệu của bạn.
+        </p>
+      </div>
+
+      <form class="search-bar" aria-label="Tìm khách sạn tại Đà Lạt">
+        <div class="field field--street">
+          <label for="street">Đường phố</label>
+          <input
+            id="street"
+            type="text"
+            placeholder="Trung tâm, Hồ Xuân Hương…"
+          />
+        </div>
+        <div class="field-divider" aria-hidden="true"></div>
+        <div class="field field--dates">
+          <label for="checkin">Ngày nhận phòng / trả phòng</label>
+          <input id="checkin" type="text" placeholder="12 Th09 — 14 Th09" />
+        </div>
+        <div class="field-divider" aria-hidden="true"></div>
+        <div class="field field--guests">
+          <label for="guests">Khách và phòng</label>
+          <input id="guests" type="text" placeholder="2 khách · 1 phòng" />
+        </div>
+        <button class="search-submit" type="submit">
+          <i class="material-symbols-rounded">search</i> Tìm kiếm
+        </button>
+      </form>
+    </section>
+
+    <!-- ================= CONTENT ================= -->
+    <main class="content">
+      <aside class="sidebar">
+        <div class="sidebar-panel">
+          <section class="panel-section panel-section--map">
+            <div class="panel-section__head">
+              <i class="material-symbols-rounded">location_on</i>
+              <h3>Bản đồ</h3>
+            </div>
+            <div
+              class="map-canvas"
+              role="img"
+              aria-label="Bản đồ khu vực Đà Lạt"
+            >
+              <span class="map-pin"
+                ><i class="material-symbols-rounded">location_on</i></span
+              >
+            </div>
+          </section>
+
+          <section class="panel-section panel-section--weather">
+            <div class="panel-section__head">
+              <i class="material-symbols-rounded">cloud</i>
+              <h3>Thời tiết</h3>
+            </div>
+            <div class="weather-body">
+              <i class="material-symbols-rounded weather-icon">foggy</i>
+              <div class="weather-temp">18°C</div>
+              <div class="weather-desc">Se lạnh, sương mù buổi sáng</div>
+            </div>
+          </section>
+
+          <section class="panel-section panel-section--filter">
+            <div class="panel-section__head">
+              <i class="material-symbols-rounded">tune</i>
+              <h3>Bộ lọc</h3>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Loại chỗ ở</span>
+              <div class="check-list">
+                <label><input type="checkbox" checked /> Khách sạn</label>
+                <label><input type="checkbox" /> Homestay / Lữ quán</label>
+                <label><input type="checkbox" /> Resort / Khu nghỉ dưỡng</label>
+                <label
+                  ><input type="checkbox" /> Biệt thự / Villa nguyên căn</label
+                >
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Giá mỗi đêm</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value="45"
+                class="price-range"
+              />
+              <div class="price-range__scale">
+                <span>500K</span>
+                <span>5.000K+</span>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Vị trí &amp; không khí</span>
+              <div class="check-list">
+                <label
+                  ><input type="checkbox" checked /> Gần trung tâm / Chợ
+                  đêm</label
+                >
+                <label
+                  ><input type="checkbox" /> Ven rừng / Gần Hồ Tuyền Lâm</label
+                >
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Tiện nghi nổi bật</span>
+              <div class="chip-filters">
+                <label class="chip"
+                  ><input type="checkbox" checked /><i
+                    class="material-symbols-rounded"
+                    >free_breakfast</i
+                  >
+                  Bữa sáng miễn phí</label
+                >
+                <label class="chip"
+                  ><input type="checkbox" /><i class="material-symbols-rounded"
+                    >local_parking</i
+                  >
+                  Bãi đỗ xe ô tô</label
+                >
+                <label class="chip"
+                  ><input type="checkbox" /><i class="material-symbols-rounded"
+                    >fireplace</i
+                  >
+                  Lò sưởi / BBQ</label
+                >
+                <label class="chip"
+                  ><input type="checkbox" /><i class="material-symbols-rounded"
+                    >landscape</i
+                  >
+                  View thung lũng</label
+                >
+                <label class="chip"
+                  ><input type="checkbox" /><i class="material-symbols-rounded"
+                    >waves</i
+                  >
+                  View hồ</label
+                >
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Đánh giá sao</span>
+              <div class="star-filters">
+                <label
+                  ><input type="checkbox" checked />
+                  <i class="material-symbols-rounded">star</i
+                  ><i class="material-symbols-rounded">star</i
+                  ><i class="material-symbols-rounded">star</i
+                  ><i class="material-symbols-rounded">star</i
+                  ><i class="material-symbols-rounded">star</i></label
+                >
+                <label
+                  ><input type="checkbox" />
+                  <i class="material-symbols-rounded">star</i
+                  ><i class="material-symbols-rounded">star</i
+                  ><i class="material-symbols-rounded">star</i
+                  ><i class="material-symbols-rounded">star</i></label
+                >
+                <label
+                  ><input type="checkbox" />
+                  <i class="material-symbols-rounded">star</i
+                  ><i class="material-symbols-rounded">star</i
+                  ><i class="material-symbols-rounded">star</i></label
+                >
+                <label
+                  ><input type="checkbox" />
+                  <i class="material-symbols-rounded">star</i
+                  ><i class="material-symbols-rounded">star</i></label
+                >
+              </div>
+            </div>
+          </section>
+        </div>
+      </aside>
+
+      <section class="results" aria-label="Danh sách khách sạn tại Đà Lạt">
+        <div class="results-head">
+          <span><strong>24</strong> khách sạn tại Đà Lạt</span>
+          <label class="sort">
+            Sắp xếp theo
+            <select>
+              <option>Phù hợp nhất</option>
+              <option>Giá thấp đến cao</option>
+              <option>Đánh giá cao nhất</option>
+            </select>
+          </label>
+        </div>
+
+        <article class="hotel-card">
+          <div class="hotel-card__photo hotel-card__photo--pine"></div>
+          <div class="hotel-card__body">
+            <div class="hotel-card__top">
+              <div>
+                <h3>Đồi Thông Retreat</h3>
+                <span class="hotel-card__addr"
+                  ><i class="material-symbols-rounded">location_on</i> Phường 5,
+                  gần Hồ Tuyền Lâm</span
+                >
+              </div>
+              <div class="hotel-card__rating">
+                <span class="score">9.1</span>
+                <span class="score-label">Tuyệt hảo · 482 đánh giá</span>
+              </div>
+            </div>
+            <div class="hotel-card__tags">
+              <span
+                ><i class="material-symbols-rounded">local_parking</i> Bãi đỗ
+                xe</span
+              >
+              <span
+                ><i class="material-symbols-rounded">fireplace</i> Lò sưởi</span
+              >
+              <span
+                ><i class="material-symbols-rounded">free_breakfast</i> Bữa
+                sáng</span
+              >
+            </div>
+            <div class="hotel-card__bottom">
+              <div class="price">
+                <span class="price__from">Chỉ từ</span>
+                <span class="price__value">1.250.000₫</span>
+                <span class="price__unit">/ đêm</span>
+              </div>
+              <button class="btn-solid btn-view"  onclick="location.href='hotel.html?city=dalat&id=grand-mercure'">Xem phòng</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="hotel-card">
+          <div class="hotel-card__photo hotel-card__photo--mist"></div>
+          <div class="hotel-card__body">
+            <div class="hotel-card__top">
+              <div>
+                <h3>Làn Sương Boutique Hotel</h3>
+                <span class="hotel-card__addr"
+                  ><i class="material-symbols-rounded">location_on</i> Trung
+                  tâm, cạnh Hồ Xuân Hương</span
+                >
+              </div>
+              <div class="hotel-card__rating">
+                <span class="score">8.7</span>
+                <span class="score-label">Rất tốt · 316 đánh giá</span>
+              </div>
+            </div>
+            <div class="hotel-card__tags">
+              <span
+                ><i class="material-symbols-rounded">wifi</i> Wifi miễn
+                phí</span
+              >
+              <span
+                ><i class="material-symbols-rounded">restaurant</i> Nhà
+                hàng</span
+              >
+              <span
+                ><i class="material-symbols-rounded">gpp_good</i> Nhận phòng
+                24h</span
+              >
+            </div>
+            <div class="hotel-card__bottom">
+              <div class="price">
+                <span class="price__from">Chỉ từ</span>
+                <span class="price__value">980.000₫</span>
+                <span class="price__unit">/ đêm</span>
+              </div>
+              <button class="btn-solid btn-view">Xem phòng</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="hotel-card">
+          <div class="hotel-card__photo hotel-card__photo--valley"></div>
+          <div class="hotel-card__body">
+            <div class="hotel-card__top">
+              <div>
+                <h3>Lữ Quán Cao Nguyên</h3>
+                <span class="hotel-card__addr"
+                  ><i class="material-symbols-rounded">location_on</i> Đường
+                  Trần Hưng Đạo</span
+                >
+              </div>
+              <div class="hotel-card__rating">
+                <span class="score">8.4</span>
+                <span class="score-label">Rất tốt · 201 đánh giá</span>
+              </div>
+            </div>
+            <div class="hotel-card__tags">
+              <span
+                ><i class="material-symbols-rounded">yard</i> Vườn riêng</span
+              >
+              <span
+                ><i class="material-symbols-rounded">free_breakfast</i> Bữa
+                sáng</span
+              >
+              <span
+                ><i class="material-symbols-rounded">local_taxi</i> Đưa đón sân
+                bay</span
+              >
+            </div>
+            <div class="hotel-card__bottom">
+              <div class="price">
+                <span class="price__from">Chỉ từ</span>
+                <span class="price__value">760.000₫</span>
+                <span class="price__unit">/ đêm</span>
+              </div>
+              <button class="btn-solid btn-view">Xem phòng</button>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+    <script src="header.js"></script>
+    <script>
+      mountHeader("site-header", {
+        logoHref: "index1.html",
+        middle: `<div class="text-booking">Booking - Đặt phòng khách sạn</div>`,
+      });
+    </script>
+    <script src="auth-service.js"></script>
+  </body>
+</html>

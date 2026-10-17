@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tài khoản của tôi — THREEK.COM</title>
+    <link rel="stylesheet" href="header.css" />
+    <link rel="stylesheet" href="taikhoan.css" />
+    <link rel="stylesheet" href="doimatkhau.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header id="site-header"></header>
+
+      <main class="profile-main">
+        <div class="profile-container">
+          <div class="profile-error" id="profile-error"></div>
+
+          <!-- 1. Form thông tin (nút Lưu nằm ngoài, bên dưới khối liên kết) -->
+          <form class="profile-form" id="profile-form" novalidate>
+            <div class="profile-field">
+              <label for="fullname">Họ và tên</label>
+              <input
+                type="text"
+                id="fullname"
+                name="fullname"
+                value="Nguyễn Tuấn Khôi"
+              />
+            </div>
+
+            <!-- MỚI: tên hiển thị -->
+            <div class="profile-field">
+              <label for="displayname">Tên hiển thị</label>
+              <input
+                type="text"
+                id="displayname"
+                name="displayname"
+                maxlength="30"
+                placeholder="Tên hiển thị trên website"
+              />
+              <span class="profile-field__hint profile-field__hint--info"
+                >Tên này hiển thị ở góc phải thanh menu (2–30 ký tự).</span
+              >
+            </div>
+
+            <div class="profile-field">
+              <label for="birthday">Ngày sinh</label>
+              <input type="date" id="birthday" name="birthday" />
+            </div>
+
+            <div class="profile-field">
+              <label for="phone">Số điện thoại</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                placeholder="Chưa cập nhật"
+              />
+            </div>
+
+            <div class="profile-field">
+              <label for="email">Email tài khoản</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Chưa cập nhật"
+                readonly
+              />
+              <span class="profile-field__hint"
+                >Email dùng để đăng nhập, không thể thay đổi trực tiếp.</span
+              >
+            </div>
+
+            <div class="profile-field">
+              <label for="password">Mật khẩu</label>
+              <div class="profile-field__row">
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value="********"
+                  readonly
+                />
+                <button
+                  type="button"
+                  class="btn-ghost"
+                  id="change-password-btn"
+                >
+                  Đổi mật khẩu
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- 2. MỚI: Liên kết tài khoản -->
+          <section class="profile-link" id="profile-link">
+            <div class="profile-link__head">
+              <h2>Liên kết tài khoản</h2>
+            </div>
+            <p class="profile-link__desc">
+              Liên kết để đăng nhập nhanh hơn bằng Google hoặc Facebook mà không
+              cần nhập mật khẩu.
+            </p>
+
+            <div class="link-row" data-provider="google">
+              <div class="link-row__icon">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                  <path
+                    fill="#EA4335"
+                    d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"
+                  />
+                  <path
+                    fill="#4285F4"
+                    d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M10.5 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.3.8-4.7l-7.9-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.1z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"
+                  />
+                </svg>
+              </div>
+              <div class="link-row__info">
+                <div class="link-row__name">Google</div>
+                <span class="link-row__status">Chưa liên kết</span>
+              </div>
+              <button type="button" class="link-btn">Liên kết</button>
+            </div>
+
+            <div class="link-row" data-provider="facebook">
+              <div class="link-row__icon link-row__icon--fb">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                  <circle cx="24" cy="24" r="24" fill="#1877F2" />
+                  <path
+                    fill="#fff"
+                    d="M26.5 38V25.8h4.1l.6-4.8h-4.7v-3c0-1.4.4-2.3 2.4-2.3h2.5V11.4c-.4-.1-1.9-.2-3.6-.2-3.6 0-6.1 2.2-6.1 6.2V21h-4.1v4.8h4.1V38h4.8z"
+                  />
+                </svg>
+              </div>
+              <div class="link-row__info">
+                <div class="link-row__name">Facebook</div>
+                <span class="link-row__status">Chưa liên kết</span>
+              </div>
+              <button type="button" class="link-btn">Liên kết</button>
+            </div>
+          </section>
+
+          <!-- 3. Nút Lưu thay đổi: gần cuối, ngay trước khu Xóa tài khoản -->
+          <button type="submit" form="profile-form" class="auth-submit">
+            Lưu thay đổi
+          </button>
+
+          <!-- 4. Xóa tài khoản -->
+          <div class="profile-danger">
+            <div>
+              <h3>Xóa tài khoản</h3>
+              <p>
+                Hành động này không thể hoàn tác. Toàn bộ dữ liệu đặt phòng và
+                thông tin cá nhân của bạn sẽ bị xóa vĩnh viễn.
+              </p>
+            </div>
+            <button type="button" class="auth-logout" id="delete-account-btn">
+              Xóa tài khoản
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- QUAN TRỌNG: auth-service.js phải nạp TRƯỚC header.js -->
+    <script src="auth-service.js"></script>
+    <script src="header.js"></script>
+    <script>
+      mountHeader("site-header", {
+        logoHref: "index1.html",
+      });
+    </script>
+    <script src="taikhoan.js"></script>
+    <script src="doimatkhau.js"></script>
+    <script src="xacthucsdt.js"></script>
+  </body>
+</html>
