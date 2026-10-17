@@ -14,7 +14,8 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="header.css" />
+    <link rel="stylesheet" href="../common/header.css" />
+    <link rel="stylesheet" href="../common/footer.css" />
     <link rel="stylesheet" href="myBooking.css" />
   </head>
   <body>
@@ -62,10 +63,12 @@
     </div>
 
     <div class="toast" id="toast"></div>
-
-    <script src="header.js"></script>
+    <footer id="site-footer"></footer>
+    <script src="../common/header.js"></script>
+    <script src="../common/footer.js"></script>
     <script>
-      mountHeader("site-header", { logoHref: "index1.html" });
+      mountHeader("site-header");
+      mountFooter("site-footer");
     </script>
     <script src="auth-service.js"></script>
     <script src="myBooking.js"></script>

@@ -1,4 +1,4 @@
-const MOCK_LOGIN_ENABLED = true; // đổi thành false khi đã có auth-service.js thật
+const MOCK_LOGIN_ENABLED = true;
 
 if (MOCK_LOGIN_ENABLED && typeof getCurrentUser !== "function") {
   window.getCurrentUser = function () {
@@ -15,24 +15,39 @@ if (MOCK_LOGIN_ENABLED && typeof logout !== "function") {
     localStorage.removeItem("mock_logged_out");
   };
 }
-
-/* ---------- 1. Logo / thương hiệu ---------- */
-function renderBrand({ logoHref = "index1.html" } = {}) {
+const SITE_ROOT = new URL("../", document.currentScript.src).href;
+const ROUTES = {
+  home: "index1.html",
+  login: "auth/login.html",
+  register: "auth/register.html",
+  account: "account/taikhoan.html",
+  bookings: "booking/myBooking.html",
+  dalat: "destinations/dalat.html",
+  vungtau: "destinations/vungtau.html",
+  hotel: "hotel/hotel.html",
+};
+function siteUrl(path) {
+  return new URL(path, SITE_ROOT).href;
+}
+function route(name) {
+  if (!ROUTES[name])
+    console.warn(`route: chưa khai báo "${name}" trong ROUTES`);
+  return siteUrl(ROUTES[name] || "index1.html");
+}
+function renderBrand() {
   return `
-    <a class="brand" href="${logoHref}">
-      <img class="img-logo" src="sources/3k5.jpg" alt="" onerror="this.style.display='none'" />THREEK.COM
+    <a class="brand" href="${route("home")}">
+      <img class="img-logo" src="${siteUrl("sources/3k5.jpg")}" alt="" onerror="this.style.display='none'" />THREEK.COM
     </a>
   `;
 }
-
-/* ---------- 2. Breadcrumb (dùng ở trang Đà Lạt, Vũng Tàu...) ---------- */
 function renderBreadcrumb(items = []) {
-  // items: [{ label: 'Trang chủ', href: 'index1.html' }, { label: 'Đà Lạt' }]
   const html = items
     .map((item, i) => {
       const isLast = i === items.length - 1;
-      if (isLast || !item.href) return `<span>${item.label}</span>`;
-      return `<a href="${item.href}">${item.label}</a><i class="ri-arrow-right-s-line"></i>`;
+      const href = item.to ? route(item.to) : item.href;
+      if (isLast || !href) return `<span>${item.label}</span>`;
+      return `<a href="${href}">${item.label}</a><i class="ri-arrow-right-s-line"></i>`;
     })
     .join("");
   return `<nav class="crumb">${html}</nav>`;
@@ -41,24 +56,22 @@ function renderTextBooking() {
   return `<div class="text-booking">Booking - Đặt phòng khách sạn</div>`;
 }
 
-/* ---------- 3. Nút khi CHƯA đăng nhập ---------- */
 function renderGuestActions() {
   return `
     <div class="header-actions" id="guest-actions">
-      <button class="btn-ghost-header" onclick="location.href='login.html'">Đăng nhập</button>
-      <button class="btn-solid-header" onclick="location.href='register.html'">Đăng ký</button>
+      <button class="btn-ghost-header" onclick="location.href='${route("login")}'">Đăng nhập</button>
+      <button class="btn-solid-header" onclick="location.href='${route("register")}'">Đăng ký</button>
     </div>
   `;
 }
 
-/* ---------- 4. Avatar + dropdown khi ĐÃ đăng nhập ---------- */
 function renderDropdownMenu() {
   return `
     <div class="dropdown-menu" id="dropdownMenu" role="menu">
-      <a href="taikhoan.html" class="dropdown-item" role="menuitem">
+      <a href="${route("account")}" class="dropdown-item" role="menuitem">
         <i></i> Hồ sơ của tôi
       </a>
-      <a href="myBooking.html" class="dropdown-item" role="menuitem">
+      <a href="${route("bookings")}" class="dropdown-item" role="menuitem">
         <i></i> Đặt phòng của tôi
       </a>
       <div class="dropdown-divider"></div>
@@ -83,7 +96,6 @@ function renderProfileActions() {
   `;
 }
 
-/* ---------- 5. Hành vi mở/đóng dropdown (tách khỏi phần render) ---------- */
 function initAvatarDropdown() {
   const avatarBtn = document.getElementById("avatarBtn");
   const dropdownMenu = document.getElementById("dropdownMenu");
@@ -120,12 +132,11 @@ function initAvatarDropdown() {
       } catch (err) {
         console.error("Đăng xuất lỗi:", err);
       }
-      location.href = "index1.html";
+      location.href = route("home");
     });
   }
 }
 
-/* ---------- 6. Kiểm tra trạng thái đăng nhập, đổi UI tương ứng ---------- */
 function initials(name) {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/);
@@ -133,7 +144,6 @@ function initials(name) {
   return last.charAt(0).toUpperCase();
 }
 
-// Ưu tiên tên hiển thị người dùng đã đặt ở trang Tài khoản
 function getShownName(user) {
   return (
     localStorage.getItem("threek_display_name") || user.displayName || user.name
@@ -160,8 +170,7 @@ function updateLoginState() {
   }
 }
 
-/* ---------- 7. Ghép tất cả lại, gắn vào DOM ---------- */
-function mountHeader(mountId, { logoHref, middle } = {}) {
+function mountHeader(mountId, { middle } = {}) {
   const el = document.getElementById(mountId);
   if (!el) return console.warn(`mountHeader: không tìm thấy #${mountId}`);
 
@@ -169,7 +178,7 @@ function mountHeader(mountId, { logoHref, middle } = {}) {
 
   el.classList.add("site-header");
   el.innerHTML = `
-    ${renderBrand({ logoHref })}
+    ${renderBrand()}
     ${middleContent}
     ${renderGuestActions()}
     ${renderProfileActions()}

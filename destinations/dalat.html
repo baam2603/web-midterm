@@ -16,7 +16,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="dalat.css" />
-    <link rel="stylesheet" href="header.css">
+    <link rel="stylesheet" href="../common/header.css" />
+    <link rel="stylesheet" href="../common/footer.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -26,7 +27,7 @@
     <header id="site-header"></header>
     <!-- ================= HERO + SEARCH ================= -->
     <section class="hero">
-      <img class="background-hero" src="sources/dalatlake.jpg" alt="" />
+      <img class="background-hero" src="../sources/dalatlake.jpg" alt="" />
       <div class="hero-inner">
         <h1>Đà Lạt</h1>
         <p>
@@ -258,7 +259,15 @@
                 <span class="price__value">1.250.000₫</span>
                 <span class="price__unit">/ đêm</span>
               </div>
-              <button class="btn-solid btn-view"  onclick="location.href='hotel.html?city=dalat&id=grand-mercure'">Xem phòng</button>
+              <button
+                class="btn-solid btn-view"
+                onclick="
+                  location.href =
+                    '../hotel/hotel.html?city=dalat&id=grand-mercure'
+                "
+              >
+                Xem phòng
+              </button>
             </div>
           </div>
         </article>
@@ -345,13 +354,12 @@
         </article>
       </section>
     </main>
-    <script src="header.js"></script>
+    <footer id="site-footer"></footer>
+    <script src="../common/header.js"></script>
+    <script src="../common/footer.js"></script>
     <script>
-      mountHeader("site-header", {
-        logoHref: "index1.html",
-        middle: `<div class="text-booking">Booking - Đặt phòng khách sạn</div>`,
-      });
+      mountHeader("site-header");
+      mountFooter("site-footer");
     </script>
-    <script src="auth-service.js"></script>
   </body>
 </html>
