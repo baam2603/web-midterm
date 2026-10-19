@@ -1,0 +1,295 @@
+/* =====================================================================
+   common/city-page.css — style cho các thành phần thêm vào (dùng chung)
+   Tất cả class đều có tiền tố "tk-" để không đụng CSS riêng của từng trang.
+   ===================================================================== */
+:root {
+  --tk-green-900: #1f3a2c;
+  --tk-green-700: #2f5a40;
+  --tk-green-600: #3d6b4e;
+  --tk-gold: #d4b05a;
+  --tk-cream: #f3f0e6;
+  --tk-line: #d9d6c8;
+  --tk-text: #22302a;
+  --tk-muted: #6d7568;
+}
+
+/* Ô nhập trong thanh tìm kiếm */
+.search-bar .field input {
+  cursor: pointer;
+}
+.search-bar .field input#street {
+  cursor: text;
+}
+
+/* ---------- Popup nổi (gắn vào <body>) ---------- */
+.tk-popup {
+  position: absolute;
+  z-index: 10000;
+  background: #fff;
+  color: var(--tk-text);
+  border: 1px solid var(--tk-line);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(20, 40, 28, 0.22);
+  font-family: "Be Vietnam Pro", system-ui, sans-serif;
+  font-size: 14px;
+  animation: tk-pop 0.14s ease-out;
+}
+@keyframes tk-pop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Gợi ý đường phố ---------- */
+.tk-suggest {
+  min-width: 300px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+}
+.tk-suggest__title {
+  padding: 8px 10px 4px;
+  font-size: 12px;
+  color: var(--tk-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.tk-suggest__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  background: none;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.tk-suggest__item:hover,
+.tk-suggest__item.is-active {
+  background: var(--tk-cream);
+}
+.tk-suggest__item i {
+  color: var(--tk-green-600);
+  font-size: 22px;
+}
+.tk-suggest__item strong {
+  display: block;
+  font-weight: 600;
+}
+.tk-suggest__item small {
+  color: var(--tk-muted);
+}
+.tk-suggest__empty {
+  padding: 14px;
+  color: var(--tk-muted);
+}
+
+/* ---------- Lịch ---------- */
+.tk-cal {
+  padding: 16px 18px 14px;
+}
+.tk-cal__months {
+  display: flex;
+  gap: 28px;
+}
+.tk-cal__month {
+  width: 266px;
+}
+.tk-cal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 34px;
+  margin-bottom: 6px;
+}
+.tk-cal__head strong {
+  font-family: "Fraunces", serif;
+  font-weight: 560;
+  font-size: 16px;
+}
+.tk-cal__nav {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--tk-line);
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: var(--tk-green-700);
+}
+.tk-cal__nav:hover { background: var(--tk-cream); }
+.tk-cal__nav[disabled] { opacity: 0.3; cursor: default; }
+.tk-cal__nav--ghost { visibility: hidden; }
+.tk-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 2px;
+}
+.tk-cal__dow {
+  text-align: center;
+  font-size: 12px;
+  color: var(--tk-muted);
+  padding: 4px 0 6px;
+}
+.tk-cal__day {
+  height: 36px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--tk-text);
+  cursor: pointer;
+  position: relative;
+}
+.tk-cal__day:hover:not([disabled]):not(.is-start):not(.is-end) {
+  background: var(--tk-cream);
+  border-radius: 50%;
+}
+.tk-cal__day[disabled] {
+  color: #bdbfb5;
+  text-decoration: line-through;
+  cursor: default;
+}
+.tk-cal__day.is-today { font-weight: 700; color: var(--tk-green-700); }
+.tk-cal__day.is-range { background: #e4ecdf; border-radius: 0; }
+.tk-cal__day.is-start,
+.tk-cal__day.is-end {
+  background: var(--tk-green-700);
+  color: #fff;
+  border-radius: 50%;
+  z-index: 1;
+}
+.tk-cal__day.is-start.has-range { border-radius: 50% 0 0 50%; }
+.tk-cal__day.is-end.has-range { border-radius: 0 50% 50% 0; }
+.tk-cal__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--tk-line);
+  color: var(--tk-muted);
+}
+
+/* ---------- Khách & phòng ---------- */
+.tk-guests {
+  width: 320px;
+  padding: 8px 18px 16px;
+}
+.tk-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-row small { display: block; color: var(--tk-muted); }
+.tk-step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.tk-step button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--tk-green-600);
+  background: #fff;
+  color: var(--tk-green-700);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.tk-step button[disabled] { opacity: 0.3; cursor: default; }
+.tk-step output { min-width: 18px; text-align: center; font-weight: 600; }
+
+/* ---------- Nút dùng trong popup ---------- */
+.tk-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 18px;
+  font: inherit;
+  font-weight: 600;
+  background: var(--tk-green-700);
+  color: #fff;
+  cursor: pointer;
+}
+.tk-btn:hover { background: var(--tk-green-900); }
+.tk-btn--ghost {
+  background: none;
+  color: var(--tk-green-700);
+  border: 1px solid var(--tk-green-600);
+}
+.tk-btn--ghost:hover { background: var(--tk-cream); }
+.tk-guests .tk-btn { width: 100%; margin-top: 14px; }
+
+/* ---------- Bộ lọc ---------- */
+.price-range__current {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tk-green-700);
+}
+.tk-reset {
+  width: 100%;
+  margin-top: 6px;
+}
+
+/* ---------- Danh sách kết quả ---------- */
+.tk-empty {
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--tk-muted);
+}
+.tk-empty i { font-size: 44px; color: var(--tk-green-600); }
+.tk-empty p { margin: 10px 0 16px; }
+.hotel-card.tk-fade { animation: tk-pop 0.25s ease-out; }
+.hotel-card--active { outline: 2px solid #000000; 
+  outline-offset: -2px; /* Đẩy viền vào trong một chút cho gọn */
+  border-radius: 12px; 
+  background-color: var(--tk-cream); }
+
+/* ---------- Bản đồ (Leaflet) ---------- */
+.map-canvas.tk-map {
+  isolation: isolate;
+  background: none !important;
+  padding: 0;
+  overflow: hidden;
+  min-height: 200px;
+}
+.map-canvas.tk-map::before,
+.map-canvas.tk-map::after { display: none !important; }
+.tk-pin {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: #EA4335;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+}
+.tk-pin i { font-size: 34px; font-variation-settings: "FILL" 1; }
+.tk-pin.is-active { color: #B31412; /* Màu đỏ sậm hơn khi đang được chọn */
+  transform: scale(1.15); /* Phóng to nhẹ lên để dễ nhận biết */
+  transition: all 0.2s ease; }
+.tk-map-pop strong { display: block; font-family: "Fraunces", serif; }
+.tk-map-pop span { color: var(--tk-green-700); font-weight: 600; }
+
+/* ---------- Thời tiết ---------- */
+.weather-meta {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--tk-muted);
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 720px) {
+  .tk-popup { left: 12px !important; right: 12px; width: auto !important; max-width: none; }
+  .tk-cal__months { gap: 0; }
+  .tk-cal__month { width: 100%; }
+  .tk-cal__month + .tk-cal__month { display: none; }
+  .tk-guests { width: auto; }
+}
