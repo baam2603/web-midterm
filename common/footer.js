@@ -28,6 +28,16 @@ const FOOTER_COLUMNS = [
       { label: "Đặt phòng của tôi", to: "bookings" },
       { label: "Đăng nhập", to: "login" },
       { label: "Đăng ký", to: "register" },
+      { label: "Tra cứu đơn khách", to: "lookup" },
+      { label: "Thông báo", to: "notifications" },
+    ],
+  },
+  {
+    title: "Trợ giúp",
+    links: [
+      { label: "Hỗ trợ / FAQ", to: "support" },
+      { label: "Chính sách demo", href: siteUrl("info/policies.html") },
+      { label: "Quản trị demo", href: siteUrl("admin/index.html") },
     ],
   },
 ];

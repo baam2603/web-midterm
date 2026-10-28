@@ -1,8 +1,8 @@
 /* =====================================================================
    common/city-page.js
    Logic dùng chung cho mọi trang thành phố.
-   Cách dùng ở cuối trang:   initCityPage("dalat");   hoặc   initCityPage("vungtau");
-   Cần nạp trước: common/city-data.js
+   Khởi tạo từ city-bootstrap.js sau khi city-data.js và API sẵn sàng.
+   Yêu cầu: window.CITY_DATA, window.AMENITIES từ city-data.js
    - Thanh tìm kiếm: gợi ý đường phố, lịch chọn ngày, chọn khách & phòng
    - Bộ lọc render tự động theo cấu hình từng thành phố, lọc khách sạn trực tiếp
    - Thời tiết: Open-Meteo (miễn phí, không cần API key)
@@ -142,14 +142,32 @@
   }
 
   /* ===================================================================
-     initCityPage
+     initCityPage: chỉ khởi tạo một lần sau khi dữ liệu đã sẵn sàng.
      =================================================================== */
+  const initializedCities = new Set();
   window.initCityPage = function (cityKey) {
-    const city = (window.CITY_DATA || {})[cityKey];
-    if (!city) {
-      console.error("[city-page] Không có dữ liệu cho:", cityKey);
-      return;
+    if (initializedCities.has(cityKey)) {
+      console.warn("[city-page] Trang đã được khởi tạo:", cityKey);
+      return true;
     }
+
+    const city = window.CITY_DATA?.[cityKey];
+    if (
+      !city ||
+      !Array.isArray(city.hotels) ||
+      !city.filters ||
+      !Array.isArray(city.streets) ||
+      !window.AMENITIES
+    ) {
+      console.error(
+        "[city-page] Thiếu CITY_DATA/AMENITIES hoặc cấu hình thành phố:",
+        cityKey,
+        "— kiểm tra common/city-data.js trước khi khởi tạo.",
+      );
+      return false;
+    }
+
+    initializedCities.add(cityKey);
 
     const state = {
       street: "",
@@ -295,6 +313,32 @@
     }
 
     function matches(h) {
+      if (h.hidden) return false;
+      if (
+        state.checkin &&
+        state.checkout &&
+        window.HOTELS &&
+        window.BookingStore
+      ) {
+        const detail = window.HOTELS[cityKey]?.[h.id];
+        if (
+          !detail ||
+          !(detail.rooms || []).some(
+            (r) =>
+              !r.closed &&
+              r.guests * state.rooms >= state.adults + state.children &&
+              BookingStore.availability(
+                cityKey,
+                h.id,
+                r.id,
+                dateKey(state.checkin),
+                dateKey(state.checkout),
+                r.left ?? 5,
+              ) >= state.rooms,
+          )
+        )
+          return false;
+      }
       if (state.types.size && !state.types.has(h.type)) return false;
       if (state.zones.size && !h.zones.some((z) => state.zones.has(z)))
         return false;
@@ -863,5 +907,6 @@
     renderResults();
     loadWeather();
     initMap();
+    return true;
   };
 })();

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../common/header.css" />
+    <link rel="stylesheet" href="../common/footer.css" />
+    <link rel="stylesheet" href="../common/extension.css" />
+    <title>Hỗ trợ & FAQ | THREEK.COM</title>
+  </head>
+  <body>
+    <header id="site-header"></header>
+    <main class="tk-page">
+      <div class="tk-container tk-container--narrow">
+        <span class="tk-eyebrow">TRUNG TÂM TRỢ GIÚP</span>
+        <h1>THREEK hỗ trợ bạn</h1>
+        <p class="tk-lead">
+          Tra cứu câu trả lời thường gặp và gửi yêu cầu hỗ trợ. Dữ liệu và phản
+          hồi dưới đây chỉ mô phỏng trên cùng trình duyệt, không gửi email thật.
+        </p>
+        <div class="tk-flexcols">
+          <section class="tk-surface tk-faq">
+            <h2>Câu hỏi thường gặp</h2>
+            <details open>
+              <summary>Tôi kiểm tra đặt phòng ở đâu?</summary>
+              <p>
+                Vào Đặt phòng của tôi khi đã đăng nhập. Nếu đặt bằng khách vãng
+                lai, sử dụng trang Tra cứu đơn và xác minh email, số điện thoại.
+              </p>
+            </details>
+            <details>
+              <summary>Khi nào được hủy phòng?</summary>
+              <p>
+                Trong demo, chỉ đơn chưa đến ngày nhận phòng, chưa nhận phòng và
+                loại phòng cho phép hủy mới có thể hủy từ phía khách hàng. Không
+                có hoàn tiền thật.
+              </p>
+            </details>
+            <details>
+              <summary>Tôi đã thanh toán tiền chưa?</summary>
+              <p>
+                Chưa. Các lựa chọn thanh toán trên bản demo không tạo giao dịch
+                ngân hàng, ví điện tử hoặc thẻ thực.
+              </p>
+            </details>
+            <details>
+              <summary>Giá phòng có thể thay đổi không?</summary>
+              <p>
+                Giá được cấu hình trong trang quản trị demo. Sau khi đặt, số
+                tiền của đơn đã tạo được giữ nguyên làm ảnh chụp giao dịch.
+              </p>
+            </details>
+            <details>
+              <summary>Tôi có thể đổi lịch lưu trú không?</summary>
+              <p>
+                Chưa tự thay đổi đơn trong demo. Hãy gửi yêu cầu hỗ trợ; sau khi
+                kết nối backend có thể phát triển quy trình đổi ngày kèm tính
+                chênh lệch giá.
+              </p>
+            </details>
+            <nav class="tk-nav">
+              <a href="../booking/lookup.html">Tra cứu đơn</a
+              ><a href="../info/policies.html">Chính sách</a>
+            </nav>
+          </section>
+          <section class="tk-surface">
+            <h2>Gửi yêu cầu hỗ trợ</h2>
+            <form class="tk-form" id="tk-ticket-form">
+              <label>Họ tên<input name="name" required minlength="2" /></label
+              ><label
+                >Email liên hệ<input
+                  name="email"
+                  type="email"
+                  required /></label
+              ><label
+                >Chủ đề<select name="topic">
+                  <option>Đặt phòng</option>
+                  <option>Hủy / hoàn tiền</option>
+                  <option>Thanh toán</option>
+                  <option>Tài khoản</option>
+                  <option>Khác</option>
+                </select></label
+              ><label
+                >Mã đơn (nếu có)<input
+                  name="code"
+                  maxlength="80"
+                  placeholder="Không bắt buộc" /></label
+              ><label
+                >Nội dung<textarea
+                  name="message"
+                  minlength="15"
+                  maxlength="3000"
+                  required
+                  placeholder="Mô tả vấn đề của bạn"
+                ></textarea>
+              </label>
+              <p id="tk-ticket-status" class="tk-feedback" role="status"></p>
+              <button class="tk-primary">Gửi yêu cầu demo</button>
+            </form>
+          </section>
+        </div>
+        <section class="tk-surface" style="margin-top: 18px" id="tk-my-tickets">
+          <h2>Yêu cầu của tôi</h2>
+          <div id="tk-ticket-list"></div>
+        </section>
+      </div>
+    </main>
+    <footer id="site-footer"></footer>
+    <script src="../common/auth-service.js"></script>
+    <script src="../common/header.js"></script>
+    <script src="../common/footer.js"></script>
+    <script>
+      mountHeader("site-header");
+      mountFooter("site-footer");
+    </script>
+    <script src="../common/booking-store.js"></script>
+    <script src="../common/domain-store.js"></script>
+    <script src="support.js"></script>
+  </body>
+</html>

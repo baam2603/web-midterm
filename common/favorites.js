@@ -1,15 +1,19 @@
-const FAV_KEY = "threek_favorites";
+const FAV_KEY = "threek_favorites"; // legacy guest data
+function favoriteKey() {
+  const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
+  return user ? "threek_favorites_user_" + user.id : FAV_KEY;
+}
 
 function getFavorites() {
   try {
-    return JSON.parse(localStorage.getItem(FAV_KEY)) || [];
+    return JSON.parse(localStorage.getItem(favoriteKey())) || [];
   } catch {
     return [];
   }
 }
 
 function setFavorites(list) {
-  localStorage.setItem(FAV_KEY, JSON.stringify(list));
+  localStorage.setItem(favoriteKey(), JSON.stringify(list));
 }
 
 function isFavorite(id) {

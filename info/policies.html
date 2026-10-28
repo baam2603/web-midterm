@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../common/header.css" />
+    <link rel="stylesheet" href="../common/footer.css" />
+    <link rel="stylesheet" href="../common/extension.css" />
+    <title>Chính sách sử dụng | THREEK.COM</title>
+  </head>
+  <body>
+    <header id="site-header"></header>
+    <main class="tk-page">
+      <div class="tk-container tk-container--narrow">
+        <span class="tk-eyebrow">THÔNG TIN MINH BẠCH</span>
+        <h1>Chính sách & điều khoản demo</h1>
+        <p class="tk-lead">
+          Nội dung dưới đây mô tả quy tắc đang áp dụng trong bản UI thử nghiệm
+          THREEK.COM, không phải cam kết dịch vụ lưu trú thực.
+        </p>
+        <section class="tk-stack">
+          <article class="tk-surface">
+            <h2>1. Đặt phòng và xác nhận</h2>
+            <p>
+              Giá, phòng và tồn kho là dữ liệu mẫu được lưu trên trình duyệt.
+              Đơn hiển thị “đã xác nhận” chỉ là xác nhận mô phỏng, không tạo
+              quyền nhận phòng tại bất kỳ khách sạn thật nào.
+            </p>
+          </article>
+          <article class="tk-surface">
+            <h2>2. Hủy đặt phòng</h2>
+            <p>
+              Đơn chỉ được khách tự hủy trước ngày nhận phòng, chưa check-in và
+              phòng có thuộc tính cho phép hủy. Đơn không cho phép hủy cần liên
+              hệ hỗ trợ. Trạng thái hoàn tiền là mô phỏng, không chuyển tiền
+              thật.
+            </p>
+          </article>
+          <article class="tk-surface">
+            <h2>3. Thanh toán</h2>
+            <p>
+              Không có cổng thanh toán thật. Không sử dụng thẻ thật, mã OTP thật
+              hoặc chuyển khoản tiền thật. Mọi số tiền chỉ phục vụ minh họa và
+              kiểm thử.
+            </p>
+          </article>
+          <article class="tk-surface">
+            <h2>4. Tài khoản và dữ liệu</h2>
+            <p>
+              Tài khoản, thông báo, đơn và đánh giá được lưu trong localStorage
+              trên thiết bị. Người cùng sử dụng trình duyệt có thể truy cập dữ
+              liệu thiết bị; đây không phải hệ thống lưu trữ bảo mật cho sản
+              phẩm thật. Cần xác thực, phân quyền, kiểm toán và lưu trữ phía máy
+              chủ khi triển khai.
+            </p>
+          </article>
+          <article class="tk-surface">
+            <h2>5. Liên hệ</h2>
+            <p>
+              Vui lòng dùng <a href="../support/index.html">trang hỗ trợ</a> để
+              thử luồng gửi yêu cầu demo. Không có email tự động hay nhân viên
+              trực tổng đài được liên kết trong bản này.
+            </p>
+          </article>
+        </section>
+      </div>
+    </main>
+    <footer id="site-footer"></footer>
+    <script src="../common/auth-service.js"></script>
+    <script src="../common/header.js"></script>
+    <script src="../common/footer.js"></script>
+    <script>
+      mountHeader("site-header");
+      mountFooter("site-footer");
+    </script>
+    <script src="../common/booking-store.js"></script>
+    <script src="../common/domain-store.js"></script>
+  </body>
+</html>

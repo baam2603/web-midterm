@@ -23,10 +23,15 @@
     <link rel="stylesheet" href="../common/footer.css" />
     <link rel="stylesheet" href="../hotel/Booking.css" />
     <link rel="stylesheet" href="payment.css" />
+    <link rel="stylesheet" href="../common/extension.css" />
   </head>
   <body data-city="dalat">
     <header id="site-header"></header>
 
+    <div class="tk-alert" style="max-width: 950px; margin: 15px auto">
+      THANH TOÁN MÔ PHỎNG — Không nhập thẻ thật và không chuyển khoản tiền thật.
+      Không có giao dịch ngân hàng được thực hiện.
+    </div>
     <main class="booking-page" id="pay-root"></main>
 
     <footer id="site-footer"></footer>
@@ -39,6 +44,10 @@
     <script src="../common/city-data.js"></script>
     <script src="../hotel/hotel-data.js"></script>
     <script src="../common/booking-store.js"></script>
+    <script src="../common/domain-store.js"></script>
+    <script>
+      ThreeKData.applyCatalog();
+    </script>
     <script src="payment.js"></script>
   </body>
 </html>

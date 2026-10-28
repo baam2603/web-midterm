@@ -39,6 +39,27 @@
     <script src="../common/city-data.js"></script>
     <script src="hotel-data.js"></script>
     <script src="../common/booking-store.js"></script>
-    <script src="Booking.js"></script>
+    <script src="../common/domain-store.js"></script>
+    <script>
+      ThreeKData.applyCatalog();
+    </script>
+
+    <script src="hotel-detail-api.js"></script>
+
+    <script>
+      async function startBooking() {
+        try {
+          await HotelDetailAPI.sync();
+        } catch (error) {
+          console.warn("Không tải được dữ liệu MySQL:", error.message);
+        }
+
+        const script = document.createElement("script");
+        script.src = "Booking.js";
+        document.body.appendChild(script);
+      }
+
+      startBooking().catch(console.error);
+    </script>
   </body>
 </html>

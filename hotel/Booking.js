@@ -12,7 +12,10 @@
 
   const city = CITIES[cityKey];
   const hotel = city && HOTELS[cityKey] && HOTELS[cityKey][hotelId];
-  const room = hotel && (hotel.rooms || []).find((r) => r.id === roomId);
+  const room =
+    hotel &&
+    !hotel.hidden &&
+    (hotel.rooms || []).find((r) => r.id === roomId && !r.closed);
 
   document.body.dataset.city = city ? city.theme : "dalat";
 
@@ -313,7 +316,7 @@
           <label class="field">
             <span>Số phòng <b>*</b></span>
             <select data-f="rooms">${Array.from(
-              { length: room.left || 5 },
+              { length: room.left ?? 5 },
               (_, i) => i + 1,
             )
               .map(
@@ -456,7 +459,7 @@
         roomId,
         state.checkin,
         state.checkout,
-        room.left || 5,
+        room.left ?? 5,
       ) < state.rooms
     )
       e.rooms = "Không còn đủ phòng trống cho ngày đã chọn.";

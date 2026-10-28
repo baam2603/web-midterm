@@ -359,3 +359,6 @@ const HOTELS = {
     });
   }
 })();
+
+/* Expose catalog to the demo repository adapter and admin UI. */
+window.HOTELS = HOTELS;

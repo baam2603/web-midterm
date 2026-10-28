@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="../common/header.css" />
     <link rel="stylesheet" href="../common/footer.css" />
     <link rel="stylesheet" href="hotel.css" />
+    <link rel="stylesheet" href="../common/extension.css" />
   </head>
   <body data-city="dalat">
     <!-- ================= HEADER ================= -->
@@ -66,6 +67,39 @@
     <script src="../common/city-data.js"></script>
     <script src="hotel-data.js"></script>
     <script src="../common/booking-store.js"></script>
-    <script src="hotel.js"></script>
+    <script src="../common/domain-store.js"></script>
+    <script>
+      ThreeKData.applyCatalog();
+    </script>
+
+    <script src="hotel-detail-api.js"></script>
+
+    <script>
+      async function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.onload = resolve;
+          script.onerror = () => reject(new Error("Không tải được " + src));
+          document.body.appendChild(script);
+        });
+      }
+
+      async function startHotelDetail() {
+        try {
+          await HotelDetailAPI.sync();
+        } catch (error) {
+          console.warn(
+            "Không tải được chi tiết MySQL, dùng dữ liệu demo:",
+            error.message,
+          );
+        }
+
+        await loadScript("hotel.js");
+        await loadScript("reviews.js");
+      }
+
+      startHotelDetail().catch(console.error);
+    </script>
   </body>
 </html>

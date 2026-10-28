@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Khôi phục mật khẩu demo | THREEK.COM</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../common/header.css" />
+    <link rel="stylesheet" href="../common/footer.css" />
+    <link rel="stylesheet" href="../common/extension.css" />
+  </head>
+  <body>
+    <header id="site-header"></header>
+    <main class="tk-page">
+      <div class="tk-container tk-container--narrow">
+        <span class="tk-eyebrow">TÀI KHOẢN</span>
+        <h1>Khôi phục mật khẩu</h1>
+        <p class="tk-lead">
+          Quy trình demo không gửi email: mã thử nghiệm sẽ hiển thị ngay trên
+          màn hình và hết hạn sau 10 phút. Khi có backend, thay bằng email/OTP
+          bảo mật với rate limit.
+        </p>
+        <div class="tk-surface">
+          <form class="tk-form" id="tk-forgot-request">
+            <label
+              >Email tài khoản demo<input
+                name="email"
+                type="email"
+                required
+                autocomplete="email" /></label
+            ><button class="tk-primary">Tạo mã khôi phục demo</button>
+          </form>
+          <div id="tk-demo-otp" class="tk-alert" hidden role="status"></div>
+          <form
+            class="tk-form"
+            id="tk-forgot-reset"
+            hidden
+            style="margin-top: 20px"
+          >
+            <label
+              >Mã xác minh 6 chữ số<input
+                name="otp"
+                required
+                inputmode="numeric"
+                minlength="6"
+                maxlength="6"
+                pattern="[0-9]{6}" /></label
+            ><label
+              >Mật khẩu mới<input
+                name="password"
+                type="password"
+                minlength="8"
+                required
+                autocomplete="new-password" /></label
+            ><label
+              >Nhập lại mật khẩu<input
+                name="confirm"
+                type="password"
+                minlength="8"
+                required
+                autocomplete="new-password" /></label
+            ><button class="tk-primary">Đặt lại mật khẩu demo</button>
+          </form>
+          <p id="tk-forgot-feedback" class="tk-feedback" role="status"></p>
+        </div>
+        <nav class="tk-nav"><a href="login.html">← Quay lại đăng nhập</a></nav>
+      </div>
+    </main>
+    <footer id="site-footer"></footer>
+    <script src="../common/auth-service.js"></script>
+    <script src="../common/header.js"></script>
+    <script src="../common/footer.js"></script>
+    <script>
+      mountHeader("site-header");
+      mountFooter("site-footer");
+    </script>
+    <script src="forgot.js"></script>
+  </body>
+</html>

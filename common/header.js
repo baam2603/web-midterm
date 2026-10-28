@@ -9,6 +9,9 @@ const ROUTES = {
   vungtau: "destinations/vungtau.html",
   hotel: "hotel/hotel.html",
   favorites: "account/favorites.html",
+  notifications: "account/notifications.html",
+  support: "support/index.html",
+  lookup: "booking/lookup.html",
 };
 function siteUrl(path) {
   return new URL(path, SITE_ROOT).href;
@@ -59,6 +62,8 @@ function renderDropdownMenu() {
         <i></i> Đặt phòng của tôi
       </a>
       <a href="${route("favorites")}" class="dropdown-item" role="menuitem"><i></i> Khách sạn yêu thích</a>
+      <a href="${route("notifications")}" class="dropdown-item" role="menuitem"><i></i> Thông báo của tôi</a>
+      <a href="${route("support")}" class="dropdown-item" role="menuitem"><i></i> Hỗ trợ &amp; FAQ</a>
       <div class="dropdown-divider"></div>
       <a href="#" class="dropdown-item dropdown-item--danger" id="logoutBtn" role="menuitem">
         <i></i> Đăng xuất

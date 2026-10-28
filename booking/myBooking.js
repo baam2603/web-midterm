@@ -24,10 +24,11 @@
   const labels = {
     confirmed: "Đã xác nhận",
     pending: "Chờ thanh toán",
+    checked_in: "Đã nhận phòng",
     completed: "Đã lưu trú",
     cancelled: "Đã hủy",
   };
-  const upcoming = ["confirmed", "pending"];
+  const upcoming = ["confirmed", "pending", "checked_in"];
   function showToast(message) {
     toast.textContent = message;
     toast.classList.add("show");
@@ -35,7 +36,7 @@
     showToast.timer = setTimeout(() => toast.classList.remove("show"), 2600);
   }
   function normalized() {
-    return BookingStore.all().map((b) => ({
+    return BookingStore.visible().map((b) => ({
       ...b,
       status: BookingStore.status(b),
       id: b.code,
@@ -129,7 +130,7 @@
     )
       return;
     try {
-      BookingStore.cancel(order.code);
+      BookingStore.cancelVisible(order.code);
       showToast("Đã hủy đặt phòng " + order.code);
       setTab("history");
     } catch (err) {

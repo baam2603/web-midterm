@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../common/header.css" />
+    <link rel="stylesheet" href="../common/footer.css" />
+    <link rel="stylesheet" href="../common/extension.css" />
+    <title>Quản trị demo | THREEK.COM</title>
+  </head>
+  <body>
+    <header id="site-header"></header>
+    <main class="tk-page">
+      <div class="tk-container">
+        <span class="tk-eyebrow">THREEK.COM / OPERATIONS</span>
+        <div class="tk-row">
+          <div>
+            <h1>Quản trị khách sạn</h1>
+            <p class="tk-lead">
+              Điều hành danh mục khách sạn, phòng, tồn phòng, đơn, phản hồi và
+              yêu cầu hỗ trợ.
+              <span class="tk-badge-demo"
+                >LOCAL DEMO — KHÔNG PHẢI ADMIN THẬT</span
+              >
+            </p>
+          </div>
+          <a class="tk-outline" href="../index1.html">← Website khách hàng</a>
+        </div>
+        <section class="tk-gate tk-surface" id="tk-admin-gate">
+          <h2>Truy cập chế độ quản trị mô phỏng</h2>
+          <p>
+            Chỉ phục vụ demo và kiểm thử frontend. Nút bên dưới KHÔNG xác thực
+            danh tính hay cấp quyền bảo mật. Khi có backend, cần thay bằng phiên
+            đăng nhập admin và kiểm tra vai trò trên server cho mọi API.
+          </p>
+          <button class="tk-primary" id="tk-enter-admin">Vào Admin demo</button>
+        </section>
+        <div id="tk-admin-app" hidden>
+          <div class="tk-dashboard" id="tk-kpis"></div>
+          <nav
+            class="tk-tabs"
+            aria-label="Phân hệ quản lý"
+            id="tk-admin-tabs"
+          ></nav>
+          <div id="tk-admin-content" aria-live="polite"></div>
+        </div>
+      </div>
+    </main>
+    <footer id="site-footer"></footer>
+    <script src="../common/auth-service.js"></script>
+    <script src="../common/header.js"></script>
+    <script src="../common/footer.js"></script>
+    <script>
+      mountHeader("site-header");
+      mountFooter("site-footer");
+    </script>
+    <script src="../common/booking-store.js"></script>
+    <script src="../common/domain-store.js"></script>
+    <script src="../common/city-data.js"></script>
+    <script src="../hotel/hotel-data.js"></script>
+    <script>
+      ThreeKData.applyCatalog();
+    </script>
+    <script src="admin.js"></script>
+  </body>
+</html>

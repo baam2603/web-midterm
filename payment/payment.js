@@ -84,7 +84,7 @@
     Math.round((fromISO(draft.checkout) - fromISO(draft.checkin)) / 864e5),
     1,
   );
-  draft.rooms = Math.max(1,Number(draft.rooms)||1);
+  draft.rooms = Math.max(1, Number(draft.rooms) || 1);
   const base = room.price * nights * draft.rooms;
   const discount = rule
     ? rule.type === "percent"
@@ -394,7 +394,7 @@
       checkin: draft.checkin,
       checkout: draft.checkout,
       nights,
-      rooms:draft.rooms,
+      rooms: draft.rooms,
       guests: draft.guests,
       total,
       guestName: `${draft.lastName.trim()} ${draft.firstName.trim()}`,
@@ -402,10 +402,18 @@
       phone: draft.phone.trim(),
       payMethod: state.method === "wallet" ? state.wallet : state.method,
       paid: false,
-      paymentStatus: state.method==='bank'?'pending-demo':state.method==='hotel'?'pay-at-hotel-demo':'simulated-demo',
+      paymentStatus:
+        state.method === "bank"
+          ? "pending-demo"
+          : state.method === "hotel"
+            ? "pay-at-hotel-demo"
+            : "simulated-demo",
       refundable: !!room.refundable,
-      status: state.method==='bank'?'pending':'confirmed',
-      userId: typeof getCurrentUser==='function' ? getCurrentUser()?.id || null : null,
+      status: state.method === "bank" ? "pending" : "confirmed",
+      userId:
+        typeof getCurrentUser === "function"
+          ? getCurrentUser()?.id || null
+          : null,
       createdAt: new Date().toISOString(),
     };
     BookingStore.save(record);
@@ -413,12 +421,32 @@
 
   function pay(btn) {
     if (state.method === "card" && !showErrors(validateCard())) return;
-    const today=new Date().toISOString().slice(0,10);
-    if (draft.checkin<today || draft.checkout<=draft.checkin || !Number.isFinite(total) || total<=0) {
-      alert('Ngày lưu trú hoặc thông tin đặt phòng không hợp lệ. Vui lòng quay lại.');return;
+    const today = new Date().toISOString().slice(0, 10);
+    if (
+      draft.checkin < today ||
+      draft.checkout <= draft.checkin ||
+      !Number.isFinite(total) ||
+      total <= 0
+    ) {
+      alert(
+        "Ngày lưu trú hoặc thông tin đặt phòng không hợp lệ. Vui lòng quay lại.",
+      );
+      return;
     }
-    if (BookingStore.availability(draft.city,draft.hotelId,draft.roomId,draft.checkin,draft.checkout,room.left||5)<draft.rooms){
-      alert('Loại phòng này không còn đủ số lượng trống. Vui lòng chọn lại phòng.');return;
+    if (
+      BookingStore.availability(
+        draft.city,
+        draft.hotelId,
+        draft.roomId,
+        draft.checkin,
+        draft.checkout,
+        room.left || 5,
+      ) < draft.rooms
+    ) {
+      alert(
+        "Loại phòng này không còn đủ số lượng trống. Vui lòng chọn lại phòng.",
+      );
+      return;
     }
     btn.disabled = true;
     btn.textContent = "Đang xử lý...";
@@ -428,7 +456,7 @@
       try {
         sessionStorage.removeItem(KEY);
       } catch (_) {}
-      location.href = "success.html?code="+encodeURIComponent(draft.code);
+      location.href = "success.html?code=" + encodeURIComponent(draft.code);
     }, 1200);
   }
 

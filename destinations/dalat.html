@@ -410,10 +410,26 @@
       mountFooter("site-footer");
       initFavorites();
     </script>
+
+    <!-- Dữ liệu giao diện gốc -->
     <script src="../common/city-data.js"></script>
-    <script src="../common/city-page.js"></script>
+    <script src="../hotel/hotel-data.js"></script>
+    <script src="../common/booking-store.js"></script>
+    <script src="../common/domain-store.js"></script>
+
     <script>
-      initCityPage("dalat");
+      if (window.ThreeKData) {
+        window.ThreeKData.applyCatalog();
+      }
     </script>
+
+    <!-- Logic hiển thị -->
+    <script src="../common/city-page.js"></script>
+
+    <!-- Backend API -->
+    <script src="../common/hotels-api.js"></script>
+
+    <!-- Khởi tạo trang Đà Lạt -->
+    <script src="../common/city-bootstrap.js" data-city="dalat"></script>
   </body>
 </html>

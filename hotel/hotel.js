@@ -20,7 +20,7 @@
 
   const root = document.getElementById("hotel-root");
 
-  if (!hotel) {
+  if (!hotel || hotel.hidden) {
     root.innerHTML = `
       <div class="not-found">
         <h1>Không tìm thấy khách sạn</h1>
@@ -78,7 +78,16 @@
       ? params.get("checkout")
       : toISO(new Date(new Date(start + "T12:00:00").getTime() + 86400000));
   const leftFor = (r) =>
-    BookingStore.availability(cityKey, hotelId, r.id, start, end, r.left || 5);
+    r.closed
+      ? 0
+      : BookingStore.availability(
+          cityKey,
+          hotelId,
+          r.id,
+          start,
+          end,
+          r.left ?? 5,
+        );
 
   const roomCard = (r) => `
     <article class="room">
