@@ -1,6 +1,4 @@
 :root {
-
-
   /* Đà Lạt — cao nguyên, thông, sương sớm, mái ngói đất nung */
   --dl-deep: #294534;
   --dl-mid: #4c7350;
@@ -15,7 +13,6 @@
 
   --radius-sm: 4px;
   --radius-md: 10px;
-
 }
 
 * {
@@ -140,7 +137,6 @@ a {
   top: 0;
   bottom: 0;
   width: 5px;
-  
 }
 .field {
   flex: 1;
@@ -547,7 +543,6 @@ a {
 .btn-view {
   padding: 10px 20px;
   border-radius: var(--radius-sm);
-
 }
 
 /* ---------- Responsive ---------- */

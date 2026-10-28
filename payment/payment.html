@@ -21,7 +21,7 @@
     />
     <link rel="stylesheet" href="../common/header.css" />
     <link rel="stylesheet" href="../common/footer.css" />
-    <link rel="stylesheet" href="booking.css" />
+    <link rel="stylesheet" href="../hotel/Booking.css" />
     <link rel="stylesheet" href="payment.css" />
   </head>
   <body data-city="dalat">
@@ -30,12 +30,15 @@
     <main class="booking-page" id="pay-root"></main>
 
     <footer id="site-footer"></footer>
+    <script src="../common/auth-service.js"></script>
     <script src="../common/header.js"></script>
     <script src="../common/footer.js"></script>
     <script>
       mountFooter("site-footer");
     </script>
-    <script src="hotel-data.js"></script>
+    <script src="../common/city-data.js"></script>
+    <script src="../hotel/hotel-data.js"></script>
+    <script src="../common/booking-store.js"></script>
     <script src="payment.js"></script>
   </body>
 </html>

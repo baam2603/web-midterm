@@ -1,6 +1,4 @@
 :root {
- 
-
   /* Vũng Tàu — biển, nắng, cát, hoàng hôn */
   --vt-deep: #0f4c6b;
   --vt-mid: #3e93a8;
@@ -15,8 +13,6 @@
 
   --radius-sm: 4px;
   --radius-md: 10px;
-
-  
 }
 
 * {
@@ -141,7 +137,6 @@ a {
   top: 0;
   bottom: 0;
   width: 5px;
- 
 }
 .field {
   flex: 1;

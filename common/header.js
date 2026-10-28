@@ -1,20 +1,3 @@
-const MOCK_LOGIN_ENABLED = true;
-
-if (MOCK_LOGIN_ENABLED && typeof getCurrentUser !== "function") {
-  window.getCurrentUser = function () {
-    if (localStorage.getItem("mock_logged_out") === "1") return null;
-    return { name: "Nguyễn Văn A" }; // sửa tên tuỳ ý để test
-  };
-}
-if (MOCK_LOGIN_ENABLED && typeof logout !== "function") {
-  window.logout = function () {
-    localStorage.setItem("mock_logged_out", "1");
-    console.log("[MOCK] đã đăng xuất");
-  };
-  window.mockLogin = function () {
-    localStorage.removeItem("mock_logged_out");
-  };
-}
 const SITE_ROOT = new URL("../", document.currentScript.src).href;
 const ROUTES = {
   home: "index1.html",
@@ -25,6 +8,7 @@ const ROUTES = {
   dalat: "destinations/dalat.html",
   vungtau: "destinations/vungtau.html",
   hotel: "hotel/hotel.html",
+  favorites: "account/favorites.html",
 };
 function siteUrl(path) {
   return new URL(path, SITE_ROOT).href;
@@ -74,6 +58,7 @@ function renderDropdownMenu() {
       <a href="${route("bookings")}" class="dropdown-item" role="menuitem">
         <i></i> Đặt phòng của tôi
       </a>
+      <a href="${route("favorites")}" class="dropdown-item" role="menuitem"><i></i> Khách sạn yêu thích</a>
       <div class="dropdown-divider"></div>
       <a href="#" class="dropdown-item dropdown-item--danger" id="logoutBtn" role="menuitem">
         <i></i> Đăng xuất
@@ -145,9 +130,7 @@ function initials(name) {
 }
 
 function getShownName(user) {
-  return (
-    localStorage.getItem("threek_display_name") || user.displayName || user.name
-  );
+  return user.displayName || user.name;
 }
 
 function updateLoginState() {

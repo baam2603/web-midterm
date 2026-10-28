@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tài khoản của tôi — THREEK.COM</title>
-    <link rel="stylesheet" href="header.css" />
+    <link rel="stylesheet" href="../common/header.css" />
     <link rel="stylesheet" href="taikhoan.css" />
     <link rel="stylesheet" href="doimatkhau.css" />
   </head>
@@ -20,12 +20,7 @@
           <form class="profile-form" id="profile-form" novalidate>
             <div class="profile-field">
               <label for="fullname">Họ và tên</label>
-              <input
-                type="text"
-                id="fullname"
-                name="fullname"
-                value="Nguyễn Tuấn Khôi"
-              />
+              <input type="text" id="fullname" name="fullname" value="" />
             </div>
 
             <!-- MỚI: tên hiển thị -->
@@ -174,8 +169,9 @@
     <div class="toast" id="toast"></div>
 
     <!-- QUAN TRỌNG: auth-service.js phải nạp TRƯỚC header.js -->
-    <script src="auth-service.js"></script>
-    <script src="header.js"></script>
+
+    <script src="../common/auth-service.js"></script>
+    <script src="../common/header.js"></script>
     <script>
       mountHeader("site-header", {
         logoHref: "index1.html",
@@ -183,6 +179,5 @@
     </script>
     <script src="taikhoan.js"></script>
     <script src="doimatkhau.js"></script>
-    <script src="xacthucsdt.js"></script>
   </body>
 </html>

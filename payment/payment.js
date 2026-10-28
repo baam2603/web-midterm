@@ -84,7 +84,8 @@
     Math.round((fromISO(draft.checkout) - fromISO(draft.checkin)) / 864e5),
     1,
   );
-  const base = room.price * nights;
+  draft.rooms = Math.max(1,Number(draft.rooms)||1);
+  const base = room.price * nights * draft.rooms;
   const discount = rule
     ? rule.type === "percent"
       ? Math.round((base * rule.value) / 100)
@@ -102,13 +103,13 @@
   } catch (_) {}
 
   const METHODS = [
-    ["card", "credit_card", "Thẻ tín dụng / ghi nợ", "Visa, Mastercard, JCB"],
+    ["card", "credit_card", "Thẻ tín dụng / ghi nợ", "Chỉ dùng thẻ thử nghiệm"],
     ["wallet", "account_balance_wallet", "Ví điện tử", "MoMo, ZaloPay, VNPAY"],
     [
       "bank",
       "account_balance",
       "Chuyển khoản ngân hàng",
-      "Xác nhận trong 24 giờ",
+      "Mô phỏng · chưa chuyển tiền",
     ],
     ["hotel", "storefront", "Thanh toán tại khách sạn", "Trả khi nhận phòng"],
   ];
@@ -119,17 +120,17 @@
     wallet: "momo",
     card: { name: "", number: "", exp: "", cvv: "" },
   };
-  const backUrl = draft.back || "booking.html";
+  const backUrl = draft.back || "../hotel/Booking.html";
 
   /* ---------- Khung trang ---------- */
   root.innerHTML = `
     <nav class="breadcrumb" aria-label="Điều hướng">
       <a href="../index1.html">Trang chủ</a>${icon("chevron_right")}
-      <a href="hotel.html?city=${encodeURIComponent(draft.city)}&id=${encodeURIComponent(draft.hotelId)}">${esc(hotel.name)}</a>${icon("chevron_right")}
+      <a href="../hotel/hotel.html?city=${encodeURIComponent(draft.city)}&id=${encodeURIComponent(draft.hotelId)}">${esc(hotel.name)}</a>${icon("chevron_right")}
       <a href="${esc(backUrl)}">Đặt phòng</a>${icon("chevron_right")}
       <span class="current">Thanh toán</span>
     </nav>
-    <h1 class="booking-title">Thanh toán an toàn</h1>
+    <h1 class="booking-title">Thanh toán mô phỏng</h1>
     <ol class="stepper" id="pStepper"></ol>
     <div class="booking-grid">
       <div class="booking-left" id="pLeft"></div>
@@ -158,7 +159,7 @@
     $("#pPrice").innerHTML = `
       <h2>Chi tiết giá</h2>
       <ul class="price-lines">
-        <li><span>1 phòng × ${nights} đêm<small>${money(room.price)} / đêm</small></span><b>${money(base)}</b></li>
+        <li><span>${draft.rooms} phòng × ${nights} đêm<small>${money(room.price)} / đêm</small></span><b>${money(base)}</b></li>
         ${discount ? `<li class="is-discount"><span>Giảm giá<small>Mã ${esc(draft.coupon)}</small></span><b>-${money(discount)}</b></li>` : ""}
         <li><span>Thuế &amp; phí (${TAX_RATE * 100}%)</span><b>${money(tax)}</b></li>
       </ul>
@@ -178,7 +179,7 @@
           <li>${icon("hotel")}<span>Khách sạn</span><b>${esc(hotel.name)}</b></li>
           <li>${icon("bed")}<span>Loại phòng</span><b>${esc(room.name)}</b></li>
           <li>${icon("person")}<span>Người nhận phòng</span><b>${esc(draft.lastName)} ${esc(draft.firstName)}</b></li>
-          <li>${icon("group")}<span>Số khách</span><b>${draft.guests} khách</b></li>
+          <li>${icon("group")}<span>Số khách / số phòng</span><b>${draft.guests} khách · ${draft.rooms} phòng</b></li>
           <li>${icon("login")}<span>Nhận phòng<em>${esc(factOf("Nhận phòng", "Từ 14:00"))}</em></span><b>${fmtDate(draft.checkin)}</b></li>
           <li>${icon("logout")}<span>Trả phòng<em>${esc(factOf("Trả phòng", "Trước 12:00"))}</em></span><b>${fmtDate(draft.checkout)}</b></li>
           <li>${icon("nights_stay")}<span>Thời gian lưu trú</span><b>${nights} đêm</b></li>
@@ -234,20 +235,20 @@
             )
             .join("")}
         </div>
-        <div class="pay-note">Bạn sẽ được chuyển sang ứng dụng ${WALLETS[state.wallet]} để xác nhận số tiền ${money(total)}.</div>`;
+        <div class="pay-note">Bản demo mô phỏng thanh toán qua ${WALLETS[state.wallet]} với số tiền ${money(total)}; không mở ứng dụng ví thực tế.</div>`;
     }
     if (state.method === "bank") {
       return `
         <ul class="bank-list">
-          ${bankRow("Ngân hàng", "Vietcombank")}
-          ${bankRow("Số tài khoản", "0071000888888", "0071000888888")}
-          ${bankRow("Chủ tài khoản", "CÔNG TY THREEK")}
+          ${bankRow("Ngân hàng", "NGÂN HÀNG DEMO")}
+          ${bankRow("Số tài khoản", "KHÔNG CÓ TÀI KHOẢN THẬT")}
+          ${bankRow("Chủ tài khoản", "THREEK DEMO")}
           ${bankRow("Số tiền", money(total), String(total))}
           ${bankRow("Nội dung", draft.code, draft.code)}
         </ul>
-        <div class="pay-note">Vui lòng nhập đúng nội dung chuyển khoản để chúng tôi đối soát nhanh. Đơn được giữ trong 24 giờ chờ thanh toán.</div>`;
+        <div class="pay-note">DỮ LIỆU MINH HỌA: Không chuyển tiền thật tới các thông tin này. Đơn chỉ lưu cục bộ ở trạng thái chờ thanh toán.</div>`;
     }
-    return `<div class="pay-note">Bạn thanh toán trực tiếp tại khách sạn khi nhận phòng. Khách sạn có thể yêu cầu thẻ bảo đảm.</div>`;
+    return `<div class="pay-note">Phương thức trả tại khách sạn đang được mô phỏng, chưa gửi đặt phòng tới khách sạn thực tế.</div>`;
   }
 
   const payLabel = () =>
@@ -256,7 +257,7 @@
       : state.method === "wallet"
         ? `Thanh toán bằng ${WALLETS[state.wallet]}`
         : state.method === "bank"
-          ? "Tôi đã chuyển khoản"
+          ? "Xác nhận chuyển khoản demo"
           : "Xác nhận đặt phòng";
 
   function payHTML() {
@@ -278,7 +279,7 @@
         <button type="button" class="btn btn--ghost" data-back>${icon("arrow_back")} Quay lại</button>
         <button type="button" class="btn btn--primary" data-pay>${icon("lock")} ${payLabel()}</button>
       </div>
-      <p class="secure">${icon("verified_user")} Chúng tôi không lưu thông tin thẻ của bạn.</p>`;
+      <p class="secure">${icon("verified_user")} THANH TOÁN DEMO — không trừ tiền, không gửi email. Chỉ dùng số thẻ thử nghiệm, không nhập thẻ thật.</p>`;
   }
 
   function doneHTML() {
@@ -393,25 +394,32 @@
       checkin: draft.checkin,
       checkout: draft.checkout,
       nights,
+      rooms:draft.rooms,
       guests: draft.guests,
       total,
       guestName: `${draft.lastName.trim()} ${draft.firstName.trim()}`,
       email: draft.email.trim(),
       phone: draft.phone.trim(),
       payMethod: state.method === "wallet" ? state.wallet : state.method,
-      paid: state.method === "card" || state.method === "wallet",
-      status: "confirmed",
+      paid: false,
+      paymentStatus: state.method==='bank'?'pending-demo':state.method==='hotel'?'pay-at-hotel-demo':'simulated-demo',
+      refundable: !!room.refundable,
+      status: state.method==='bank'?'pending':'confirmed',
+      userId: typeof getCurrentUser==='function' ? getCurrentUser()?.id || null : null,
       createdAt: new Date().toISOString(),
     };
-    try {
-      const list = JSON.parse(localStorage.getItem("threek_bookings") || "[]");
-      if (!list.some((b) => b.code === record.code)) list.push(record);
-      localStorage.setItem("threek_bookings", JSON.stringify(list));
-    } catch (_) {}
+    BookingStore.save(record);
   }
 
   function pay(btn) {
     if (state.method === "card" && !showErrors(validateCard())) return;
+    const today=new Date().toISOString().slice(0,10);
+    if (draft.checkin<today || draft.checkout<=draft.checkin || !Number.isFinite(total) || total<=0) {
+      alert('Ngày lưu trú hoặc thông tin đặt phòng không hợp lệ. Vui lòng quay lại.');return;
+    }
+    if (BookingStore.availability(draft.city,draft.hotelId,draft.roomId,draft.checkin,draft.checkout,room.left||5)<draft.rooms){
+      alert('Loại phòng này không còn đủ số lượng trống. Vui lòng chọn lại phòng.');return;
+    }
     btn.disabled = true;
     btn.textContent = "Đang xử lý...";
     clearInterval(timer);
@@ -420,9 +428,7 @@
       try {
         sessionStorage.removeItem(KEY);
       } catch (_) {}
-      state.phase = "done";
-      renderLeft();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      location.href = "success.html?code="+encodeURIComponent(draft.code);
     }, 1200);
   }
 

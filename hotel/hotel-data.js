@@ -224,3 +224,138 @@ const HOTELS = {
     },
   },
 };
+/* Bridge the 16 cards from city-data.js to the original detail-page layout.
+   Demo descriptions and local photographs are illustrative, not live listings. */
+(function () {
+  const PHOTO = {
+    dalat: [
+      "dalat1.jpg",
+      "dalat2.jpg",
+      "dalat3.jpg",
+      "dalat4.jpg",
+      "dalatlake.jpg",
+      "chodalat.jpg",
+    ],
+    vungtau: [
+      "vungtau.jpg",
+      "vungtau2.jpg",
+      "vungtau3.jpg",
+      "vungtau4.jpg",
+      "vungtau5.jpg",
+      "vungtauhero.jpg",
+    ],
+  };
+  const commonNearby = {
+    dalat: [
+      { icon: "waves", name: "Hồ Xuân Hương", distance: "Khu vực Đà Lạt" },
+      {
+        icon: "local_florist",
+        name: "Điểm tham quan Đà Lạt",
+        distance: "Tùy vị trí",
+      },
+    ],
+    vungtau: [
+      {
+        icon: "beach_access",
+        name: "Bãi biển Vũng Tàu",
+        distance: "Khu vực Vũng Tàu",
+      },
+      {
+        icon: "restaurant",
+        name: "Khu ẩm thực địa phương",
+        distance: "Tùy vị trí",
+      },
+    ],
+  };
+  for (const [cityKey, city] of Object.entries(window.CITY_DATA || {})) {
+    if (!HOTELS[cityKey]) HOTELS[cityKey] = {};
+    city.hotels.forEach((h, i) => {
+      const original = HOTELS[cityKey][h.id] || {};
+      const photos = PHOTO[cityKey].map(
+        (_, j) =>
+          "../sources/" + PHOTO[cityKey][(j + i) % PHOTO[cityKey].length],
+      );
+      const amenities = h.amenities
+        .map((k) => window.AMENITIES[k])
+        .filter(Boolean);
+      const maxGuests = Math.max(2, h.capacity || 2);
+      const stock = 5;
+      const room = (id, name, price, guests, breakfast, refundable, index) => ({
+        id,
+        name,
+        image: photos[index],
+        area: 26 + index * 12,
+        bed: guests > 3 ? "1 giường đôi + 2 giường đơn" : "1 giường đôi",
+        guests,
+        features: amenities.slice(0, 3),
+        breakfast,
+        refundable,
+        price,
+        left: stock,
+      });
+      const templateRooms = [
+        room(
+          "standard",
+          "Phòng tiêu chuẩn",
+          h.price,
+          Math.min(maxGuests, 2),
+          false,
+          true,
+          0,
+        ),
+        room(
+          "deluxe",
+          "Phòng Deluxe",
+          Math.round((h.price * 1.35) / 10000) * 10000,
+          Math.min(maxGuests, 3),
+          true,
+          true,
+          2,
+        ),
+        room(
+          "family",
+          "Phòng gia đình",
+          Math.round((h.price * 1.7) / 10000) * 10000,
+          maxGuests,
+          true,
+          true,
+          4,
+        ),
+      ];
+      HOTELS[cityKey][h.id] = {
+        ...original,
+        name: h.name,
+        stars: h.stars,
+        address: h.address,
+        rating: h.score,
+        ratingLabel:
+          h.score >= 9 ? "Tuyệt hảo" : h.score >= 8 ? "Rất tốt" : "Tốt",
+        reviewCount: h.reviews,
+        priceFrom: h.price,
+        images: photos,
+        intro:
+          original.intro && original.name === h.name
+            ? original.intro
+            : `${h.name} là lựa chọn lưu trú tại ${city.name}. Đây là thông tin minh họa dành cho bản demo giao diện THREEK.COM; vui lòng kiểm tra lại giá, vị trí và tiện nghi khi kết nối dữ liệu thật.`,
+        facts: [
+          { icon: "login", label: "Nhận phòng", value: "Từ 14:00" },
+          { icon: "logout", label: "Trả phòng", value: "Trước 12:00" },
+          { icon: "meeting_room", label: "Loại phòng", value: "3 lựa chọn" },
+          {
+            icon: "group",
+            label: "Sức chứa tham khảo",
+            value: `Tối đa ${maxGuests} khách`,
+          },
+        ],
+        amenities,
+        rules: [
+          "Thông tin và giá phòng trên website hiện là dữ liệu demo.",
+          "Có thể hủy miễn phí trước ngày nhận phòng đối với loại phòng cho phép hủy.",
+          "Vui lòng mang giấy tờ tùy thân hợp lệ khi nhận phòng.",
+        ],
+        nearby: commonNearby[cityKey],
+        rooms: templateRooms,
+      };
+    });
+  }
+})();

@@ -95,7 +95,17 @@
     firstName: "",
     email: "",
     phone: "",
-    guests: 1,
+    guests: Math.max(
+      1,
+      Math.min(
+        room.guests * Math.max(1, Number(params.get("rooms")) || 1),
+        Number(params.get("guests")) || 1,
+      ),
+    ),
+    rooms: Math.max(
+      1,
+      Math.min(room.left || 5, Number(params.get("rooms")) || 1),
+    ),
     note: "",
     promo: true,
     checkin: validISO(params.get("checkin"))
@@ -109,6 +119,7 @@
     card: { name: "", number: "", exp: "", cvv: "" },
     code: "",
   };
+  if (fromISO(state.checkin) < today) state.checkin = toISO(addDays(today, 1));
   if (fromISO(state.checkout) <= fromISO(state.checkin))
     state.checkout = toISO(addDays(fromISO(state.checkin), 1));
 
@@ -122,6 +133,7 @@
         "email",
         "phone",
         "guests",
+        "rooms",
         "note",
         "checkin",
         "checkout",
@@ -139,7 +151,7 @@
 
   function calc() {
     const nights = Math.max(getNights(), 0);
-    const base = room.price * nights;
+    const base = room.price * nights * state.rooms;
     let discount = 0;
     if (state.coupon) {
       discount =
@@ -207,7 +219,7 @@
           : ""
       }
       <ul class="price-lines">
-        <li><span>1 phòng × ${c.nights} đêm<small>${money(room.price)} / đêm</small></span><b>${money(c.base)}</b></li>
+        <li><span>${state.rooms} phòng × ${c.nights} đêm<small>${money(room.price)} / đêm</small></span><b>${money(c.base)}</b></li>
         ${c.discount ? `<li class="is-discount"><span>Giảm giá</span><b>-${money(c.discount)}</b></li>` : ""}
         <li><span>Thuế &amp; phí (${TAX_RATE * 100}%)</span><b>${money(c.tax)}</b></li>
       </ul>
@@ -229,7 +241,7 @@
           <li>${icon("hotel")}<span>Khách sạn</span><b>${esc(hotel.name)}</b></li>
           <li>${icon("bed")}<span>Loại phòng</span><b>${esc(room.name)}</b></li>
           <li>${icon("single_bed")}<span>Giường</span><b>${esc(room.bed)}</b></li>
-          <li>${icon("group")}<span>Số khách</span><b>${esc(guestsLabel)}</b></li>
+          <li>${icon("group")}<span>Số khách / số phòng</span><b>${esc(guestsLabel)} · ${state.rooms} phòng</b></li>
           <li>${icon("login")}<span>Nhận phòng<em>${esc(factOf("Nhận phòng", "Từ 14:00"))}</em></span><b>${fmtDate(state.checkin)}</b></li>
           <li>${icon("logout")}<span>Trả phòng<em>${esc(factOf("Trả phòng", "Trước 12:00"))}</em></span><b>${fmtDate(state.checkout)}</b></li>
           <li>${icon("nights_stay")}<span>Thời gian lưu trú</span><b id="sumNights">${getNights()} đêm</b></li>
@@ -287,9 +299,30 @@
           ${field("Số điện thoại", "phone", { type: "tel", ph: "0901 234 567", value: state.phone, full: true })}
           <label class="field">
             <span>Số khách <b>*</b></span>
-            <select data-f="guests">${guestOpts}</select>
+            <select data-f="guests">${Array.from(
+              { length: Math.max(room.guests * state.rooms, state.guests) },
+              (_, i) => i + 1,
+            )
+              .map(
+                (n) =>
+                  `<option value="${n}" ${n === state.guests ? "selected" : ""}>${n} khách</option>`,
+              )
+              .join("")}</select>
+            <em class="field__err" data-err="guests"></em>
           </label>
-          <div></div>
+          <label class="field">
+            <span>Số phòng <b>*</b></span>
+            <select data-f="rooms">${Array.from(
+              { length: room.left || 5 },
+              (_, i) => i + 1,
+            )
+              .map(
+                (n) =>
+                  `<option value="${n}" ${n === state.rooms ? "selected" : ""}>${n} phòng</option>`,
+              )
+              .join("")}</select>
+            <em class="field__err" data-err="rooms"></em>
+          </label>
           <label class="field full">
             <span>Yêu cầu đặc biệt (không bắt buộc)</span>
             <textarea data-f="note" placeholder="Ví dụ: nhận phòng sớm, tầng cao, giường phụ...">${esc(state.note)}</textarea>
@@ -326,18 +359,18 @@
       </label>`;
     let detail = "";
     if (state.pay === "card") {
-      detail = `<div class="pay-note">Bạn sẽ nhập thông tin thẻ ở trang thanh toán bảo mật ở bước tiếp theo.</div>`;
+      detail = `<div class="pay-note">Bạn sẽ nhập dữ liệu thẻ kiểm thử ở bước tiếp theo (không xử lý giao dịch thật).</div>`;
     } else if (state.pay === "bank") {
-      detail = `<div class="pay-note">Sau khi xác nhận, bạn sẽ nhận hướng dẫn chuyển khoản qua email. Đơn đặt phòng được giữ trong 24 giờ chờ thanh toán.</div>`;
+      detail = `<div class="pay-note">Đây là luồng chuyển khoản mô phỏng. Đơn được lưu ở trạng thái chờ thanh toán, không gửi hướng dẫn qua email.</div>`;
     } else {
-      detail = `<div class="pay-note">Bạn thanh toán trực tiếp tại khách sạn khi nhận phòng. Khách sạn có thể yêu cầu thẻ bảo đảm.</div>`;
+      detail = `<div class="pay-note">Bạn chọn trả tại khách sạn (mô phỏng). Website chưa gửi đơn đặt phòng tới khách sạn thật.</div>`;
     }
     return `
       <div class="card">
         <h2>Phương thức thanh toán</h2>
         <div class="pay-options">
           ${opt("card", "credit_card", "Thẻ tín dụng / ghi nợ", "Visa, Mastercard, JCB")}
-          ${opt("bank", "account_balance", "Chuyển khoản ngân hàng", "Nhận hướng dẫn qua email")}
+          ${opt("bank", "account_balance", "Chuyển khoản ngân hàng", "Xác nhận trong bản demo")}
           ${opt("hotel", "storefront", "Thanh toán tại khách sạn", "Trả khi nhận phòng")}
         </div>
         ${detail}
@@ -406,10 +439,27 @@
       e.email = "Email không hợp lệ.";
     if (!/^(0|\+84)\d{9,10}$/.test(state.phone.replace(/[\s.\-]/g, "")))
       e.phone = "Số điện thoại không hợp lệ.";
-    if (fromISO(state.checkin) < today)
+    if (validISO(state.checkin) && fromISO(state.checkin) < today)
       e.checkin = "Ngày nhận phòng không được ở quá khứ.";
-    if (getNights() < 1)
+    if (
+      !validISO(state.checkin) ||
+      !validISO(state.checkout) ||
+      getNights() < 1
+    )
       e.checkout = "Ngày trả phòng phải sau ngày nhận phòng.";
+    if (state.guests > room.guests * state.rooms)
+      e.guests = "Số khách vượt quá sức chứa phòng.";
+    if (
+      BookingStore.availability(
+        cityKey,
+        hotelId,
+        roomId,
+        state.checkin,
+        state.checkout,
+        room.left || 5,
+      ) < state.rooms
+    )
+      e.rooms = "Không còn đủ phòng trống cho ngày đã chọn.";
     return e;
   }
 
@@ -447,7 +497,9 @@
       em.closest(".field").classList.add("is-invalid");
     });
     if (keys.length) {
-      const first = elLeft.querySelector(".field.is-invalid input");
+      const first = elLeft.querySelector(
+        ".field.is-invalid input, .field.is-invalid select",
+      );
       if (first) first.focus();
     }
     return keys.length === 0;
@@ -498,6 +550,7 @@
       checkin: state.checkin,
       checkout: state.checkout,
       guests: state.guests,
+      rooms: state.rooms,
       lastName: state.lastName,
       firstName: state.firstName,
       email: state.email,
@@ -510,7 +563,7 @@
     try {
       sessionStorage.setItem("threek_checkout", JSON.stringify(draft));
     } catch (_) {}
-    location.href = "payment.html";
+    location.href = "../payment/payment.html";
   }
 
   /* ---------- Sự kiện ---------- */
@@ -537,7 +590,7 @@
     const k = t.dataset.f;
     if (!k || k === "pay") return;
     if (t.type === "checkbox") state[k] = t.checked;
-    else if (k === "guests") state.guests = Number(t.value);
+    else if (k === "guests" || k === "rooms") state[k] = Number(t.value);
     else state[k] = t.value;
 
     if (k === "checkin" || k === "checkout") {
@@ -561,8 +614,11 @@
         renderPrice();
         renderSummary();
       }
-    } else if (k === "guests") {
-      renderSummary();
+    } else if (k === "guests" || k === "rooms") {
+      if (k === "rooms") {
+        state.guests = Math.min(state.guests, room.guests * state.rooms);
+        renderLeft();
+      } else renderSummary();
     }
   });
 

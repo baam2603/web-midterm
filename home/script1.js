@@ -37,10 +37,15 @@
   function selectDestination(panel) {
     const dest = panel.dataset.dest || "điểm đến này";
     showToast(`Đang chuyển đến trang đặt phòng ${dest}…`);
+    location.href = panel.classList.contains("panel--vungtau")
+      ? route("vungtau")
+      : route("dalat");
   }
 
   panels.forEach((panel) => {
-    panel.addEventListener("click", () => selectDestination(panel));
+    panel.addEventListener("click", (e) => {
+      if (!e.target.closest(".cta")) selectDestination(panel);
+    });
 
     panel.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {

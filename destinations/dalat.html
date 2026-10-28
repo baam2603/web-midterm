@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="../common/header.css" />
     <link rel="stylesheet" href="../common/footer.css" />
     <link rel="stylesheet" href="../common/city-page.css" />
+    <link rel="stylesheet" href="../common/favorites.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -229,8 +230,21 @@
           </label>
         </div>
 
+        <!-- ===== Card 1 ===== -->
         <article class="hotel-card">
-          <div class="hotel-card__photo hotel-card__photo--pine"></div>
+          <div class="hotel-card__photo hotel-card__photo--pine">
+            <button
+              class="btn-fav"
+              type="button"
+              data-id="grand-mercure"
+              data-name="Đồi Thông Retreat"
+              data-city="dalat"
+              aria-pressed="false"
+              aria-label="Lưu khách sạn"
+            >
+              <i class="material-symbols-rounded">favorite</i>
+            </button>
+          </div>
           <div class="hotel-card__body">
             <div class="hotel-card__top">
               <div>
@@ -277,8 +291,21 @@
           </div>
         </article>
 
+        <!-- ===== Card 2 ===== -->
         <article class="hotel-card">
-          <div class="hotel-card__photo hotel-card__photo--mist"></div>
+          <div class="hotel-card__photo hotel-card__photo--mist">
+            <button
+              class="btn-fav"
+              type="button"
+              data-id="lan-suong"
+              data-name="Làn Sương Boutique Hotel"
+              data-city="dalat"
+              aria-pressed="false"
+              aria-label="Lưu khách sạn"
+            >
+              <i class="material-symbols-rounded">favorite</i>
+            </button>
+          </div>
           <div class="hotel-card__body">
             <div class="hotel-card__top">
               <div>
@@ -318,8 +345,21 @@
           </div>
         </article>
 
+        <!-- ===== Card 3 ===== -->
         <article class="hotel-card">
-          <div class="hotel-card__photo hotel-card__photo--valley"></div>
+          <div class="hotel-card__photo hotel-card__photo--valley">
+            <button
+              class="btn-fav"
+              type="button"
+              data-id="cao-nguyen"
+              data-name="Lữ Quán Cao Nguyên"
+              data-city="dalat"
+              aria-pressed="false"
+              aria-label="Lưu khách sạn"
+            >
+              <i class="material-symbols-rounded">favorite</i>
+            </button>
+          </div>
           <div class="hotel-card__body">
             <div class="hotel-card__top">
               <div>
@@ -360,11 +400,15 @@
       </section>
     </main>
     <footer id="site-footer"></footer>
+
+    <script src="../common/auth-service.js"></script>
     <script src="../common/header.js"></script>
     <script src="../common/footer.js"></script>
+    <script src="../common/favorites.js"></script>
     <script>
       mountHeader("site-header");
       mountFooter("site-footer");
+      initFavorites();
     </script>
     <script src="../common/city-data.js"></script>
     <script src="../common/city-page.js"></script>

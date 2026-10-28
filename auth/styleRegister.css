@@ -1,115 +1,115 @@
 body {
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: white;
-    font-family: Arial, Helvetica, sans-serif;
-    padding: 10;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 10;
 }
 
 .register-container {
-    width: 500px;
-    padding: 20px;
-    border: 1px solid rgb(238, 236, 236);
-    border-radius: 8px;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 500px;
+  padding: 20px;
+  border: 1px solid rgb(238, 236, 236);
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .register-header h2 {
-    margin: 0 0 8px 0;
-    font-size: 24px;
+  margin: 0 0 8px 0;
+  font-size: 24px;
 }
 
 .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .form-group label {
-    font-size: 13px;
+  font-size: 13px;
 }
 
 .form-control {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid;
-    border-radius: 12px;
-    border-color: #dbdee2;
-    font-size: 15px;
-    box-sizing: border-box;
-    outline: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid;
+  border-radius: 12px;
+  border-color: #dbdee2;
+  font-size: 15px;
+  box-sizing: border-box;
+  outline: none;
 }
 
 .form-control:focus {
-    border-color: #1877f2;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 0 2px #e7f3ff;
+  border-color: #1877f2;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 0 2px #e7f3ff;
 }
 
 .form-group .name-row {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .form-group .name-row .form-control {
-    flex: 1;
+  flex: 1;
 }
 
 .birth-select {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .birth-select .form-control {
-    flex: 1;
+  flex: 1;
 }
 
 .btn-submit {
-    border: none;
-    border-radius: 30px;
-    width: 100%;
-    background-color: #1877f2;
-    color: white;
-    font-size: 18px;
-    padding: 10px 16px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+  border: none;
+  border-radius: 30px;
+  width: 100%;
+  background-color: #1877f2;
+  color: white;
+  font-size: 18px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .btn-submit:hover {
-    background-color: #186ddc;
+  background-color: #186ddc;
 }
 
 .btn-already-have {
-    border: none;
-    border-radius: 24px;
-    width: 100%;
-    background-color: #dbdee2;
-    color: black;
-    font-size: 18px;
-    padding: 10px 16px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+  border: none;
+  border-radius: 24px;
+  width: 100%;
+  background-color: #dbdee2;
+  color: black;
+  font-size: 18px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .btn-already-have:hover {
-    background-color: #d1d3d5;
+  background-color: #d1d3d5;
 }
 
 .needs-validation.was-validated .form-control:invalid {
-    border-color: red;
+  border-color: red;
 }
 
 .needs-validation.was-validated .form-control:valid {
-    border-color: green;
+  border-color: green;
 }

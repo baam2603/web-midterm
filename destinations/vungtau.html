@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="../common/header.css" />
     <link rel="stylesheet" href="../common/footer.css" />
     <link rel="stylesheet" href="../common/city-page.css" />
+    <link rel="stylesheet" href="../common/favorites.css" />
   </head>
   <body>
     <!-- ================= HEADER ================= -->
@@ -239,8 +240,21 @@
           </label>
         </div>
 
+        <!-- ===== Card 1 ===== -->
         <article class="hotel-card">
-          <div class="hotel-card__photo hotel-card__photo--sea"></div>
+          <div class="hotel-card__photo hotel-card__photo--sea">
+            <button
+              class="btn-fav"
+              type="button"
+              data-id="sample-vungtau"
+              data-name="Sóng Biển Resort"
+              data-city="vungtau"
+              aria-pressed="false"
+              aria-label="Lưu khách sạn"
+            >
+              <i class="material-symbols-rounded">favorite</i>
+            </button>
+          </div>
           <div class="hotel-card__body">
             <div class="hotel-card__top">
               <div>
@@ -285,8 +299,21 @@
           </div>
         </article>
 
+        <!-- ===== Card 2 ===== -->
         <article class="hotel-card">
-          <div class="hotel-card__photo hotel-card__photo--sand"></div>
+          <div class="hotel-card__photo hotel-card__photo--sand">
+            <button
+              class="btn-fav"
+              type="button"
+              data-id="anh-duong"
+              data-name="Ánh Dương Boutique Hotel"
+              data-city="vungtau"
+              aria-pressed="false"
+              aria-label="Lưu khách sạn"
+            >
+              <i class="material-symbols-rounded">favorite</i>
+            </button>
+          </div>
           <div class="hotel-card__body">
             <div class="hotel-card__top">
               <div>
@@ -326,8 +353,21 @@
           </div>
         </article>
 
+        <!-- ===== Card 3 ===== -->
         <article class="hotel-card">
-          <div class="hotel-card__photo hotel-card__photo--sunset"></div>
+          <div class="hotel-card__photo hotel-card__photo--sunset">
+            <button
+              class="btn-fav"
+              type="button"
+              data-id="hai-au"
+              data-name="Hải Âu Homestay"
+              data-city="vungtau"
+              aria-pressed="false"
+              aria-label="Lưu khách sạn"
+            >
+              <i class="material-symbols-rounded">favorite</i>
+            </button>
+          </div>
           <div class="hotel-card__body">
             <div class="hotel-card__top">
               <div>
@@ -368,17 +408,20 @@
       </section>
     </main>
     <footer id="site-footer"></footer>
+
+    <script src="../common/auth-service.js"></script>
     <script src="../common/header.js"></script>
     <script src="../common/footer.js"></script>
+    <script src="../common/favorites.js"></script>
     <script>
       mountHeader("site-header");
       mountFooter("site-footer");
+      initFavorites();
     </script>
     <script src="../common/city-data.js"></script>
     <script src="../common/city-page.js"></script>
     <script>
       initCityPage("vungtau");
     </script>
-    <script src="auth-service.js"></script>
   </body>
 </html>

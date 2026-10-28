@@ -24,7 +24,7 @@
     root.innerHTML = `
       <div class="not-found">
         <h1>Không tìm thấy khách sạn</h1>
-        <p><a href="${city ? city.listHref : "index1.html"}">Quay lại danh sách</a></p>
+        <p><a href="${city ? "../" + city.listHref : "../index1.html"}">Quay lại danh sách</a></p>
       </div>`;
     return;
   }
@@ -33,14 +33,26 @@
 
   /* ---------- Helpers ---------- */
   const esc = (s) =>
-    String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    String(s).replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
   const money = (n) => n.toLocaleString("vi-VN") + "₫";
   const icon = (name) => `<i class="material-symbols-rounded">${name}</i>`;
 
   // Ô ảnh: nền gradient luôn có sẵn, ảnh lỗi/thiếu thì ẩn đi
   const photo = (i, extra = "") => {
     const src = hotel.images[i];
-    const img = src ? `<img src="${esc(src)}" alt="${esc(hotel.name)} - ảnh ${i + 1}" loading="lazy" onerror="this.remove()" />` : "";
+    const img = src
+      ? `<img src="${esc(src)}" alt="${esc(hotel.name)} - ảnh ${i + 1}" loading="lazy" onerror="this.remove()" />`
+      : "";
     return `<button type="button" class="gallery__item gallery__item--${i + 1} ${extra}" data-index="${i}" aria-label="Xem ảnh ${i + 1}">${img}`;
   };
 
@@ -53,12 +65,27 @@
 
   /* ---------- Loại phòng ---------- */
   const rooms = hotel.rooms || [];
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const toISO = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const start =
+    params.get("checkin") && params.get("checkin") >= toISO(now)
+      ? params.get("checkin")
+      : toISO(new Date(now.getTime() + 86400000));
+  const end =
+    params.get("checkout") && params.get("checkout") > start
+      ? params.get("checkout")
+      : toISO(new Date(new Date(start + "T12:00:00").getTime() + 86400000));
+  const leftFor = (r) =>
+    BookingStore.availability(cityKey, hotelId, r.id, start, end, r.left || 5);
+
   const roomCard = (r) => `
     <article class="room">
       <div class="room__photo">
         ${r.image ? `<img src="${esc(r.image)}" alt="${esc(r.name)}" loading="lazy" onerror="this.remove()" />` : ""}
         <span class="room__badge">${icon("square_foot")} ${r.area} m²</span>
-        ${r.left ? `<span class="room__badge room__badge--warn">Chỉ còn ${r.left} phòng</span>` : ""}
+        ${leftFor(r) <= 3 ? `<span class="room__badge room__badge--warn">${leftFor(r) ? `Chỉ còn ${leftFor(r)} phòng` : "Hết phòng"}</span>` : ""}
       </div>
       <div class="room__body">
         <h3>${esc(r.name)}</h3>
@@ -78,7 +105,7 @@
             <strong>${money(r.price)}</strong>
             <span>/ đêm · chưa gồm thuế phí</span>
           </div>
-          <button type="button" class="room__btn" data-room="${esc(r.id)}">Chọn phòng</button>
+          <button type="button" class="room__btn" data-room="${esc(r.id)}" ${leftFor(r) === 0 ? "disabled" : ""}>${leftFor(r) === 0 ? "Hết phòng" : "Chọn phòng"}</button>
         </div>
       </div>
     </article>`;
@@ -128,14 +155,22 @@
           <a class="rating-card__link" href="#reviews">Xem tất cả đánh giá ${icon("arrow_forward")}</a>
         </div>
 
-        ${(hotel.nearby || []).length
-          ? `<div class="card highlight-card">
+        ${
+          (hotel.nearby || []).length
+            ? `<div class="card highlight-card">
           <h3>Địa điểm lân cận</h3>
           <ul>
-            ${hotel.nearby.slice(0, 4).map((p) => `<li>${icon(p.icon)} <span>${esc(p.name)}</span><b class="nearby__dist">${esc(p.distance)}</b></li>`).join("")}
+            ${hotel.nearby
+              .slice(0, 4)
+              .map(
+                (p) =>
+                  `<li>${icon(p.icon)} <span>${esc(p.name)}</span><b class="nearby__dist">${esc(p.distance)}</b></li>`,
+              )
+              .join("")}
           </ul>
         </div>`
-          : ""}
+            : ""
+        }
       </aside>
     </section>
 
@@ -149,7 +184,10 @@
         <h2>Thông số khách sạn</h2>
         <div class="facts">
           ${hotel.facts
-            .map((f) => `<div class="fact">${icon(f.icon)}<div><span class="fact__label">${esc(f.label)}</span><span class="fact__value">${esc(f.value)}</span></div></div>`)
+            .map(
+              (f) =>
+                `<div class="fact">${icon(f.icon)}<div><span class="fact__label">${esc(f.label)}</span><span class="fact__value">${esc(f.value)}</span></div></div>`,
+            )
             .join("")}
         </div>
       </div>
@@ -186,8 +224,18 @@
 
   /* ---------- Chọn phòng ---------- */
   function goBooking(roomId) {
-    // TODO: đổi sang trang đặt phòng thật của bạn
-    location.href = `booking.html?city=${encodeURIComponent(cityKey)}&id=${encodeURIComponent(hotelId)}&room=${encodeURIComponent(roomId)}`;
+    const selected = rooms.find((r) => r.id === roomId);
+    if (!selected || !leftFor(selected)) return;
+    const next = new URLSearchParams({
+      city: cityKey,
+      id: hotelId,
+      room: roomId,
+    });
+    next.set("checkin", start);
+    next.set("checkout", end);
+    for (const key of ["guests", "rooms"])
+      if (params.has(key)) next.set(key, params.get(key));
+    location.href = `Booking.html?${next}`;
   }
 
   /* ---------- Carousel loại phòng (mũi tên hiện khi phòng bị tràn) ---------- */
@@ -206,8 +254,12 @@
       prevBtn.disabled = track.scrollLeft <= 4;
       nextBtn.disabled = track.scrollLeft >= max - 4;
     };
-    prevBtn.addEventListener("click", () => track.scrollBy({ left: -step(), behavior: "smooth" }));
-    nextBtn.addEventListener("click", () => track.scrollBy({ left: step(), behavior: "smooth" }));
+    prevBtn.addEventListener("click", () =>
+      track.scrollBy({ left: -step(), behavior: "smooth" }),
+    );
+    nextBtn.addEventListener("click", () =>
+      track.scrollBy({ left: step(), behavior: "smooth" }),
+    );
     track.addEventListener("scroll", updateArrows, { passive: true });
     window.addEventListener("resize", updateArrows);
     updateArrows();
@@ -248,7 +300,7 @@
               <strong>${money(r.price)}</strong>
               <span>/ đêm · chưa gồm thuế phí</span>
             </div>
-            <button type="button" class="room__btn" data-room="${esc(r.id)}">Chọn phòng</button>
+            <button type="button" class="room__btn" data-room="${esc(r.id)}" ${leftFor(r) === 0 ? "disabled" : ""}>${leftFor(r) === 0 ? "Hết phòng" : "Chọn phòng"}</button>
           </div>
         </div>
       </div>`;
@@ -261,7 +313,8 @@
   }
 
   modal.addEventListener("click", (e) => {
-    if (e.target === modal || e.target.closest(".room-modal__close")) return closeRoom();
+    if (e.target === modal || e.target.closest(".room-modal__close"))
+      return closeRoom();
     const pick = e.target.closest("[data-room]");
     if (pick) goBooking(pick.dataset.room);
   });
@@ -305,8 +358,12 @@
     if (btn) openLightbox(Number(btn.dataset.index));
   });
   document.getElementById("lbClose").addEventListener("click", closeLightbox);
-  document.getElementById("lbPrev").addEventListener("click", () => showImage(current - 1));
-  document.getElementById("lbNext").addEventListener("click", () => showImage(current + 1));
+  document
+    .getElementById("lbPrev")
+    .addEventListener("click", () => showImage(current - 1));
+  document
+    .getElementById("lbNext")
+    .addEventListener("click", () => showImage(current + 1));
   lb.addEventListener("click", (e) => {
     if (e.target === lb) closeLightbox();
   });

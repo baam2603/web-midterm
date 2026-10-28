@@ -13,10 +13,13 @@
 
   /* ------------------------- Tiện ích ------------------------- */
   const pad = (n) => String(n).padStart(2, "0");
-  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const startOfDay = (d) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const addDays = (d, n) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
   const sameDay = (a, b) => a && b && a.getTime() === b.getTime();
-  const dateKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const dateKey = (d) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const parseKey = (k) => {
     const [y, m, d] = k.split("-").map(Number);
     return new Date(y, m - 1, d);
@@ -31,10 +34,33 @@
       .replace(/Đ/g, "D")
       .toLowerCase();
   const esc = (s) =>
-    String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+    String(s).replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
   const icon = (name) => `<i class="material-symbols-rounded">${name}</i>`;
 
-  const MONTH_NAMES = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+  const MONTH_NAMES = [
+    "Tháng 1",
+    "Tháng 2",
+    "Tháng 3",
+    "Tháng 4",
+    "Tháng 5",
+    "Tháng 6",
+    "Tháng 7",
+    "Tháng 8",
+    "Tháng 9",
+    "Tháng 10",
+    "Tháng 11",
+    "Tháng 12",
+  ];
   const DOW = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
   const CHIP_LABEL = {
     breakfast: "Bữa sáng miễn phí",
@@ -72,7 +98,8 @@
       const r = this.field.getBoundingClientRect();
       const w = this.el.offsetWidth;
       let left = r.left + window.scrollX;
-      const maxLeft = window.scrollX + document.documentElement.clientWidth - w - 12;
+      const maxLeft =
+        window.scrollX + document.documentElement.clientWidth - w - 12;
       left = Math.max(window.scrollX + 12, Math.min(left, maxLeft));
       this.el.style.left = left + "px";
       this.el.style.top = r.bottom + window.scrollY + 10 + "px";
@@ -150,13 +177,13 @@
       const typeHTML = f.types
         .map(
           (t) =>
-            `<label><input type="checkbox" data-group="types" value="${t.value}"> ${t.icon ? icon(t.icon) + " " : ""}${esc(t.label)}</label>`
+            `<label><input type="checkbox" data-group="types" value="${t.value}"> ${t.icon ? icon(t.icon) + " " : ""}${esc(t.label)}</label>`,
         )
         .join("");
       const zoneHTML = f.zones
         .map(
           (z) =>
-            `<label><input type="checkbox" data-group="zones" value="${z.value}"> ${z.icon ? icon(z.icon) + " " : ""}${esc(z.label)}</label>`
+            `<label><input type="checkbox" data-group="zones" value="${z.value}"> ${z.icon ? icon(z.icon) + " " : ""}${esc(z.label)}</label>`,
         )
         .join("");
       const chipHTML = f.amenities
@@ -168,7 +195,7 @@
       const starHTML = [5, 4, 3, 2]
         .map(
           (n) =>
-            `<label><input type="checkbox" data-group="stars" value="${n}"> ${icon("star").repeat(n)}</label>`
+            `<label><input type="checkbox" data-group="stars" value="${n}"> ${icon("star").repeat(n)}</label>`,
         )
         .join("");
 
@@ -203,8 +230,10 @@
           state.maxPrice = Infinity;
           $("#tk-price-out").textContent = "Không giới hạn giá";
         } else {
-          state.maxPrice = Math.round((500000 + (v / 100) * 4500000) / 50000) * 50000;
-          $("#tk-price-out").textContent = "Tối đa " + fmtMoney(state.maxPrice) + " / đêm";
+          state.maxPrice =
+            Math.round((500000 + (v / 100) * 4500000) / 50000) * 50000;
+          $("#tk-price-out").textContent =
+            "Tối đa " + fmtMoney(state.maxPrice) + " / đêm";
         }
         renderResults();
       });
@@ -217,7 +246,9 @@
       state.amenities.clear();
       state.stars.clear();
       state.maxPrice = Infinity;
-      filterSection.querySelectorAll('input[type="checkbox"]').forEach((c) => (c.checked = false));
+      filterSection
+        .querySelectorAll('input[type="checkbox"]')
+        .forEach((c) => (c.checked = false));
       const p = $("#tk-price");
       p.value = 100;
       $("#tk-price-out").textContent = "Không giới hạn giá";
@@ -237,7 +268,11 @@
       listEl = document.createElement("div");
       listEl.className = "tk-list";
       resultsSection.appendChild(listEl);
-      if (sortEl) sortEl.addEventListener("change", () => { state.sort = sortEl.selectedIndex; renderResults(); });
+      if (sortEl)
+        sortEl.addEventListener("change", () => {
+          state.sort = sortEl.selectedIndex;
+          renderResults();
+        });
 
       listEl.addEventListener("click", (e) => {
         const btn = e.target.closest(".btn-view");
@@ -261,11 +296,14 @@
 
     function matches(h) {
       if (state.types.size && !state.types.has(h.type)) return false;
-      if (state.zones.size && !h.zones.some((z) => state.zones.has(z))) return false;
-      for (const a of state.amenities) if (!h.amenities.includes(a)) return false;
+      if (state.zones.size && !h.zones.some((z) => state.zones.has(z)))
+        return false;
+      for (const a of state.amenities)
+        if (!h.amenities.includes(a)) return false;
       if (state.stars.size && !state.stars.has(h.stars)) return false;
       if (h.price > state.maxPrice) return false;
-      if (state.adults + state.children > h.capacity * state.rooms) return false;
+      if (state.adults + state.children > h.capacity * state.rooms)
+        return false;
       const q = norm(state.street.trim());
       if (q) {
         const hay = norm(h.address + " " + h.streets.join(" ") + " " + h.name);
@@ -279,7 +317,10 @@
       const rest = h.amenities.filter((a) => !state.amenities.has(a));
       const tags = [...picked, ...rest]
         .slice(0, 3)
-        .map((k) => `<span>${icon(window.AMENITIES[k].icon)} ${esc(window.AMENITIES[k].label)}</span>`)
+        .map(
+          (k) =>
+            `<span>${icon(window.AMENITIES[k].icon)} ${esc(window.AMENITIES[k].label)}</span>`,
+        )
         .join("");
       const photoClass = h.photo ? ` hotel-card__photo--${h.photo}` : "";
       return `
@@ -322,15 +363,23 @@
           : `<div class="tk-empty">${icon("search_off")}<p>Không có khách sạn nào phù hợp với yêu cầu của bạn.</p>
              <button type="button" class="tk-btn" id="tk-empty-reset">Xóa bộ lọc</button></div>`;
         const r = $("#tk-empty-reset");
-        if (r) r.addEventListener("click", () => { clearStreet(); resetFilters(); });
+        if (r)
+          r.addEventListener("click", () => {
+            clearStreet();
+            resetFilters();
+          });
       }
       updateMap();
     }
 
     /* ============================ THỜI TIẾT ============================ */
     function weatherInfo(code, isDay) {
-      if (code === 0) return isDay ? ["sunny", "Trời quang, nắng đẹp"] : ["clear_night", "Trời quang, đêm trong"];
-      if (code === 1 || code === 2) return [isDay ? "partly_cloudy_day" : "partly_cloudy_night", "Ít mây"];
+      if (code === 0)
+        return isDay
+          ? ["sunny", "Trời quang, nắng đẹp"]
+          : ["clear_night", "Trời quang, đêm trong"];
+      if (code === 1 || code === 2)
+        return [isDay ? "partly_cloudy_day" : "partly_cloudy_night", "Ít mây"];
       if (code === 3) return ["cloud", "Nhiều mây"];
       if (code === 45 || code === 48) return ["foggy", "Sương mù"];
       if (code >= 51 && code <= 57) return ["rainy", "Mưa phùn"];
@@ -353,12 +402,20 @@
       try {
         if (!data) {
           const url =
-            "https://api.open-meteo.com/v1/forecast?latitude=" + city.lat + "&longitude=" + city.lng +
+            "https://api.open-meteo.com/v1/forecast?latitude=" +
+            city.lat +
+            "&longitude=" +
+            city.lng +
             "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day&timezone=auto";
           const res = await fetch(url);
           if (!res.ok) throw new Error("HTTP " + res.status);
           data = (await res.json()).current;
-          try { sessionStorage.setItem(cacheKey, JSON.stringify({ t: Date.now(), d: data })); } catch (_) {}
+          try {
+            sessionStorage.setItem(
+              cacheKey,
+              JSON.stringify({ t: Date.now(), d: data }),
+            );
+          } catch (_) {}
         }
         const [ic, desc] = weatherInfo(data.weather_code, data.is_day === 1);
         const iconEl = $(".weather-icon", body);
@@ -373,9 +430,17 @@
           meta.className = "weather-meta";
           body.appendChild(meta);
         }
-        meta.textContent = "Độ ẩm " + Math.round(data.relative_humidity_2m) + "% · Gió " + Math.round(data.wind_speed_10m) + " km/h";
+        meta.textContent =
+          "Độ ẩm " +
+          Math.round(data.relative_humidity_2m) +
+          "% · Gió " +
+          Math.round(data.wind_speed_10m) +
+          " km/h";
       } catch (err) {
-        console.warn("[city-page] Không tải được thời tiết, giữ nội dung mặc định.", err);
+        console.warn(
+          "[city-page] Không tải được thời tiết, giữ nội dung mặc định.",
+          err,
+        );
       }
     }
 
@@ -391,10 +456,13 @@
         box.innerHTML = "";
         box.classList.add("tk-map");
         if (box.clientHeight < 180) box.style.height = "220px";
-        map = L.map(box, { scrollWheelZoom: false, zoomControl: true }).setView([city.lat, city.lng], city.zoom);
+        map = L.map(box, { scrollWheelZoom: false, zoomControl: true }).setView(
+          [city.lat, city.lng],
+          city.zoom,
+        );
         L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
-        maxZoom: 19,
-        attribution: "&copy; Google Maps",
+          maxZoom: 19,
+          attribution: "&copy; Google Maps",
         }).addTo(map);
 
         city.hotels.forEach((h) => {
@@ -407,7 +475,9 @@
               popupAnchor: [0, -28],
             }),
           });
-          m.bindPopup(`<div class="tk-map-pop"><strong>${esc(h.name)}</strong><span>${fmtMoney(h.price)} / đêm</span></div>`);
+          m.bindPopup(
+            `<div class="tk-map-pop"><strong>${esc(h.name)}</strong><span>${fmtMoney(h.price)} / đêm</span></div>`,
+          );
           m.on("click", () => highlight(h.id, true));
           markers[h.id] = m;
         });
@@ -424,25 +494,41 @@
       const ids = new Set(visible.map((h) => h.id));
       Object.keys(markers).forEach((id) => {
         const m = markers[id];
-        if (ids.has(id)) { if (!map.hasLayer(m)) m.addTo(map); }
-        else if (map.hasLayer(m)) map.removeLayer(m);
+        if (ids.has(id)) {
+          if (!map.hasLayer(m)) m.addTo(map);
+        } else if (map.hasLayer(m)) map.removeLayer(m);
       });
-      if (visible.length === 1) map.setView([visible[0].lat, visible[0].lng], 15);
-      else if (visible.length > 1) map.fitBounds(L.latLngBounds(visible.map((h) => [h.lat, h.lng])), { padding: [24, 24], maxZoom: 15 });
+      if (visible.length === 1)
+        map.setView([visible[0].lat, visible[0].lng], 15);
+      else if (visible.length > 1)
+        map.fitBounds(L.latLngBounds(visible.map((h) => [h.lat, h.lng])), {
+          padding: [24, 24],
+          maxZoom: 15,
+        });
       else map.setView([city.lat, city.lng], city.zoom);
     }
 
     function highlight(id, scroll) {
-      document.querySelectorAll(".hotel-card--active").forEach((c) => c.classList.remove("hotel-card--active"));
-      Object.values(markers).forEach((m) => m._icon && m._icon.firstChild && m._icon.firstChild.classList.remove("is-active"));
+      document
+        .querySelectorAll(".hotel-card--active")
+        .forEach((c) => c.classList.remove("hotel-card--active"));
+      Object.values(markers).forEach(
+        (m) =>
+          m._icon &&
+          m._icon.firstChild &&
+          m._icon.firstChild.classList.remove("is-active"),
+      );
       if (!id) return;
-      const card = listEl && listEl.querySelector(`.hotel-card[data-id="${id}"]`);
+      const card =
+        listEl && listEl.querySelector(`.hotel-card[data-id="${id}"]`);
       if (card) {
         card.classList.add("hotel-card--active");
-        if (scroll) card.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (scroll)
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
       }
       const m = markers[id];
-      if (m && m._icon && m._icon.firstChild) m._icon.firstChild.classList.add("is-active");
+      if (m && m._icon && m._icon.firstChild)
+        m._icon.firstChild.classList.add("is-active");
     }
 
     /* ======================= THANH TÌM KIẾM ======================= */
@@ -464,7 +550,9 @@
 
       function items() {
         const q = norm(streetInput.value.trim());
-        return city.streets.filter((s) => !q || norm(s.name + " " + s.note).includes(q));
+        return city.streets.filter(
+          (s) => !q || norm(s.name + " " + s.note).includes(q),
+        );
       }
       function show() {
         const list = items();
@@ -476,7 +564,7 @@
               .map(
                 (s, i) =>
                   `<button type="button" class="tk-suggest__item${i === active ? " is-active" : ""}" data-name="${esc(s.name)}">
-                    ${icon("location_on")}<span><strong>${esc(s.name)}</strong><small>${esc(s.note)}</small></span></button>`
+                    ${icon("location_on")}<span><strong>${esc(s.name)}</strong><small>${esc(s.note)}</small></span></button>`,
               )
               .join("")
           : `<div class="tk-suggest__empty">Không tìm thấy gợi ý — nhấn Tìm kiếm để lọc theo từ khóa.</div>`;
@@ -501,8 +589,13 @@
         if (dateInput && !state.checkin) setTimeout(() => dateInput.focus(), 0);
       }
 
-      streetInput.addEventListener("focus", () => { active = -1; show(); });
-      streetInput.addEventListener("click", () => { if (Popup.owner !== "street") show(); });
+      streetInput.addEventListener("focus", () => {
+        active = -1;
+        show();
+      });
+      streetInput.addEventListener("click", () => {
+        if (Popup.owner !== "street") show();
+      });
       streetInput.addEventListener("input", () => {
         active = -1;
         state.street = streetInput.value;
@@ -511,9 +604,18 @@
       });
       streetInput.addEventListener("keydown", (e) => {
         const list = items();
-        if (e.key === "ArrowDown") { e.preventDefault(); active = Math.min(active + 1, list.length - 1); show(); }
-        else if (e.key === "ArrowUp") { e.preventDefault(); active = Math.max(active - 1, 0); show(); }
-        else if (e.key === "Enter" && active >= 0 && list[active]) { e.preventDefault(); pick(list[active].name); }
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          active = Math.min(active + 1, list.length - 1);
+          show();
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          active = Math.max(active - 1, 0);
+          show();
+        } else if (e.key === "Enter" && active >= 0 && list[active]) {
+          e.preventDefault();
+          pick(list[active].name);
+        }
       });
     }
 
@@ -550,25 +652,43 @@
           const m = first.getMonth();
           const lead = (first.getDay() + 6) % 7; // Thứ 2 là cột đầu
           const days = new Date(y, m + 1, 0).getDate();
-          let cells = DOW.map((d) => `<div class="tk-cal__dow">${d}</div>`).join("");
-          cells += '<div></div>'.repeat(lead);
+          let cells = DOW.map(
+            (d) => `<div class="tk-cal__dow">${d}</div>`,
+          ).join("");
+          cells += "<div></div>".repeat(lead);
           for (let d = 1; d <= days; d++) {
             const dt = new Date(y, m, d);
             const cls = ["tk-cal__day"];
             const past = dt < today;
             if (sameDay(dt, today)) cls.push("is-today");
-            if (sameDay(dt, state.checkin)) { cls.push("is-start"); if (state.checkout) cls.push("has-range"); }
-            if (sameDay(dt, state.checkout)) { cls.push("is-end"); cls.push("has-range"); }
-            if (state.checkin && state.checkout && dt > state.checkin && dt < state.checkout) cls.push("is-range");
+            if (sameDay(dt, state.checkin)) {
+              cls.push("is-start");
+              if (state.checkout) cls.push("has-range");
+            }
+            if (sameDay(dt, state.checkout)) {
+              cls.push("is-end");
+              cls.push("has-range");
+            }
+            if (
+              state.checkin &&
+              state.checkout &&
+              dt > state.checkin &&
+              dt < state.checkout
+            )
+              cls.push("is-range");
             cells += `<button type="button" class="${cls.join(" ")}" data-date="${dateKey(dt)}"${past ? " disabled" : ""}>${d}</button>`;
           }
-          const atMin = first.getFullYear() === today.getFullYear() && first.getMonth() === today.getMonth();
-          const prev = side === 0
-            ? `<button type="button" class="tk-cal__nav" data-nav="-1"${atMin ? " disabled" : ""}>${icon("chevron_left")}</button>`
-            : `<span class="tk-cal__nav tk-cal__nav--ghost"></span>`;
-          const next = side === 1
-            ? `<button type="button" class="tk-cal__nav" data-nav="1">${icon("chevron_right")}</button>`
-            : `<span class="tk-cal__nav tk-cal__nav--ghost"></span>`;
+          const atMin =
+            first.getFullYear() === today.getFullYear() &&
+            first.getMonth() === today.getMonth();
+          const prev =
+            side === 0
+              ? `<button type="button" class="tk-cal__nav" data-nav="-1"${atMin ? " disabled" : ""}>${icon("chevron_left")}</button>`
+              : `<span class="tk-cal__nav tk-cal__nav--ghost"></span>`;
+          const next =
+            side === 1
+              ? `<button type="button" class="tk-cal__nav" data-nav="1">${icon("chevron_right")}</button>`
+              : `<span class="tk-cal__nav tk-cal__nav--ghost"></span>`;
           return `<div class="tk-cal__month"><div class="tk-cal__head">${prev}<strong>${MONTH_NAMES[m]} ${y}</strong>${next}</div><div class="tk-cal__grid">${cells}</div></div>`;
         }
 
@@ -576,7 +696,9 @@
           const second = new Date(view.getFullYear(), view.getMonth() + 1, 1);
           let status = "Chọn ngày nhận phòng";
           if (state.checkin && !state.checkout) status = "Chọn ngày trả phòng";
-          if (state.checkin && state.checkout) status = Math.round((state.checkout - state.checkin) / 86400000) + " đêm";
+          if (state.checkin && state.checkout)
+            status =
+              Math.round((state.checkout - state.checkin) / 86400000) + " đêm";
           root.innerHTML = `
             <div class="tk-cal__months">${monthHTML(view, 0)}${monthHTML(second, 1)}</div>
             <div class="tk-cal__foot"><span>${status}</span>
@@ -586,7 +708,11 @@
         root.addEventListener("click", (e) => {
           const nav = e.target.closest("[data-nav]");
           if (nav) {
-            view = new Date(view.getFullYear(), view.getMonth() + Number(nav.dataset.nav), 1);
+            view = new Date(
+              view.getFullYear(),
+              view.getMonth() + Number(nav.dataset.nav),
+              1,
+            );
             render();
             Popup.place();
             return;
@@ -634,7 +760,8 @@
 
     /* ---- 3) Khách & phòng ---- */
     function updateGuestInput() {
-      if (guestInput) guestInput.value = `${state.adults + state.children} khách · ${state.rooms} phòng`;
+      if (guestInput)
+        guestInput.value = `${state.adults + state.children} khách · ${state.rooms} phòng`;
     }
 
     function initGuests() {
@@ -645,9 +772,27 @@
       updateGuestInput();
 
       const rows = [
-        { key: "adults", label: "Người lớn", sub: "Từ 13 tuổi trở lên", min: 1, max: 16 },
-        { key: "children", label: "Trẻ em", sub: "Dưới 13 tuổi", min: 0, max: 8 },
-        { key: "rooms", label: "Phòng", sub: "Số phòng cần đặt", min: 1, max: 8 },
+        {
+          key: "adults",
+          label: "Người lớn",
+          sub: "Từ 13 tuổi trở lên",
+          min: 1,
+          max: 16,
+        },
+        {
+          key: "children",
+          label: "Trẻ em",
+          sub: "Dưới 13 tuổi",
+          min: 0,
+          max: 8,
+        },
+        {
+          key: "rooms",
+          label: "Phòng",
+          sub: "Số phòng cần đặt",
+          min: 1,
+          max: 8,
+        },
       ];
 
       function openGuests() {
@@ -657,17 +802,23 @@
           root.innerHTML =
             rows
               .map(
-                (r) => `<div class="tk-row"><div><strong>${r.label}</strong><small>${r.sub}</small></div>
+                (
+                  r,
+                ) => `<div class="tk-row"><div><strong>${r.label}</strong><small>${r.sub}</small></div>
                   <div class="tk-step">
                     <button type="button" data-k="${r.key}" data-d="-1"${state[r.key] <= r.min ? " disabled" : ""}>−</button>
                     <output>${state[r.key]}</output>
                     <button type="button" data-k="${r.key}" data-d="1"${state[r.key] >= r.max ? " disabled" : ""}>+</button>
-                  </div></div>`
+                  </div></div>`,
               )
-              .join("") + `<button type="button" class="tk-btn" data-done>Xong</button>`;
+              .join("") +
+            `<button type="button" class="tk-btn" data-done>Xong</button>`;
         }
         root.addEventListener("click", (e) => {
-          if (e.target.closest("[data-done]")) { Popup.close(); return; }
+          if (e.target.closest("[data-done]")) {
+            Popup.close();
+            return;
+          }
           const b = e.target.closest("button[data-k]");
           if (!b || b.disabled) return;
           const k = b.dataset.k;
@@ -697,7 +848,8 @@
         Popup.close();
         if (streetInput) state.street = streetInput.value;
         renderResults();
-        if (resultsSection) resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (resultsSection)
+          resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     }
 
