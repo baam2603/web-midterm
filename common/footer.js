@@ -1,8 +1,8 @@
 const FOOTER_INFO = {
   brand: "THREEK.COM",
   tagline: "Đặt phòng khách sạn nhanh gọn tại Đà Lạt và Vũng Tàu.",
-  email: "support@threek.com",
-  phone: "0900 000 000",
+  email: "nguyentuankhoi2603@gmail.com",
+  phone: "0824343474",
   address: "Việt Nam",
   note: "Đồ án môn học",
   socials: [
