@@ -10,13 +10,15 @@ body[data-city="dalat"] {
   --c-mist: #dfe4d5;
   --c-accent: #b6862f;
   --c-on-accent: #22331d;
+  --c-ok: #2f7a43;
 }
 body[data-city="vungtau"] {
-  --c-deep: #1d3f66;
-  --c-mid: #4f86c2;
+  --c-deep: #0f4c6b;
+  --c-mid: #1b6a8f;
   --c-mist: #dfe4d5;
   --c-accent: #d7b56d;
   --c-on-accent: #1d2a3a;
+  --c-ok: #0f4c6b;
 }
 
 :root {
@@ -449,7 +451,7 @@ a {
   font-size: 0.82rem;
 }
 .room__perks .is-yes {
-  color: #2f7a43;
+  color: var(--c-ok);
   font-weight: 500;
 }
 .room__perks .is-no {
@@ -504,14 +506,19 @@ a {
   padding: 0;
   border: none;
   background: none;
-  color: var(--c-deep);
+  /* Màu trung tính (đen xám) để không trùng với icon/tiện nghi màu chủ đề */
+  color: #2b2b2b;
   font-family: "Be Vietnam Pro", sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
 }
+.room__detail .material-symbols-rounded {
+  color: #5a5a5a;
+}
 .room__detail:hover {
   text-decoration: underline;
+  color: #000;
 }
 
 /* ---------- Khối tiện nghi nổi bật (aside) ---------- */

@@ -11,6 +11,17 @@
   --tk-line: #d9d6c8;
   --tk-text: #22302a;
   --tk-muted: #6d7568;
+  --tk-range: #e4ecdf;
+}
+
+/* Bảng màu riêng từng thành phố — city-page.js gán <html data-city="...">.
+   Thêm thành phố mới: chỉ cần thêm một khối :root[data-city="..."] tương tự. */
+:root[data-city="vungtau"] {
+  --tk-green-900: #0a3349;
+  --tk-green-700: #0f4c6b;
+  --tk-green-600: #1b6a8f;
+  --tk-gold: #e0a84a;
+  --tk-range: #d6e6ef;
 }
 
 /* Ô nhập trong thanh tìm kiếm */
@@ -154,7 +165,7 @@
   cursor: default;
 }
 .tk-cal__day.is-today { font-weight: 700; color: var(--tk-green-700); }
-.tk-cal__day.is-range { background: #e4ecdf; border-radius: 0; }
+.tk-cal__day.is-range { background: var(--tk-range); border-radius: 0; }
 .tk-cal__day.is-start,
 .tk-cal__day.is-end {
   background: var(--tk-green-700);

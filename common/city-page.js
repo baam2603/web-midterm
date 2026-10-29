@@ -168,6 +168,8 @@
     }
 
     initializedCities.add(cityKey);
+    // Cho CSS đổi bảng màu theo thành phố (xem :root[data-city] trong city-page.css)
+    document.documentElement.dataset.city = cityKey;
 
     const state = {
       street: "",
