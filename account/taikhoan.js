@@ -21,22 +21,34 @@
     el.textContent = msg;
     el.classList.toggle("show", !!msg);
   };
-  $("fullname").value = user.fullName || "";
+  function fillProfile(profile) {
+    $("fullname").value = profile.fullName || "";
+    $("displayname").value = profile.displayName || "";
+    $("birthday").value = profile.birthday || "";
+    $("phone").value = profile.phone || "";
+    $("email").value = profile.email || "";
+  }
+  loadProfile().then(fillProfile).catch(err => error(err.message));
+  /* Original local cache fallback */
+  /* $("fullname").value = user.fullName || "";
   $("displayname").value = user.displayName || "";
   $("birthday").value = user.birthday || "";
   $("phone").value = user.phone || "";
-  $("email").value = user.email || "";
-  $("profile-form").addEventListener("submit", (e) => {
+  $("email").value = user.email || ""; */
+  $("profile-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     error("");
     try {
-      updateProfile({
+      await updateProfile({
         fullName: $("fullname").value,
         displayName: $("displayname").value,
         birthday: $("birthday").value,
         phone: $("phone").value,
       });
-      updateLoginState();
+      fillProfile(updateProfile);
+      if (typeof updateLoginState === "function") {
+        updateLoginState();
+      }
       toast("Đã lưu thay đổi");
     } catch (err) {
       error(err.message);
@@ -49,14 +61,11 @@
     b.title =
       "Liên kết Google/Facebook yêu cầu hệ thống OAuth và backend thực tế.";
   });
-  $("delete-account-btn").addEventListener("click", () => {
-    if (
-      !confirm(
-        "Xóa tài khoản demo cùng các đơn đặt phòng gắn với tài khoản này?",
-      )
-    )
-      return;
-    deleteCurrentAccount();
-    location.href = "../index1.html";
+  $("delete-account-btn").addEventListener("click", async () => {
+    if (!confirm("Bạn có chắc muốn xóa vĩnh viễn tài khoản?")) return;
+    const password = prompt("Nhập mật khẩu để xác nhận xóa tài khoản:");
+    if (password === null) return;
+    try { await deleteCurrentAccount(password); location.href = "../index1.html"; }
+    catch (err) { error(err.message); }
   });
 })();
