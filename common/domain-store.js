@@ -281,9 +281,7 @@
   }
   function approvedReviews(city, id) {
     return read()
-      .reviews.filter(
-        (x) => x.city === city && x.hotelId === id && x.status === "approved",
-      )
+      .reviews.filter((x) => x.city === city && x.hotelId === id)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
   function reviewsForAdmin() {
@@ -326,7 +324,7 @@
       author: user.displayName || user.name,
       score,
       comment,
-      status: "pending",
+      status: "approved",
       createdAt: new Date().toISOString(),
     });
     write(db);
@@ -352,6 +350,23 @@
     );
     audit("review." + status, id);
   }
+
+  function deleteReview(id) {
+    const db = read(),
+      r = db.reviews.find((x) => x.id === id);
+    if (!r) throw Error("Không tìm thấy đánh giá.");
+    db.reviews = db.reviews.filter((x) => x.id !== id);
+    write(db);
+    alertUser(
+      r.userId,
+      "review",
+      "Đánh giá đã bị gỡ",
+      "Đánh giá của bạn đã bị quản trị viên gỡ do vi phạm quy định nội dung.",
+      r.code,
+    );
+    audit("review.deleted", id);
+  }
+
   function createTicket(input) {
     const name = String(input.name || "").trim(),
       email = String(input.email || "")
@@ -422,7 +437,7 @@
     approvedReviews,
     reviewsForAdmin,
     submitReview,
-    moderateReview,
+    deleteReview,
     createTicket,
     ticketsForUser,
     answerTicket,

@@ -105,13 +105,11 @@
   }
   function overview() {
     const all = BookingStore.all().slice().reverse().slice(0, 5),
-      review = ThreeKData.reviewsForAdmin().filter(
-        (r) => r.status === "pending",
-      ).length,
+      review = ThreeKData.reviewsForAdmin().length,
       tickets = ThreeKData.read().tickets.filter(
         (t) => t.status === "open",
       ).length;
-    return `<div class="tk-grid"><div class="tk-surface"><h2>Cần xử lý</h2><p>${review} đánh giá chờ duyệt</p><p>${tickets} yêu cầu hỗ trợ chưa phản hồi</p><p>${BookingStore.all().filter((x) => x.status === "pending").length} đơn chờ thanh toán</p><div class="tk-alert">Đây là dữ liệu trên <strong>trình duyệt hiện tại</strong>. Không phải dữ liệu toàn hệ thống và không tự đồng bộ đa thiết bị.</div></div><div class="tk-surface"><h2>Luồng vận hành</h2><p>1. Khách chọn ngày, phòng và tạo đơn.</p><p>2. Admin kiểm tra, xác nhận hoặc xử lý hủy.</p><p>3. Admin cập nhật tồn kho và giá mới.</p><p>4. Khách hoàn tất lưu trú và gửi đánh giá.</p></div></div><h2 style="margin-top:24px">Đơn gần nhất</h2>${table(["Mã đơn", "Khách sạn", "Khách", "Trạng thái", "Tổng tiền"], all.map((b) => `<tr><td>${esc(b.code)}</td><td>${esc(b.hotelName)}</td><td>${esc(b.guestName)}</td><td>${statusTag(BookingStore.status(b))}</td><td>${money(b.total)}</td></tr>`).join(""))}`;
+    return `<div class="tk-grid"><div class="tk-surface"><h2>Cần xử lý</h2><p>${tickets} yêu cầu hỗ trợ chưa phản hồi</p><p>${BookingStore.all().filter((x) => x.status === "pending").length} đơn chờ thanh toán</p><p>${review} đánh giá hiện có (xem tab Đánh giá để kiểm tra và xóa nội dung vi phạm)</p><div class="tk-alert">Đây là dữ liệu trên <strong>trình duyệt hiện tại</strong>. Không phải dữ liệu toàn hệ thống và không tự đồng bộ đa thiết bị.</div></div><div class="tk-surface"><h2>Luồng vận hành</h2><p>1. Khách chọn ngày, phòng và tạo đơn.</p><p>2. Admin kiểm tra, xác nhận hoặc xử lý hủy.</p><p>3. Admin cập nhật tồn kho và giá mới.</p><p>4. Khách hoàn tất lưu trú và gửi đánh giá; admin chỉ kiểm tra và xóa nếu vi phạm.</p></div></div><h2 style="margin-top:24px">Đơn gần nhất</h2>${table(["Mã đơn", "Khách sạn", "Khách", "Trạng thái", "Tổng tiền"], all.map((b) => `<tr><td>${esc(b.code)}</td><td>${esc(b.hotelName)}</td><td>${esc(b.guestName)}</td><td>${statusTag(BookingStore.status(b))}</td><td>${money(b.total)}</td></tr>`).join(""))}`;
   }
   function hotelTab() {
     return `<div class="tk-flexcols"><section class="tk-surface"><h2>Thêm khách sạn demo</h2><form id="tk-create-hotel" class="tk-form"><label>Điểm đến<select name="city"><option value="dalat">Đà Lạt</option><option value="vungtau">Vũng Tàu</option></select></label><label>Tên khách sạn<input name="name" required minlength="3" maxlength="100" placeholder="Tên khách sạn"></label><label>Địa chỉ<input name="address" required minlength="5"></label><label>Giá phòng tiêu chuẩn (VNĐ)<input type="number" name="price" min="100000" step="10000" value="850000" required></label><div class="tk-flexcols"><label>Số phòng<input type="number" name="stock" min="0" max="999" value="5" required></label><label>Khách/phòng<input type="number" name="guests" min="1" max="12" value="2" required></label></div><button class="tk-primary">+ Thêm khách sạn</button></form></section><section class="tk-surface"><h2>Chỉnh sửa khách sạn</h2><form id="tk-edit-hotel" class="tk-form"><label>Khách sạn<select id="tk-hotel-picker" name="key">${hotels()
@@ -195,12 +193,12 @@
     );
   }
   function reviewsTab() {
-    return `<h2>Duyệt đánh giá</h2><p class="tk-muted">Chỉ tài khoản có đơn đã lưu trú mới được gửi đánh giá. Đánh giá chưa duyệt không hiển thị công khai.</p>${table(
-      ["Người gửi", "Khách sạn", "Đánh giá", "Trạng thái", "Thao tác"],
+    return `<h2>Kiểm tra đánh giá</h2><p class="tk-muted">Chỉ tài khoản có đơn đã lưu trú mới được gửi đánh giá. Đánh giá hiển thị công khai ngay khi gửi; admin chỉ kiểm tra và xóa nội dung vi phạm.</p>${table(
+      ["Người gửi", "Khách sạn", "Đánh giá", "Thao tác"],
       ThreeKData.reviewsForAdmin()
         .map(
           (r) =>
-            `<tr><td>${esc(r.author)}<span class="tk-mini">${date(r.createdAt)}</span></td><td>${esc(hotelName(r.city, r.hotelId))}</td><td><span class="tk-rating">${"★".repeat(r.score)}</span><p>${esc(r.comment)}</p></td><td>${statusTag(r.status)}</td><td><div class="tk-actions">${r.status === "pending" ? `<button class="tk-outline" data-review="${esc(r.id)}" data-moderate="approved">Duyệt</button><button class="tk-danger" data-review="${esc(r.id)}" data-moderate="rejected">Từ chối</button>` : "Đã xử lý"}</div></td></tr>`,
+            `<tr><td>${esc(r.author)}<span class="tk-mini">${date(r.createdAt)}</span></td><td>${esc(hotelName(r.city, r.hotelId))}</td><td><span class="tk-rating">${"★".repeat(r.score)}</span><p>${esc(r.comment)}</p></td><td><div class="tk-actions"><button class="tk-danger" data-delete-review="${esc(r.id)}">Xóa</button></div></td></tr>`,
         )
         .join(""),
     )}`;
@@ -418,10 +416,11 @@
         BookingStore.adminRefund(b.dataset.refund);
         render();
         feedback("Đã ghi nhận hoàn tiền demo.");
-      } else if (b.dataset.review) {
-        ThreeKData.moderateReview(b.dataset.review, b.dataset.moderate);
+      } else if (b.dataset.deleteReview) {
+        if (!confirm("Xóa đánh giá này? Không thể hoàn tác.")) return;
+        ThreeKData.deleteReview(b.dataset.deleteReview);
         render();
-        feedback("Đã duyệt trạng thái đánh giá.");
+        feedback("Đã xóa đánh giá.");
       } else if (b.id === "tk-delete-hotel") {
         const f = document.getElementById("tk-edit-hotel"),
           [city, id] = f.elements.key.value.split("/");
