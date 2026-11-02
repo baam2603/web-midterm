@@ -1,3 +1,11 @@
+-- 3K Booking seed data (repaired from user-uploaded truncated file)
+-- This file originally started at amenity id 5; ids 1-4 were NOT provided.
+-- Existing records are not overwritten when static seed IDs already exist.
+-- Run only after schema is in place; take a backup before importing.
+SET NAMES utf8mb4;
+START TRANSACTION;
+
+INSERT INTO `amenities` (`id`, `code`, `label`, `icon`) VALUES
 (5, 'restaurant', 'Nhà hàng', 'restaurant'),
 (6, 'fireplace', 'Lò sưởi', 'fireplace'),
 (7, 'valley', 'View thung lũng', 'landscape'),
@@ -6,7 +14,8 @@
 (10, 'sunset', 'View hoàng hôn', 'bedtime'),
 (11, 'garden', 'Vườn riêng', 'yard'),
 (12, 'shuttle', 'Đưa đón sân bay', 'local_taxi'),
-(13, 'checkin24', 'Nhận phòng 24h', 'gpp_good');
+(13, 'checkin24', 'Nhận phòng 24h', 'gpp_good')
+ON DUPLICATE KEY UPDATE `id` = `id`;
 
 --
 -- Dumping data for table `hotels`
@@ -28,7 +37,8 @@ INSERT INTO `hotels` (`id`, `slug`, `name`, `city`, `type`, `stars`, `address`, 
 (25, 'bai-truoc-grand', 'Bãi Trước Grand Hotel', 'vungtau', 'hotel', 5, 'Đường Quang Trung, Bãi Trước', 2100000.00, NULL, '2026-10-28 13:38:21'),
 (26, 'thi-sach-inn', 'Thi Sách Inn', 'vungtau', 'hotel', 3, 'Đường Thi Sách, khu phố ẩm thực', 560000.00, NULL, '2026-10-28 13:38:21'),
 (27, 'thuy-van-apartment', 'Thùy Vân Sea Apartment', 'vungtau', 'villa', 4, 'Đường Thùy Vân, Bãi Sau', 1180000.00, NULL, '2026-10-28 13:38:21'),
-(28, 'lhp-homestay', 'Lê Hồng Phong Homestay', 'vungtau', 'homestay', 2, 'Đường Lê Hồng Phong, trung tâm', 480000.00, NULL, '2026-10-28 13:38:21');
+(28, 'lhp-homestay', 'Lê Hồng Phong Homestay', 'vungtau', 'homestay', 2, 'Đường Lê Hồng Phong, trung tâm', 480000.00, NULL, '2026-10-28 13:38:21')
+ON DUPLICATE KEY UPDATE `id` = `id`;
 
 --
 -- Dumping data for table `hotel_images`
@@ -37,7 +47,8 @@ INSERT INTO `hotels` (`id`, `slug`, `name`, `city`, `type`, `stars`, `address`, 
 INSERT INTO `hotel_images` (`id`, `hotel_id`, `image_path`, `sort_order`, `is_cover`) VALUES
 (1, 1, 'sources/dalat1.jpg', 1, 1),
 (2, 1, 'sources/dalat2.jpg', 2, 0),
-(3, 3, 'sources/vungtau.jpg', 1, 1);
+(3, 3, 'sources/vungtau.jpg', 1, 1)
+ON DUPLICATE KEY UPDATE `id` = `id`;
 
 --
 -- Dumping data for table `room_types`
@@ -47,7 +58,8 @@ INSERT INTO `room_types` (`id`, `hotel_id`, `code`, `name`, `capacity`, `total_r
 (1, 1, 'deluxe', 'Deluxe Garden', 2, 6, 1250000.00, 'Phòng hướng vườn', '2026-10-28 11:36:30'),
 (2, 1, 'family-suite', 'Family Suite', 4, 3, 2100000.00, 'Phòng gia đình', '2026-10-28 11:37:08'),
 (3, 2, 'standard', 'Standard Double', 2, 8, 980000.00, 'Phòng tiêu chuẩn', '2026-10-28 11:38:05'),
-(4, 2, 'deluxe', 'Deluxe City View', 2, 5, 1350000.00, 'Phòng hướng thành phố', '2026-10-28 11:38:36');
+(4, 2, 'deluxe', 'Deluxe City View', 2, 5, 1350000.00, 'Phòng hướng thành phố', '2026-10-28 11:38:36')
+ON DUPLICATE KEY UPDATE `id` = `id`;
 --
 -- Bo sung loai phong Vung Tau (dung chung seed.sql)
 -- Match frontend room IDs: standard, deluxe, family.
@@ -76,7 +88,3 @@ WHERE h.city = 'vungtau'
   );
 
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
