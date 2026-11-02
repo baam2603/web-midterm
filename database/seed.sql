@@ -1,35 +1,3 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1:3308
--- Generation Time: Oct 28, 2026 at 05:21 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `threek_booking`
---
-
---
--- Dumping data for table `amenities`
---
-
-INSERT INTO `amenities` (`id`, `code`, `label`, `icon`) VALUES
-(1, 'wifi', 'Wifi miễn phí', 'wifi'),
-(2, 'parking', 'Bãi đỗ xe', 'local_parking'),
-(3, 'breakfast', 'Bữa sáng', 'free_breakfast'),
-(4, 'pool', 'Hồ bơi', 'pool'),
 (5, 'restaurant', 'Nhà hàng', 'restaurant'),
 (6, 'fireplace', 'Lò sưởi', 'fireplace'),
 (7, 'valley', 'View thung lũng', 'landscape'),
@@ -80,6 +48,33 @@ INSERT INTO `room_types` (`id`, `hotel_id`, `code`, `name`, `capacity`, `total_r
 (2, 1, 'family-suite', 'Family Suite', 4, 3, 2100000.00, 'Phòng gia đình', '2026-10-28 11:37:08'),
 (3, 2, 'standard', 'Standard Double', 2, 8, 980000.00, 'Phòng tiêu chuẩn', '2026-10-28 11:38:05'),
 (4, 2, 'deluxe', 'Deluxe City View', 2, 5, 1350000.00, 'Phòng hướng thành phố', '2026-10-28 11:38:36');
+--
+-- Bo sung loai phong Vung Tau (dung chung seed.sql)
+-- Match frontend room IDs: standard, deluxe, family.
+-- Chi them room chua ton tai, khong thay doi cac room Da Lat.
+-- Gia va so luong la du lieu demo; can dong bo voi du lieu thuc te.
+--
+INSERT INTO `room_types`
+  (`hotel_id`, `code`, `name`, `capacity`, `total_rooms`, `price_per_night`, `description`)
+SELECT h.id, rt.code, rt.room_name, rt.capacity, 5,
+       CASE rt.code
+         WHEN 'standard' THEN h.price_per_night
+         WHEN 'deluxe' THEN ROUND(h.price_per_night * 1.35, -4)
+         WHEN 'family' THEN ROUND(h.price_per_night * 1.70, -4)
+       END,
+       'Phong demo Vung Tau - can xac nhan gia va so luong thuc te'
+FROM `hotels` AS h
+CROSS JOIN (
+    SELECT 'standard' AS code, 'Phòng tiêu chuẩn' AS room_name, 2 AS capacity
+    UNION ALL SELECT 'deluxe', 'Phòng Deluxe', 3
+    UNION ALL SELECT 'family', 'Phòng gia đình', 5
+) AS rt
+WHERE h.city = 'vungtau'
+  AND NOT EXISTS (
+      SELECT 1 FROM `room_types` AS existing
+      WHERE existing.hotel_id = h.id AND existing.code = rt.code
+  );
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

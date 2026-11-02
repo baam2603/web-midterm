@@ -35,10 +35,11 @@
     clearTimeout(showToast.timer);
     showToast.timer = setTimeout(() => toast.classList.remove("show"), 2600);
   }
+  let serverBookings = [];
   function normalized() {
-    return BookingStore.visible().map((b) => ({
+    return serverBookings.map((b) => ({
       ...b,
-      status: BookingStore.status(b),
+      status: b.status,
       id: b.code,
       hotel: b.hotelName,
       checkIn: b.checkin,
@@ -120,23 +121,39 @@
   window.addEventListener("hashchange", () =>
     setTab(location.hash === "#history" ? "history" : "upcoming"),
   );
-  listEl.addEventListener("click", (e) => {
+  listEl.addEventListener("click", async (e) => {
     const b = e.target.closest('[data-action="cancel"]');
     if (!b) return;
-    const order = BookingStore.find(b.dataset.id);
-    if (
-      !order ||
-      !confirm(`Hủy đặt phòng ${order.code} tại ${order.hotelName}?`)
-    )
-      return;
+    const order = serverBookings.find(x => x.code === b.dataset.id);
+    if (!order || !confirm(`Hủy đặt phòng ${order.code} tại ${order.hotelName}?`)) return;
+    b.disabled = true;
     try {
-      BookingStore.cancelVisible(order.code);
+      const response = await fetch("../api/bookings/cancel.php", {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: order.code })
+      });
+      const result = await response.json();
+      if (!response.ok || result.status !== "success") throw Error(result.message || "Hủy thất bại");
+      await loadBookings();
       showToast("Đã hủy đặt phòng " + order.code);
       setTab("history");
-    } catch (err) {
-      showToast(err.message);
-    }
+    } catch (err) { showToast(err.message); }
+    finally { b.disabled = false; }
   });
-  window.addEventListener("storage", render);
+  async function loadBookings() {
+    listEl.innerHTML = '<div class="empty">Đang tải dữ liệu từ MySQL...</div>';
+    try {
+      const response = await fetch("../api/bookings/list.php", {credentials:"same-origin",cache:"no-store"});
+      const result = await response.json();
+      if (!response.ok || result.status !== "success" || !Array.isArray(result.data))
+        throw Error(result.message || "Không tải được đặt phòng");
+      serverBookings = result.data;
+      render();
+    } catch (err) {
+      listEl.innerHTML = `<div class="empty"><h3>Không tải được đơn đặt phòng</h3><p>${safe(err.message)}</p></div>`;
+    }
+  }
   setTab(activeTab);
+  loadBookings();
 })();

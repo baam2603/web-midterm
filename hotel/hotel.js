@@ -232,19 +232,56 @@
   `;
 
   /* ---------- Chọn phòng ---------- */
+  
+  /* ---------- Chọn phòng ---------- */
   function goBooking(roomId) {
     const selected = rooms.find((r) => r.id === roomId);
+
+    // Không tìm thấy phòng hoặc phòng đã hết
     if (!selected || !leftFor(selected)) return;
+
+    // Giữ nguyên thông tin khách sạn và phòng đã chọn
     const next = new URLSearchParams({
       city: cityKey,
       id: hotelId,
       room: roomId,
     });
+
     next.set("checkin", start);
     next.set("checkout", end);
-    for (const key of ["guests", "rooms"])
-      if (params.has(key)) next.set(key, params.get(key));
-    location.href = `Booking.html?${next}`;
+
+    for (const key of ["guests", "rooms"]) {
+      if (params.has(key)) {
+        next.set(key, params.get(key));
+      }
+    }
+
+    // Đường dẫn trang đặt phòng
+    const bookingUrl = `Booking.html?${next.toString()}`;
+
+    // Kiểm tra đăng nhập
+    const user =
+      typeof getCurrentUser === "function"
+        ? getCurrentUser()
+        : null;
+
+    if (!user) {
+      // Lưu đường dẫn quay lại sau khi đăng nhập
+      const returnUrl = new URL(bookingUrl, location.href);
+
+      const nextPath =
+        returnUrl.pathname +
+        returnUrl.search;
+
+      location.href =
+        "../auth/login.html?next=" +
+        encodeURIComponent(nextPath);
+
+      return;
+    }
+
+    // Đã đăng nhập thì vào trang đặt phòng
+    location.href = bookingUrl;
   }
 
   /* ---------- Carousel loại phòng (mũi tên hiện khi phòng bị tràn) ---------- */

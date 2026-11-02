@@ -85,14 +85,15 @@
     1,
   );
   draft.rooms = Math.max(1, Number(draft.rooms) || 1);
-  const base = room.price * nights * draft.rooms;
-  const discount = rule
+  let base = room.price * nights * draft.rooms;
+  let discount = rule
     ? rule.type === "percent"
       ? Math.round((base * rule.value) / 100)
       : Math.min(rule.value, base)
     : 0;
-  const tax = Math.round((base - discount) * TAX_RATE);
-  const total = base - discount + tax;
+  let tax = Math.round((base - discount) * TAX_RATE);
+  let total = base - discount + tax;
+  let quoteReady = false;
 
   /* ---------- State ---------- */
   if (!draft.deadline) draft.deadline = Date.now() + 15 * 60 * 1000;
@@ -382,8 +383,9 @@
     return keys.length === 0;
   }
 
-  /* ---------- Lưu đặt phòng (KHÔNG lưu thông tin thẻ) ---------- */
-  function saveBooking() {
+ 
+  /* ---------- Lưu đặt phòng vào MySQL ---------- */
+  async function saveBooking() {
     const record = {
       code: draft.code,
       city: draft.city,
@@ -397,10 +399,14 @@
       rooms: draft.rooms,
       guests: draft.guests,
       total,
-      guestName: `${draft.lastName.trim()} ${draft.firstName.trim()}`,
+      guestName:
+        `${draft.lastName.trim()} ${draft.firstName.trim()}`,
       email: draft.email.trim(),
       phone: draft.phone.trim(),
-      payMethod: state.method === "wallet" ? state.wallet : state.method,
+      payMethod:
+        state.method === "wallet"
+          ? state.wallet
+          : state.method,
       paid: false,
       paymentStatus:
         state.method === "bank"
@@ -409,17 +415,83 @@
             ? "pay-at-hotel-demo"
             : "simulated-demo",
       refundable: !!room.refundable,
-      status: state.method === "bank" ? "pending" : "confirmed",
+      status: "confirmed",
       userId:
         typeof getCurrentUser === "function"
-          ? getCurrentUser()?.id || null
+          ? getCurrentUser()?.id ?? null
           : null,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     };
-    BookingStore.save(record);
+
+    // Gửi đơn đặt phòng đến PHP + MySQL
+    const response = await fetch(
+      "../api/bookings/create.php",
+      {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          city: record.city,
+          hotelId: record.hotelId,
+          roomId: record.roomId,
+          checkin: record.checkin,
+          checkout: record.checkout,
+          rooms: record.rooms,
+          guests: record.guests,
+          coupon: draft.coupon || ""
+        })
+      }
+    );
+
+    let result;
+
+    try {
+      result = await response.json();
+    } catch {
+      throw new Error(
+        "API không trả về JSON hợp lệ (HTTP " +
+        response.status + ")."
+      );
+    }
+
+    if (!response.ok || result.status !== "success") {
+      throw new Error(
+        result.message || "Lưu đặt phòng thất bại."
+      );
+    }
+
+    if (!result.data?.code) {
+      throw new Error(
+        "API không trả về mã đơn đặt phòng."
+      );
+    }
+
+    // Lấy dữ liệu đã được MySQL xác nhận
+    record.code = result.data.code;
+    record.total = Number(result.data.total);
+    record.subtotal = Number(result.data.subtotal);
+    record.discount = Number(result.data.discount);
+    record.tax = Number(result.data.tax);
+    record.status = result.data.status;
+
+    // Đồng bộ mã đơn với giao diện
+    draft.code = record.code;
+
+    // Không lưu đơn vào localStorage; trang đặt phòng đọc từ API.
+
+    console.log(
+      "Đã tạo đơn thành công:",
+      record.code
+    );
+
+    return record;
   }
 
+
   function pay(btn) {
+    if (!quoteReady) { alert("Chưa xác nhận được giá từ MySQL. Vui lòng tải lại trang."); return; }
     if (state.method === "card" && !showErrors(validateCard())) return;
     const today = new Date().toISOString().slice(0, 10);
     if (
@@ -433,31 +505,52 @@
       );
       return;
     }
-    if (
-      BookingStore.availability(
-        draft.city,
-        draft.hotelId,
-        draft.roomId,
-        draft.checkin,
-        draft.checkout,
-        room.left || 5,
-      ) < draft.rooms
-    ) {
-      alert(
-        "Loại phòng này không còn đủ số lượng trống. Vui lòng chọn lại phòng.",
-      );
-      return;
-    }
+    // Khong kiem tra ton phong bang localStorage: server kiem tra va khoa phong trong create.php.
     btn.disabled = true;
     btn.textContent = "Đang xử lý...";
     clearInterval(timer);
-    setTimeout(() => {
-      saveBooking();
+    
+   
+    setTimeout(async () => {
       try {
+        const saved = await saveBooking();
+
+        // Cập nhật mã đơn từ MySQL
+        draft.code = saved.code;
+        total = saved.total;
+
+        // Xóa phiên thanh toán tạm
         sessionStorage.removeItem(KEY);
-      } catch (_) {}
-      location.href = "success.html?code=" + encodeURIComponent(draft.code);
+
+        // Hiển thị giao diện đặt phòng thành công
+        state.phase = "done";
+
+        renderLeft();
+        // Tong tien nguon chinh la server; hien thi ket qua khop MySQL.
+        const totalEl = document.querySelector("#pPrice .price-total strong");
+        if (totalEl) totalEl.textContent = money(saved.total);
+        renderSummary();
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+
+      } catch (err) {
+        console.error("Lỗi tạo đơn:", err);
+
+        alert(
+          err.message || "Đặt phòng thất bại."
+        );
+
+        btn.disabled = false;
+        btn.textContent = "Thử lại";
+
+        timer = setInterval(tick, 1000);
+      }
     }, 1200);
+
+
   }
 
   /* ---------- Sự kiện ---------- */
@@ -514,8 +607,33 @@
     if (btn) pay(btn);
   });
 
+  async function loadQuote() {
+    const button = root.querySelector("[data-pay]");
+    if (button) {button.disabled=true;button.textContent="Đang lấy giá từ MySQL...";}
+    try {
+      const response=await fetch("../api/bookings/quote.php",{
+        method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({city:draft.city,hotelId:draft.hotelId,roomId:draft.roomId,
+          checkin:draft.checkin,checkout:draft.checkout,rooms:draft.rooms,
+          guests:draft.guests,coupon:draft.coupon||""})
+      });
+      const result=await response.json();
+      if(!response.ok||result.status!=="success")throw Error(result.message||"Báo giá thất bại");
+      base=Number(result.data.subtotal);
+      discount=Number(result.data.discount);
+      tax=Number(result.data.tax);
+      total=Number(result.data.total);
+      quoteReady=true;
+      renderPrice();renderLeft();renderSummary();
+    } catch(err){
+      quoteReady=false;
+      const left=document.getElementById("pLeft");
+      if(left)left.innerHTML=`<div class="card"><h3>Không thể lấy báo giá</h3><p>${esc(err.message)}</p><a href="${esc(backUrl)}">Quay lại đặt phòng</a></div>`;
+    }
+  }
   renderLeft();
   renderPrice();
   renderSummary();
+  loadQuote();
   timer = setInterval(tick, 1000);
 })();

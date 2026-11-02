@@ -5,6 +5,29 @@
    Dữ liệu lấy từ hotel-data.js (CITIES, HOTELS).
    ===================================================================== */
 (function () {
+   // ====================================
+  // KIỂM TRA ĐĂNG NHẬP TRƯỚC KHI ĐẶT PHÒNG
+  // ====================================
+
+  const currentUser =
+    typeof getCurrentUser === "function"
+      ? getCurrentUser()
+      : null;
+
+  if (!currentUser) {
+    // Giữ lại đường dẫn phòng mà khách muốn đặt
+    const returnUrl =
+      location.pathname +
+      location.search +
+      location.hash;
+
+    location.replace(
+      "../auth/login.html?next=" +
+      encodeURIComponent(returnUrl)
+    );
+
+    return;
+  }
   const params = new URLSearchParams(location.search);
   const cityKey = params.get("city") || "dalat";
   const hotelId = params.get("id");
