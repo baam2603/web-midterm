@@ -1,134 +1,122 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tạo tài khoản</title>
+    <title>Tạo tài khoản - Threek Booking</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="styleRegister.css" />
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header mb-4">
+            <h2 class="font-weight-bold mb-1" style="font-size: 26px; color: #1c1e21;">Nhập thông tin để tạo tài khoản</h2>
+        </div>
+
+        <div class="register-body">
+            <form action="#" method="POST" class="needs-validation" novalidate>
+                <!-- Họ và tên -->
+                <div class="form-group mb-3">
+                    <label>Họ và tên</label>
+                    <div class="d-flex" style="gap: 12px;">
+                        <div class="w-100">
+                            <input type="text" id="text_ho" class="form-control" placeholder="Họ" required />
+                            <div class="invalid-feedback">Vui lòng nhập họ.</div>
+                        </div>
+                        <div class="w-100">
+                            <input type="text" id="text_ten" class="form-control" placeholder="Tên" required />
+                            <div class="invalid-feedback">Vui lòng nhập tên.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ngày tháng năm sinh -->
+                <div class="form-group mb-3">
+                    <label>Ngày tháng năm sinh</label>
+                    <div class="d-flex" style="gap: 12px;">
+                        <div class="w-100">
+                            <select id="day-select" class="form-control custom-select" required>
+                                <option value="" disabled selected>Day</option>
+                            </select>
+                            <div class="invalid-feedback">Chọn ngày.</div>
+                        </div>
+                        <div class="w-100">
+                            <select id="month-select" class="form-control custom-select" required>
+                                <option value="" disabled selected>Month</option>
+                            </select>
+                            <div class="invalid-feedback">Chọn tháng.</div>
+                        </div>
+                        <div class="w-100">
+                            <select id="year-select" class="form-control custom-select" required>
+                                <option value="" disabled selected>Year</option>
+                            </select>
+                            <div class="invalid-feedback">Chọn năm.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Giới tính -->
+                <div class="form-group mb-3">
+                    <label>Giới tính</label>
+                    <select id="gender-select" class="form-control custom-select" required>
+                        <option value="" disabled selected>Chọn giới tính</option>
+                        <option value="male">Nam</option>
+                        <option value="female">Nữ</option>
+                    </select>
+                    <div class="invalid-feedback">Vui lòng chọn giới tính.</div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group mb-3">
+                    <label for="email">Email của bạn</label>
+                    <input type="email" id="email" class="form-control" placeholder="123@gmail.com" required />
+                    <div class="invalid-feedback">Email không hợp lệ.</div>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div class="form-group mb-3">
+                    <label for="text">Số điện thoại</label>
+                    <input type="text" id="text" class="form-control" placeholder="" required />
+                    <div class="invalid-feedback">Vui lòng nhập số điện thoại.</div>
+                </div>
+
+                <!-- Mật khẩu -->
+                <div class="form-group mb-3">
+                    <label for="password">Mật khẩu</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" class="form-control" required />
+                        <img src="../sources/eye-close.png" alt="Toggle" class="toggle-password" id="eyeicon1" onerror="this.style.display='none'" />
+                    </div>
+                    <div class="invalid-feedback">Vui lòng nhập mật khẩu.</div>
+                </div>
+
+                <!-- Xác nhận mật khẩu -->
+                <div class="form-group mb-4">
+                    <label for="confirm_password">Xác nhận mật khẩu</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="confirm_password" class="form-control" required />
+                        <img src="../sources/eye-close.png" alt="Toggle" class="toggle-password" id="eyeicon2" onerror="this.style.display='none'" />
+                    </div>
+                    <div class="invalid-feedback">Vui lòng xác nhận mật khẩu.</div>
+                </div>
+
+                <button type="submit" class="btn-submit mb-3">Gửi</button>
+                <button type="button" class="btn-already-have" onclick="window.location.href='login.html'">
+                    Tôi đã có tài khoản
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Thư viện JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  </head>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-  <body>
-    <div class="register-container">
-      <div class="register-header">
-        <h2>Nhập thông tin để tạo tài khoản</h2>
-        <p></p>
-      </div>
-
-      <div class="register-body">
-        <form action="#" method="POST" class="needs-validation">
-          <div class="form-group">
-            <label for="username">Họ và tên</label>
-            <div class="name-row">
-              <input
-                type="text"
-                id="text_ho"
-                class="form-control"
-                placeholder="Họ"
-                required
-              />
-              <input
-                type="text"
-                id="text_ten"
-                class="form-control"
-                placeholder="Tên"
-                required
-              />
-            </div>
-          </div>
-          <br />
-
-          <div class="form-group">
-            <label for="dateofbirth">Ngày tháng năm sinh</label>
-            <div class="birth-select">
-              <select id="day-select" class="form-control" required>
-                <option value="" disabled selected>Day</option>
-              </select>
-
-              <select class="form-control" id="month-select" required>
-                <option value="" disabled selected>Month</option>
-              </select>
-
-              <select class="form-control" id="year-select" required>
-                <option value="" disabled selected>Year</option>
-              </select>
-            </div>
-          </div>
-          <br />
-
-          <div class="form-group">
-            <label for="gender">Giới tính</label>
-            <div class="birth-select">
-              <select class="form-control" required>
-                <option value="" disabled selected>Chọn giới tính</option>
-                <option value="male">Nam</option>
-                <option value="female">Nữ</option>
-              </select>
-            </div>
-          </div>
-          <br />
-
-          <div class="form-group">
-            <label for="email">Email của bạn</label>
-            <input
-              type="email"
-              id="email"
-              class="form-control"
-              placeholder="123@gmail.com"
-              required
-            />
-          </div>
-          <br />
-
-          <div class="form-group">
-            <label for="sdt">Số điện thoại</label>
-            <input
-              type="text"
-              id="text"
-              class="form-control"
-              placeholder=""
-              required
-            />
-          </div>
-          <br />
-
-          <div class="form-group">
-            <label for="password">Mật khẩu</label>
-            <input
-              type="password"
-              id="password"
-              class="form-control"
-              placeholder=""
-              required
-            />
-          </div>
-          <br />
-          <div class="form-group">
-            <label for="confirm_password">Xác nhận mật khẩu</label>
-            <input
-              type="password"
-              id="confirm_password"
-              class="form-control"
-              placeholder=""
-              required
-            />
-          </div>
-          <br />
-          <div class="form-group">
-            <button type="submit" class="btn-submit">Gửi</button>
-          </div>
-          <br />
-          <div class="form-group">
-            <button type="button" class="btn-already-have">
-              Tôi đã có tài khoản
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <!-- Giữ nguyên script kết nối Backend và xử lý form -->
     <script src="../common/auth-service.js"></script>
     <script src="registerScript.js"></script>
-  </body>
+</body>
 </html>

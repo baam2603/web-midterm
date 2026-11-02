@@ -1,67 +1,94 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng nhập</title>
+    <title>Đăng nhập - Threek Booking</title>
+    <!-- Nạp Bootstrap trước -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <!-- Nạp CSS tùy chỉnh sau để không bị ghi đè -->
     <link rel="stylesheet" href="styleLogin.css" />
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    />
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header mb-4">
+            <h2 class="font-weight-bold" style="font-size: 28px; color: #1c1e21;">Đăng nhập vào Threek Booking</h2>
+        </div>
+
+        <div class="register-body">
+            <form action="#" method="POST" class="needs-validation" novalidate>
+                <div class="form-group mb-3">
+                    <label for="email">Nhập Email của bạn</label>
+                    <input
+                        type="email"
+                        id="email"
+                        class="form-control"
+                        placeholder="example@gmail.com"
+                        required
+                    />
+                    <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="password">Mật khẩu</label>
+                    <div class="pass-wrap">
+                        <input
+                            type="password"
+                            id="password"
+                            class="form-control"
+                            placeholder=""
+                            required
+                        />
+                        <img src="../sources/eye-close.png" alt="Toggle" class="toggle-password" id="eyeicon" onerror="this.style.display='none'" />
+                    </div>
+                    <div class="invalid-feedback">Vui lòng nhập mật khẩu.</div>
+                </div>
+
+                <div class="custom-error-text mb-3">Sai tài khoản hoặc mật khẩu</div>
+
+                <div class="form-group mb-3">
+                    <button type="submit" class="btn-submit">Đăng nhập</button>
+                </div>
+
+                <div class="form-group mb-3 text-center">
+                    <button type="button" class="btn-forgot-pass" onclick="window.location.href='forgot.html'">
+                        Quên mật khẩu
+                    </button>
+                </div>
+
+                <div class="form-group mb-0 text-center">
+                    <button type="button" class="btn-register" onclick="window.location.href='register.html'">
+                        Tạo tài khoản mới
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Thư viện JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  </head>
 
-  <body>
-    <div class="register-container">
-      <div class="register-header">
-        <h2>Đăng nhập vào Threek Booking</h2>
-        <p></p>
-      </div>
+    <!-- Script xử lý ẩn/hiện mật khẩu tại chỗ -->
+    <script>
+        const eyeicon = document.getElementById("eyeicon");
+        const passwordInput = document.getElementById("password");
+        if (eyeicon && passwordInput) {
+            eyeicon.onclick = function () {
+                if (passwordInput.type === "password") {
+                    passwordInput.type = "text";
+                    eyeicon.src = "../sources/eye-open.png";
+                } else {
+                    passwordInput.type = "password";
+                    eyeicon.src = "../sources/eye-close.png";
+                }
+            };
+        }
+    </script>
 
-      <div class="register-body">
-        <form action="#" method="POST">
-          <div class="form-group">
-            <label for="email">Nhập Email của bạn</label>
-            <input
-              type="email"
-              id="email"
-              class="form-control"
-              placeholder=""
-            />
-          </div>
-          <br />
-
-          <div class="form-group">
-            <label for="password">Mật khẩu</label>
-            <input
-              type="password"
-              id="password"
-              class="form-control"
-              placeholder=""
-            />
-          </div>
-          <br />
-          <div class="form-group">
-            <button type="submit" class="btn-submit">Đăng nhập</button>
-          </div>
-          <br />
-          <div class="form-group">
-            <button type="button" class="btn-forgot-pass">Quên mật khẩu</button>
-          </div>
-          <br />
-          <div class="form-group">
-            <button type="button" class="btn-register">
-              Tạo tài khoản mới
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
+    <!-- Giữ nguyên các script kết nối Backend của project -->
     <script src="../common/auth-service.js"></script>
     <script src="login.js"></script>
-  </body>
+</body>
 </html>

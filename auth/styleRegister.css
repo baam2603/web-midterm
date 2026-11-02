@@ -5,29 +5,48 @@ body {
     justify-content: center;
     align-items: center;
     background-color: #f4f1ea;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     padding: 20px;
     box-sizing: border-box;
 }
 
 .register-container {
-    width: 650px;
-    padding: 32px;
+    width: 100%;
+    max-width: 620px;
+    padding: 36px 32px;
     border: 1px solid rgb(238, 236, 236);
-    border-radius: 8px;
+    border-radius: 12px;
     background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Khắc phục lỗi label và input nằm ngang hàng */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+}
+
+.form-group label {
+    font-size: 15px; /* Đã sửa từ 18xp thành 15px chuẩn */
+    font-weight: 600;
+    color: #606770;
+    margin-bottom: 6px;
+    display: block;
+    text-align: left;
 }
 
 .form-control,
 .custom-select {
+    width: 100% !important;
     border-radius: 12px !important;
-    padding: 10px 12px !important;
-    border: 1px solid #dbdee2;
+    padding: 10px 14px !important;
+    border: 1px solid #dbdee2 !important;
     font-size: 16px !important;
     box-sizing: border-box;
     outline: none;
-    height: auto !important;
+    height: 46px !important;
 }
 
 .form-control:focus,
@@ -37,21 +56,15 @@ body {
     box-shadow: 0 0 0 2px #e7f3ff !important;
 }
 
-.form-group label {
-    font-size: 18xp;
-    font-weight: bold;
-    color: #606770;
-    margin-bottom: 6px;
-}
-
 .btn-submit {
     border: none;
     border-radius: 30px;
     width: 100%;
     background-color: #231f20;
     color: white;
-    font-size: 18px;
-    padding: 10px 16px;
+    font-size: 17px;
+    font-weight: 600;
+    padding: 11px 16px;
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
@@ -66,9 +79,9 @@ body {
     width: 100%;
     background-color: #e9e4dc;
     color: #1c1e21;
-    font-weight: bold;
-    font-size: 17px;
-    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 11px 16px;
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
@@ -90,11 +103,12 @@ body {
     box-shadow: 0 0 0 2px #e7f3ff !important;
 }
 
+/* Định dạng cho Select2 */
 .select2-container--default .select2-selection--single {
     border-radius: 12px !important;
     border: 1px solid #dbdee2 !important;
-    height: 44px !important;
-    padding: 8px 12px !important;
+    height: 46px !important;
+    padding: 9px 12px !important;
     outline: none !important;
     background-color: #fff !important;
 }
@@ -106,7 +120,7 @@ body {
 }
 
 .select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 42px !important;
+    height: 44px !important;
     right: 10px !important;
 }
 
