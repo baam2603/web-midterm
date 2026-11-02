@@ -1,126 +1,137 @@
 body {
-  height: 100%;
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #ffffff;
-  font-family: Arial, Helvetica, sans-serif;
-  padding: 10;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f4f1ea;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .register-container {
-  width: 500px;
-  padding: 20px;
-  border: 1px solid rgb(238, 236, 236);
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.register-header h2 {
-  margin: 0 0 8px 0;
-  font-size: 24px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+    width: 550px;
+    padding: 32px;
+    border: 1px solid rgb(238, 236, 236);
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .form-group label {
-  font-size: 13px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #606770;
+    margin-bottom: 6px;
 }
 
 .form-control {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid;
-  border-radius: 12px;
-  border-color: #dbdee2;
-  font-size: 15px;
-  box-sizing: border-box;
-  outline: none;
+    border-radius: 12px !important;
+    padding: 10px 12px !important;
+    border: 1px solid #dbdee2;
+    font-size: 16px !important;
+    box-sizing: border-box;
+    outline: none;
+    height: auto !important;
 }
 
 .form-control:focus {
-  border-color: #1877f2;
-  background-color: #ffffff;
-  box-shadow: 0 0 0 0 2px #e7f3ff;
-}
-
-.form-group .name-row {
-  display: flex;
-  gap: 10px;
-}
-
-.form-group .name-row .form-control {
-  flex: 1;
-}
-
-.birth-select {
-  display: flex;
-  gap: 10px;
-}
-
-.birth-select .form-control {
-  flex: 1;
+    border-color: #1877f2 !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 0 0 2px #e7f3ff !important;
 }
 
 .btn-submit {
-  border: none;
-  border-radius: 30px;
-  width: 100%;
-  background-color: #1877f2;
-  color: white;
-  font-size: 18px;
-  padding: 10px 16px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+    border: none;
+    border-radius: 30px;
+    width: 100%;
+    background-color: #231f20;
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .btn-submit:hover {
-  background-color: #186ddc;
+    background-color: #3a3536;
 }
 
 .btn-forgot-pass {
-  border: none;
-  border-radius: 24px;
-  width: 100%;
-  background-color: white;
-  color: black;
-  font-size: 18px;
-  padding: 10px 16px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+    border: none;
+    border-radius: 24px;
+    width: 100%;
+    background-color: #e9e4dc;
+    color: black;
+    font-size: 17px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
 }
 
 .btn-forgot-pass:hover {
-  background-color: #d1d3d5;
+    background-color: #ded7cc;
+    text-decoration: none;
 }
 
 .btn-register {
-  border: solid 1px;
-  border-color: #186ddc;
-  border-radius: 24px;
-  width: 100%;
-  background-color: white;
-  color: #186ddc;
-  font-size: 18px;
-  padding: 10px 16px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+    border: solid 1px #231f20;
+    border-radius: 24px;
+    width: 100%;
+    background-color: white;
+    color: #231f20;
+    font-size: 17px;
+    font-weight: normal;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .btn-register:hover {
-  background-color: #d1d3d5;
+    background-color: #d1d3d5;
+}
+
+.needs-validation.was-validated .form-control:valid {
+    border-color: #dbdee2 !important;
+    background-image: none !important;
+    padding-right: 14px !important;
+}
+
+.needs-validation.was-validated .form-control:valid:focus {
+    border-color: #1877f2 !important;
+    box-shadow: 0 0 0 2px #e7f3ff !important;
+}
+
+.custom-error-text {
+    display: none;
+    color: red;
+    font-size: 14px;
+    margin-top: 6px;
+    text-align: left;
+}
+
+.needs-validation.was-validated:invalid .custom-error-text {
+    display: block;
+}
+
+.pass-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.pass-wrap .form-control {
+    padding-right: 40px !important;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    width: 20px;
+    cursor: pointer;
+    z-index: 10;
 }
