@@ -89,6 +89,19 @@
     }
   }
 
+  function makeHotelSlug(value) {
+    return String(value)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80)
+      .replace(/-+$/g, "");
+  }
+
   async function loadAdminHotels() {
     adminHotels = null;
     adminHotelsError = "";
@@ -137,6 +150,89 @@
       console.error("Hotels API error:", error);
       adminHotelsError = error.message;
     }
+  }
+
+  async function createAdminHotel(payload) {
+    // Bước 1: Lấy CSRF token
+    const csrfResponse = await fetch(
+      new URL("../api/admin/csrf.php", location.href),
+      {
+        credentials: "same-origin",
+        cache: "no-store",
+      },
+    );
+
+    const csrfResult = await csrfResponse.json().catch(() => null);
+
+    if (!csrfResponse.ok || !csrfResult?.data?.csrfToken) {
+      throw new Error(csrfResult?.message || "Không lấy được CSRF token.");
+    }
+
+    // Bước 2: Gửi dữ liệu khách sạn lên PHP
+    const response = await fetch(
+      new URL("../api/admin/hotels-create.php", location.href),
+      {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfResult.data.csrfToken,
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    const result = await response.json().catch(() => null);
+
+    if (!response.ok || result?.status !== "success") {
+      throw new Error(
+        result?.message || `Không thể tạo khách sạn (HTTP ${response.status}).`,
+      );
+    }
+
+    return result.data;
+  }
+
+  async function updateHotelVisibility(id, isActive) {
+    // Lấy CSRF token từ PHP Session
+    const tokenResponse = await fetch(
+      new URL("../api/admin/csrf.php", location.href),
+      {
+        credentials: "same-origin",
+        cache: "no-store",
+      },
+    );
+
+    const tokenResult = await tokenResponse.json();
+
+    if (!tokenResponse.ok || !tokenResult.data?.csrfToken) {
+      throw new Error(tokenResult.message || "Không lấy được CSRF token.");
+    }
+
+    // Cập nhật trạng thái khách sạn
+    const response = await fetch(
+      new URL("../api/admin/hotels-visibility.php", location.href),
+      {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": tokenResult.data.csrfToken,
+        },
+        body: JSON.stringify({
+          id,
+          is_active: isActive,
+        }),
+      },
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || result.status !== "success") {
+      throw new Error(result.message || "Không thể cập nhật khách sạn.");
+    }
+
+    return result.data;
   }
 
   let authRequestId = 0;
@@ -417,25 +513,261 @@
           ${Number(h.is_active) === 1 ? "Đang hiển thị" : "Đang ẩn"}
         </span>
       </td>
+      
+<td>
+  <button
+    type="button"
+    class="${Number(h.is_active) === 1 ? "tk-danger" : "tk-primary"}"
+    data-hotel-visibility="${Number(h.id)}"
+    data-target-active="${Number(h.is_active) === 1 ? 0 : 1}"
+  >
+    ${Number(h.is_active) === 1 ? "Ẩn khách sạn" : "Hiển thị"}
+  </button>
+</td>
+
     </tr>
   `,
       )
       .join("");
 
     return `
-    <div class="tk-surface">
-      <h2>Quản lý khách sạn</h2>
+    
 
+<div class="tk-surface">
+  <div class="tk-row">
+    <div>
+      <h2>Quản lý khách sạn</h2>
       <p class="tk-muted">
-        Tổng cộng: <strong>${adminHotels.length}</strong>
+        Tổng cộng
+        <strong>${adminHotels.length}</strong>
         khách sạn từ MySQL.
       </p>
-
-      <p class="tk-muted">
-        Chức năng thêm, sửa và ẩn khách sạn
-        sẽ được hoàn thiện ở bước tiếp theo.
-      </p>
     </div>
+
+    <button
+      type="button"
+      class="tk-primary"
+      id="tk-open-create-hotel"
+      aria-expanded="false"
+      aria-controls="tk-create-hotel-panel"
+    >
+      + Thêm khách sạn
+    </button>
+  </div>
+
+  <div id="tk-create-hotel-panel" hidden>
+    <h3>Thông tin khách sạn mới</h3>
+
+    <p class="tk-muted">
+      Khách sạn cần có địa điểm được xác minh
+      trên OpenStreetMap trước khi lưu.
+    </p>
+
+    <form id="tk-create-hotel-db" class="tk-form">
+
+      <!-- THÀNH PHỐ -->
+      <div class="tk-flexcols">
+        <label>
+          Thành phố *
+          <select name="city" required>
+            <option value="dalat">Đà Lạt</option>
+            <option value="vungtau">Vũng Tàu</option>
+          </select>
+        </label>
+
+        <label>
+          Loại hình *
+          <select name="type" required>
+            <option value="hotel">Khách sạn</option>
+            <option value="resort">Resort</option>
+            <option value="homestay">Homestay</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- TÌM KIẾM TRÊN BẢN ĐỒ -->
+      <div class="tk-surface">
+        <h3>1. Xác minh địa điểm trên bản đồ</h3>
+        <label>
+          Tìm kiếm theo
+          <select id="tk-maps-mode">
+            <option value="auto">Tự động nhận diện</option>
+            <option value="name">Tên khách sạn</option>
+            <option value="address">Địa chỉ / đường phố</option>
+          </select>
+        </label>
+        <label>
+          Tên khách sạn cần tìm *
+          <input
+            id="tk-maps-search"
+            type="search"
+            minlength="3"
+            maxlength="100"
+            autocomplete="off"
+            placeholder="Nhập tên khách sạn hoặc địa chỉ..."
+          >
+        </label>
+
+        <div class="tk-actions">
+          <button
+            type="button"
+            id="tk-maps-search-button"
+            class="tk-outline"
+          >
+            Tìm trên OpenStreetMap
+          </button>
+        </div>
+
+        <div
+          id="tk-maps-results"
+          class="tk-form"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+        <input
+          type="hidden"
+          name="google_place_id"
+          id="tk-osm-place-id"
+        >
+
+        <label>
+          Địa chỉ được xác minh *
+          <input
+            type="text"
+            name="address"
+            id="tk-verified-address"
+            placeholder="Hãy chọn khách sạn từ kết quả tìm kiếm"
+            readonly
+            required
+          >
+        </label>
+
+        <a
+          id="tk-selected-maps"
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          hidden
+        >
+          Xem vị trí trên OpenStreetMap
+        </a>
+
+        <p class="tk-muted">
+          Dữ liệu bản đồ:
+          <a
+            href="https://www.openstreetmap.org/copyright"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            © OpenStreetMap contributors
+          </a>
+        </p>
+      </div>
+
+      <!-- THÔNG TIN KHÁCH SẠN -->
+      <h3>2. Thông tin khách sạn</h3>
+
+      <div class="tk-flexcols">
+        <label>
+          Tên khách sạn *
+          <input
+            name="name"
+            type="text"
+            minlength="3"
+            maxlength="150"
+            placeholder="Chọn khách sạn trên bản đồ"
+            required
+          >
+        </label>
+
+        <label>
+          Slug *
+          <input
+            name="slug"
+            type="text"
+            maxlength="80"
+            pattern="[a-z0-9]+(-[a-z0-9]+)*"
+            placeholder="ten-khach-san"
+            required
+          >
+        </label>
+      </div>
+
+      <div class="tk-flexcols">
+        <label>
+          Số sao *
+          <select name="stars" required>
+            <option value="1">1 sao</option>
+            <option value="2">2 sao</option>
+            <option value="3" selected>3 sao</option>
+            <option value="4">4 sao</option>
+            <option value="5">5 sao</option>
+          </select>
+        </label>
+
+        <label>
+          Giá tham khảo/đêm (VNĐ) *
+          <input
+            name="price_per_night"
+            type="number"
+            min="100000"
+            max="100000000"
+            step="1000"
+            placeholder="850000"
+            required
+          >
+        </label>
+      </div>
+
+      <label>
+        Mô tả khách sạn
+        <textarea
+          name="description"
+          maxlength="3000"
+          rows="4"
+          placeholder="Giới thiệu về khách sạn..."
+        ></textarea>
+      </label>
+
+      <!-- TRẠNG THÁI -->
+      <div class="tk-surface">
+        <p>
+          <strong>Trạng thái khi tạo:</strong>
+          Đang ẩn
+        </p>
+
+        <p class="tk-muted">
+          Khách sạn mới chưa hiển thị trên website
+          Customer. Hãy bổ sung hình ảnh và loại phòng
+          trước khi công khai.
+        </p>
+      </div>
+
+      <!-- NÚT THAO TÁC -->
+      <div class="tk-actions">
+        <button
+          type="submit"
+          class="tk-primary"
+          id="tk-save-create-hotel"
+        >
+          Lưu khách sạn
+        </button>
+
+        <button
+          type="button"
+          class="tk-outline"
+          id="tk-close-create-hotel"
+        >
+          Hủy
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+
 
     <h2 style="margin-top:24px">
       Danh sách khách sạn
@@ -449,6 +781,7 @@
         "Loại phòng",
         "Giá tham khảo",
         "Trạng thái",
+        "Thao tác",
       ],
       rows,
     )}
@@ -640,6 +973,30 @@
     }
   });
 
+  content.addEventListener("click", (e) => {
+    const openBtn = e.target.closest("#tk-open-create-hotel");
+    const closeBtn = e.target.closest("#tk-close-create-hotel");
+
+    if (!openBtn && !closeBtn) return;
+
+    const panel = content.querySelector("#tk-create-hotel-panel");
+    const toggle = content.querySelector("#tk-open-create-hotel");
+
+    if (!panel || !toggle) return;
+
+    if (openBtn) {
+      panel.hidden = !panel.hidden;
+    } else {
+      panel.hidden = true;
+    }
+
+    toggle.setAttribute("aria-expanded", String(!panel.hidden));
+
+    if (!panel.hidden) {
+      panel.querySelector('[name="name"]')?.focus();
+    }
+  });
+
   content.addEventListener("change", (e) => {
     if (e.target.id === "tk-hotel-picker") fillHotel();
     if (e.target.id === "tk-room-hotel") fillRoomSelect();
@@ -720,11 +1077,56 @@
         bookingRows(data);
     }
   });
-  content.addEventListener("click", (e) => {
+  content.addEventListener("click", async (e) => {
     if (!active()) return;
     const b = e.target.closest("button");
     if (!b) return;
     try {
+      if (b.hasAttribute("data-hotel-visibility")) {
+        const hotelId = Number(b.dataset.hotelVisibility);
+        const newState = Number(b.dataset.targetActive);
+
+        if (
+          !Number.isSafeInteger(hotelId) ||
+          hotelId < 1 ||
+          ![0, 1].includes(newState)
+        ) {
+          throw new Error("Thông tin khách sạn không hợp lệ.");
+        }
+
+        const hotel = adminHotels?.find((h) => Number(h.id) === hotelId);
+
+        if (!hotel) {
+          throw new Error("Không tìm thấy khách sạn.");
+        }
+
+        const action = newState === 1 ? "hiển thị" : "ẩn";
+
+        if (!confirm(`Bạn có chắc muốn ${action} khách sạn "${hotel.name}"?`)) {
+          return;
+        }
+
+        b.disabled = true;
+
+        try {
+          await updateHotelVisibility(hotelId, newState);
+
+          // Lấy lại dữ liệu mới từ MySQL
+          await loadAdminHotels();
+          await loadDashboard();
+
+          if (!active()) return;
+
+          render();
+
+          feedback(`Đã ${action} khách sạn "${hotel.name}" thành công.`);
+        } finally {
+          b.disabled = false;
+        }
+
+        return;
+      }
+
       if (b.dataset.change) {
         const booking = BookingStore.find(b.dataset.change);
         const inventory = HOTELS[booking.city]?.[booking.hotelId]?.rooms.find(
@@ -780,8 +1182,355 @@
 
   window.addEventListener("threek:auth-updated", show);
   // Revalidate when returning to a previously cached Admin page.
+
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) show();
+  });
+
+  // ========================================
+  // OPENSTREETMAP — QUẢN LÝ ĐỊA ĐIỂM
+  // ========================================
+
+  let osmSearchVersion = 0;
+
+  function clearOsmSelection(form) {
+    form.elements.namedItem("google_place_id").value = "";
+    form.elements.namedItem("address").value = "";
+    delete form.dataset.selectedOsmKind;
+    const mapLink = form.querySelector("#tk-selected-maps");
+    const results = form.querySelector("#tk-maps-results");
+
+    if (mapLink) {
+      mapLink.hidden = true;
+      mapLink.removeAttribute("href");
+    }
+
+    if (results) {
+      results.replaceChildren();
+    }
+  }
+
+  // ========================================
+  // TẠO SLUG + XÓA ĐỊA ĐIỂM KHI THAY ĐỔI
+  // ========================================
+
+  content.addEventListener("input", (e) => {
+    const form = e.target.closest("#tk-create-hotel-db");
+    if (!form) return;
+
+    const slugInput = form.elements.namedItem("slug");
+
+    if (e.target.name === "slug") {
+      slugInput.dataset.userEdited = "true";
+      return;
+    }
+
+    if (e.target.name === "name") {
+      if (slugInput.dataset.userEdited !== "true") {
+        slugInput.value = makeHotelSlug(e.target.value);
+      }
+    }
+
+    if (e.target.id === "tk-maps-search") {
+      osmSearchVersion++;
+      clearOsmSelection(form);
+    }
+  });
+
+  // Đổi thành phố phải chọn lại địa điểm
+  content.addEventListener("change", (e) => {
+    const form = e.target.closest("#tk-create-hotel-db");
+    if (!form || e.target.name !== "city") return;
+
+    osmSearchVersion++;
+    clearOsmSelection(form);
+
+    const searchInput = form.querySelector("#tk-maps-search");
+    if (searchInput) searchInput.value = "";
+  });
+
+  // TÌM KHÁCH SẠN TRÊN OPENSTREETMAP
+  content.addEventListener("click", async (e) => {
+    const searchButton = e.target.closest("#tk-maps-search-button");
+
+    if (!searchButton || !active()) return;
+
+    const form = searchButton.closest("#tk-create-hotel-db");
+    const input = form.querySelector("#tk-maps-search");
+    const results = form.querySelector("#tk-maps-results");
+
+    const query = input.value.trim();
+    const city = form.elements.namedItem("city").value;
+
+    if (query.length < 3) {
+      results.textContent = "Vui lòng nhập ít nhất 3 ký tự.";
+      return;
+    }
+
+    const version = ++osmSearchVersion;
+    clearOsmSelection(form);
+
+    searchButton.disabled = true;
+    searchButton.textContent = "Đang tìm...";
+
+    results.textContent = "Đang tìm khách sạn trên OpenStreetMap...";
+
+    try {
+      const url = new URL("../api/admin/places-search.php", location.href);
+
+      url.searchParams.set("q", query);
+      url.searchParams.set("city", city);
+      url.searchParams.set(
+        "mode",
+        form.querySelector("#tk-maps-mode")?.value || "auto",
+      );
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+
+      const data = await response.json().catch(() => null);
+
+      // Bỏ qua kết quả cũ nếu Admin đã đổi từ khóa
+      if (version !== osmSearchVersion || !form.isConnected) {
+        return;
+      }
+
+      if (
+        !response.ok ||
+        data?.status !== "success" ||
+        !Array.isArray(data.data?.places)
+      ) {
+        throw new Error(data?.message || "Không thể tìm khách sạn.");
+      }
+
+      results.replaceChildren();
+
+      const places = data.data.places;
+
+      if (places.length === 0) {
+        results.textContent = "Không tìm thấy khách sạn phù hợp trên bản đồ.";
+        return;
+      }
+
+      let count = 0;
+
+      for (const place of places) {
+        if (
+          !/^osm-[NWR][0-9]{1,15}$/.test(place.placeId || "") ||
+          !place.name ||
+          !place.address
+        ) {
+          continue;
+        }
+
+        count++;
+
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "tk-outline";
+        button.style.cssText =
+          "display:block;width:100%;text-align:left;" +
+          "padding:12px;margin:8px 0;white-space:normal;";
+
+        const kind = place.kind || "lodging";
+        const prefix =
+          kind === "lodging"
+            ? "✓ Cơ sở lưu trú / Căn hộ"
+            : kind === "address"
+              ? "🏢 Tòa nhà / Địa chỉ xác thực"
+              : "○ Khu vực / Đường phố (hãy nhập chi tiết hơn)";
+        button.textContent =
+          prefix + " — " + place.name + " — " + place.address;
+        button.disabled = kind === "location" || place.canSelect === false;
+        if (button.disabled)
+          button.title =
+            "Đây là đường phố/khu vực chung, vui lòng chọn tòa nhà hoặc địa chỉ cụ thể";
+
+        button.addEventListener("click", () => {
+          if (version !== osmSearchVersion || !form.isConnected) {
+            return;
+          }
+
+          if (place.address.length > 255) {
+            results.textContent =
+              "Địa chỉ quá dài để lưu. Cần điều chỉnh giới hạn dữ liệu.";
+            return;
+          }
+
+          // Lưu OSM ID & Địa chỉ
+          form.elements.namedItem("google_place_id").value = place.placeId;
+
+          const selectedKind = place.kind || "lodging";
+          form.dataset.selectedOsmKind = selectedKind;
+          form.elements.namedItem("address").value = place.address;
+
+          const nameInput = form.elements.namedItem("name");
+          const slug = form.elements.namedItem("slug");
+
+          // Nếu địa điểm có tên rõ ràng (VD: "The Sóng", khách sạn, tòa căn hộ...) thì tự động điền sẵn
+          const suggestedName =
+            place.name &&
+            place.name !== place.address &&
+            !/^[0-9]+$/.test(place.name.trim())
+              ? place.name.trim().slice(0, 150)
+              : "";
+
+          if (suggestedName) {
+            nameInput.value = suggestedName;
+            if (slug.dataset.userEdited !== "true") {
+              slug.value = makeHotelSlug(suggestedName);
+            }
+          } else {
+            // Trường hợp tìm theo số nhà thuần túy chưa có tên tòa nhà
+            if (!nameInput.value.trim()) {
+              nameInput.placeholder =
+                "Nhập tên khách sạn / căn hộ tại địa chỉ này...";
+              nameInput.focus();
+            }
+          }
+
+          // Tạo đường dẫn OpenStreetMap an toàn
+          const mapTypes = {
+            N: "node",
+            W: "way",
+            R: "relation",
+          };
+
+          const mapType = mapTypes[place.placeId[4]];
+          const osmId = place.placeId.slice(5);
+
+          const mapLink = form.querySelector("#tk-selected-maps");
+
+          mapLink.href =
+            "https://www.openstreetmap.org/" + mapType + "/" + osmId;
+
+          mapLink.hidden = false;
+
+          results.replaceChildren();
+          results.textContent =
+            "Đã chọn địa điểm: " +
+            place.name +
+            " (Bạn có thể giữ nguyên hoặc chỉnh sửa lại Tên khách sạn bên dưới)";
+        });
+
+        results.appendChild(button);
+      }
+
+      if (count === 0) {
+        results.textContent = "Không có địa điểm hợp lệ trong kết quả.";
+      }
+    } catch (error) {
+      if (version === osmSearchVersion) {
+        console.error("OSM Search Error:", error);
+
+        results.textContent = error.message || "Lỗi tìm kiếm bản đồ.";
+      }
+    } finally {
+      if (searchButton.isConnected) {
+        searchButton.disabled = false;
+        searchButton.textContent = "Tìm trên OpenStreetMap";
+      }
+    }
+  });
+
+  //  Lưu vào SQL
+
+  content.addEventListener("submit", async (e) => {
+    const form = e.target;
+
+    if (form.id !== "tk-create-hotel-db") return;
+
+    e.preventDefault();
+
+    if (!active()) return;
+
+    const values = Object.fromEntries(new FormData(form));
+
+    const payload = {
+      name: values.name.trim(),
+      slug: values.slug.trim(),
+      city: values.city,
+      type: values.type,
+      stars: Number(values.stars),
+      address: values.address.trim(),
+
+      // Trường này chứa mã địa điểm OSM
+      google_place_id: values.google_place_id,
+
+      price_per_night: Number(values.price_per_night),
+      description: values.description.trim(),
+    };
+
+    // Bắt buộc chọn địa điểm trên bản đồ
+    if (
+      !/^osm-[NWR][0-9]{1,15}$/.test(payload.google_place_id || "") ||
+      !payload.address
+    ) {
+      feedback(
+        "Vui lòng tìm và chọn khách sạn trên " + "OpenStreetMap trước khi lưu.",
+        true,
+      );
+      return;
+    }
+
+    if (!form.reportValidity()) return;
+
+    const submitBtn = form.querySelector('[type="submit"]');
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Đang lưu...";
+
+    let created = false;
+
+    try {
+      // API PHP xác minh địa điểm và lưu MySQL
+      const result = await createAdminHotel(payload);
+
+      created = true;
+
+      // Cập nhật danh sách khách sạn
+      await loadAdminHotels();
+
+      // Cập nhật Dashboard
+      await loadDashboard();
+
+      if (!active()) return;
+
+      render();
+
+      if (adminHotelsError || dashboardError) {
+        feedback(
+          "Khách sạn đã được tạo nhưng chưa tải lại " +
+            "đầy đủ dữ liệu. Hãy làm mới trang.",
+          true,
+        );
+        return;
+      }
+
+      feedback(
+        `Đã thêm "${payload.name}" thành công! ` +
+          `ID: ${result.id}. Trạng thái: Đang ẩn.`,
+      );
+    } catch (error) {
+      console.error("Create hotel error:", error);
+
+      feedback(
+        created
+          ? "Khách sạn đã lưu, nhưng lỗi cập nhật " +
+              "giao diện: " +
+              error.message
+          : error.message,
+        true,
+      );
+    } finally {
+      if (submitBtn.isConnected) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Lưu khách sạn";
+      }
+    }
   });
 
   show();
