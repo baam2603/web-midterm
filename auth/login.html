@@ -39,7 +39,7 @@
                             placeholder=""
                             required
                         />
-                        <img src="../sources/eye-close.png" alt="Toggle" class="toggle-password" id="eyeicon" onerror="this.style.display='none'" />
+                        <button type="button" class="password-eye-button" aria-label="Hiện mật khẩu" aria-pressed="false" aria-controls="password"><img src="../sources/eye-close.png" alt="" class="toggle-password" id="eyeicon" /></button>
                     </div>
                     <div class="invalid-feedback">Vui lòng nhập mật khẩu.</div>
                 </div>
@@ -69,23 +69,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <!-- Script xử lý ẩn/hiện mật khẩu tại chỗ -->
-    <script>
-        const eyeicon = document.getElementById("eyeicon");
-        const passwordInput = document.getElementById("password");
-        if (eyeicon && passwordInput) {
-            eyeicon.onclick = function () {
-                if (passwordInput.type === "password") {
-                    passwordInput.type = "text";
-                    eyeicon.src = "../sources/eye-open.png";
-                } else {
-                    passwordInput.type = "password";
-                    eyeicon.src = "../sources/eye-close.png";
-                }
-            };
-        }
-    </script>
 
     <!-- Giữ nguyên các script kết nối Backend của project -->
     <script src="../common/auth-service.js"></script>

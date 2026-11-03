@@ -34,4 +34,20 @@
     e.preventDefault();
     location.href = "forgot.html";
   });
+
+  // Toggle password visibility using the project's original eye PNG assets.
+  function setupPasswordEye(inputId, imageId) {
+    const input = document.getElementById(inputId);
+    const img = document.getElementById(imageId);
+    const button = img?.closest(".password-eye-button");
+    if (!input || !img || !button) return;
+    button.addEventListener("click", () => {
+      const visible = input.type === "password";
+      input.type = visible ? "text" : "password";
+      img.src = visible ? "../sources/eye-open.png" : "../sources/eye-close.png";
+      button.setAttribute("aria-label", visible ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+      button.setAttribute("aria-pressed", String(visible));
+    });
+  }
+  setupPasswordEye("password", "eyeicon");
 })();
