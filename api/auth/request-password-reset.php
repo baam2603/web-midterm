@@ -40,13 +40,16 @@ try {
       requested_at=VALUES(requested_at), failed_attempts=0');
     $save->execute([$id, $hash]);
 
-    $subject = 'THREEK - Password reset code';
-    $body = "Ma xac minh THREEK cua ban: {$otp}\nMa het han sau 10 phut. Neu ban khong yeu cau, hay bo qua email nay.\n";
-    $headers = ['From: ' . $from, 'Content-Type: text/plain; charset=UTF-8'];
-    if (!mail($email, $subject, $body, implode("\r\n", $headers))) {
-        $delete = $pdo->prepare('DELETE FROM password_reset_tokens WHERE user_id = ?');
-        $delete->execute([$id]);
-        error_log('Password reset mail delivery failed; configure a mail transport for PHP.');
+    $subject = 'THREEK - Mã xác minh đặt lại mật khẩu';
+    $body = "Mã xác minh THREEK của bạn: {$otp}\nMã hết hạn sau 10 phút. Nếu bạn không yêu cầu, hãy bỏ qua email này.\n";
+    require_once __DIR__ . '/../shared/smtp-mailer.php';
+    try {
+        sendThreekMail($email, $subject, $body);
+    } catch (Throwable $mailError) {
+        // Invalidate the OTP when the mail transport fails; do not leak SMTP details.
+        $delete = $pdo->prepare('DELETE FROM password_reset_tokens WHERE user_id = ? AND otp_hash = ?');
+        $delete->execute([$id, $hash]);
+        error_log('[THREEK SMTP] ' . $mailError->getMessage());
     }
     reply(200, ['status'=>'success','message'=>$message,'data'=>[]]);
 } catch (Throwable $e) {
