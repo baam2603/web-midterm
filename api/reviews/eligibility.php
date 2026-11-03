@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/../_shared/bootstrap.php';
+require_once __DIR__.'/../shared/bootstrap.php';
 requireMethod('GET');$uid=requireUser();
 $code=trim((string)($_GET['code']??''));
 if(!$code)reply(400,['status'=>'error','message'=>'Thiếu mã đơn.']);

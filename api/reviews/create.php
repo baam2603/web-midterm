@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/../_shared/bootstrap.php';
+require_once __DIR__.'/../shared/bootstrap.php';
 requireMethod('POST');$uid=requireUser();$v=input();
 $code=trim((string)($v['code']??''));$score=filter_var($v['score']??null,FILTER_VALIDATE_INT);$comment=trim((string)($v['comment']??''));
 if(!$code || $score===false || $score<1 || $score>5 || mb_strlen($comment)<15 || mb_strlen($comment)>1500)

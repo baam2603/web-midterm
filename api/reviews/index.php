@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/../_shared/bootstrap.php';
+require_once __DIR__.'/../shared/bootstrap.php';
 requireMethod('GET');
 $city=trim((string)($_GET['city']??''));$slug=trim((string)($_GET['hotelId']??''));
 if(!in_array($city,['dalat','vungtau'],true) || !$slug) reply(400,['status'=>'error','message'=>'Thiếu city hoặc hotelId.']);

@@ -1,46 +1,40 @@
 (function () {
   "use strict";
-  const req = document.getElementById("tk-forgot-request"),
-    reset = document.getElementById("tk-forgot-reset"),
-    otp = document.getElementById("tk-demo-otp"),
-    out = document.getElementById("tk-forgot-feedback");
-  req.addEventListener("submit", (e) => {
-    e.preventDefault();
-    out.textContent = "";
+  const requestForm = document.getElementById("tk-forgot-request");
+  const resetForm = document.getElementById("tk-forgot-reset");
+  const feedback = document.getElementById("tk-forgot-feedback");
+  if (!requestForm || !resetForm || !feedback) return;
+  const message = (text, error) => {
+    feedback.dataset.error = error ? "true" : "false";
+    feedback.textContent = text;
+  };
+  requestForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const btn = requestForm.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    message("", false);
     try {
-      const code = startDemoRecovery(req.elements.email.value);
-      otp.hidden = false;
-      otp.textContent =
-        "Mã DEMO của bạn (không gửi email): " + code + " — hiệu lực 10 phút.";
-      reset.hidden = false;
-      out.dataset.error = "false";
-    } catch (err) {
-      out.dataset.error = "true";
-      out.textContent = err.message;
-    }
+      const result = await window.requestPasswordReset(requestForm.elements.email.value.trim());
+      message(result, false);
+      resetForm.hidden = false;
+    } catch (err) { message(err.message || "Không thể gửi yêu cầu.", true); }
+    finally { btn.disabled = false; }
   });
-  reset.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    out.textContent = "";
-    if (reset.elements.password.value !== reset.elements.confirm.value) {
-      out.dataset.error = "true";
-      out.textContent = "Mật khẩu xác nhận chưa khớp.";
-      return;
-    }
+  resetForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const password = resetForm.elements.password.value;
+    const confirm = resetForm.elements.confirm.value;
+    if (password !== confirm) { message("Mật khẩu xác nhận chưa khớp.", true); return; }
+    const btn = resetForm.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    message("", false);
     try {
-      await finishDemoRecovery(
-        req.elements.email.value,
-        reset.elements.otp.value,
-        reset.elements.password.value,
+      await window.resetPasswordWithOtp(
+        requestForm.elements.email.value.trim(), resetForm.elements.otp.value.trim(), password
       );
-      otp.hidden = true;
-      reset.hidden = true;
-      out.dataset.error = "false";
-      out.innerHTML =
-        'Đã đổi mật khẩu trong dữ liệu demo. <a href="login.html">Đăng nhập</a> bằng mật khẩu mới.';
-    } catch (err) {
-      out.dataset.error = "true";
-      out.textContent = err.message;
-    }
+      resetForm.hidden = true;
+      message("Đã cập nhật mật khẩu. Bạn có thể quay lại trang đăng nhập.", false);
+    } catch (err) { message(err.message || "Không thể đặt lại mật khẩu.", true); }
+    finally { btn.disabled = false; }
   });
 })();
