@@ -45,14 +45,17 @@ try {
 
     if ($city === "") {
         // Không có city: lấy tất cả
-        $sql = "SELECT * FROM hotels ORDER BY id";
+        $sql = "SELECT * FROM hotels
+        WHERE is_active = 1
+        ORDER BY id";
 
         $stmt = $pdo->query($sql);
     } else {
         // Có city: lọc theo thành phố
         $sql = "SELECT * FROM hotels
-                WHERE city = :city
-                ORDER BY id";
+        WHERE city = :city
+          AND is_active = 1
+        ORDER BY id";
 
         $stmt = $pdo->prepare($sql);
 

@@ -61,8 +61,19 @@
         const hotels = await window.HotelAPI.loadCity(cityKey);
         console.info("[3K Booking] Đã lấy từ MySQL:", cityKey, hotels.length);
       } catch (error) {
-        // Chỉ fallback khi API lỗi; không giả vờ rằng dữ liệu đang từ MySQL.
-        console.warn("[3K Booking] API lỗi, hiển thị dữ liệu demo:", error);
+        console.error("[3K Booking] Không thể tải danh sách khách sạn:", error);
+
+        const notice = document.createElement("p");
+        notice.textContent =
+          "Không thể tải danh sách khách sạn. Vui lòng thử lại sau.";
+
+        notice.style.cssText =
+          "padding:20px;margin:20px;color:#a33;" +
+          "background:#fff;border-radius:10px;";
+
+        (document.querySelector("main") || document.body).prepend(notice);
+
+        return;
       }
     } else {
       console.warn("[3K Booking] Chưa có hotels-api.js, dùng dữ liệu demo");

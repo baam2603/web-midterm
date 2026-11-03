@@ -1,0 +1,95 @@
+/* Header dành riêng cho khu vực quản trị THREEK.COM */
+.tk-admin-topbar {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 30;
+  width: 100%;
+  background: #f3f0e7;
+  color: #1c1a16;
+  border-bottom: 1px solid #d9ddcf;
+  font-family: "Be Vietnam Pro", sans-serif;
+}
+.tk-admin-topbar *,
+.tk-admin-topbar *::before,
+.tk-admin-topbar *::after { box-sizing: border-box; }
+.tk-admin-topbar__inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  min-height: 76px;
+  padding: 14px clamp(20px, 4vw, 40px);
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.tk-admin-topbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+  font: 600 clamp(1.06rem, 1.8vw, 1.6rem) "Fraunces", serif;
+}
+.tk-admin-topbar__logo {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.tk-admin-topbar__section {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 22px;
+  border-left: 1px solid #d9ddcf;
+  color: #3b6b4b;
+  font-size: 0.84rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tk-admin-topbar__section i { font-size: 1.2rem; }
+.tk-admin-topbar__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  min-width: 0;
+}
+.tk-admin-topbar__user {
+  max-width: 235px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.87rem;
+  font-weight: 600;
+}
+.tk-admin-topbar__logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #c5cdc0;
+  border-radius: 9px;
+  padding: 9px 12px;
+  background: #fff;
+  color: #294c37;
+  font: 600 0.82rem "Be Vietnam Pro", sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tk-admin-topbar__logout:hover { background: #edf2ea; }
+.tk-admin-topbar__logout:disabled { opacity: 0.6; cursor: wait; }
+/* hidden must not be overridden by display declarations above. */
+.tk-admin-topbar [hidden] { display: none !important; }
+@media (max-width: 780px) {
+  .tk-admin-topbar__inner { flex-wrap: wrap; min-height: 0; gap: 10px 16px; }
+  .tk-admin-topbar__section { order: 3; width: 100%; padding-left: 0; border: none; }
+  .tk-admin-topbar__actions { margin-left: auto; }
+  .tk-admin-topbar__user { max-width: 145px; }
+}
+@media (max-width: 440px) {
+  .tk-admin-topbar__user { max-width: 105px; font-size: 0.75rem; }
+  .tk-admin-topbar__logo { width: 30px; height: 30px; }
+  .tk-admin-topbar__logout { padding: 8px; }
+}

@@ -56,7 +56,8 @@ try {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-    
+    session_regenerate_id(true);
+
     $_SESSION["user"] = $userPayload;
 
     http_response_code(200);
@@ -65,7 +66,6 @@ try {
         "message" => "Đăng nhập thành công.",
         "data" => ["user" => $userPayload]
     ], JSON_UNESCAPED_UNICODE);
-
 } catch (Throwable $e) {
     error_log($e->getMessage());
     http_response_code(500);

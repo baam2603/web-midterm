@@ -89,10 +89,24 @@
         try {
           await HotelDetailAPI.sync();
         } catch (error) {
-          console.warn(
-            "Không tải được chi tiết MySQL, dùng dữ liệu demo:",
-            error.message,
-          );
+          console.error("Không thể tải khách sạn:", error);
+
+          const root = document.getElementById("hotel-root");
+
+          if (root) {
+            root.innerHTML = `
+      <div class="not-found">
+        <h1>Khách sạn không khả dụng</h1>
+        <p>Khách sạn không tồn tại, đang tạm ẩn
+        hoặc hệ thống chưa thể tải thông tin.</p>
+        <a href="../index1.html">
+          Quay lại trang chủ
+        </a>
+      </div>
+    `;
+          }
+
+          return;
         }
 
         await loadScript("hotel.js");

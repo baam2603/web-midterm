@@ -14,7 +14,8 @@
     <link rel="stylesheet" href="../common/header.css" />
     <link rel="stylesheet" href="../common/footer.css" />
     <link rel="stylesheet" href="../common/extension.css" />
-    <title>Quản trị demo | THREEK.COM</title>
+    <link rel="stylesheet" href="admin-header.css?v=1" />
+    <title>Quản trị khách sạn | THREEK.COM</title>
   </head>
   <body>
     <header id="site-header"></header>
@@ -34,15 +35,19 @@
           </div>
           <a class="tk-outline" href="../index1.html">← Website khách hàng</a>
         </div>
+
         <section class="tk-gate tk-surface" id="tk-admin-gate">
-          <h2>Truy cập chế độ quản trị mô phỏng</h2>
-          <p>
-            Chỉ phục vụ demo và kiểm thử frontend. Nút bên dưới KHÔNG xác thực
-            danh tính hay cấp quyền bảo mật. Khi có backend, cần thay bằng phiên
-            đăng nhập admin và kiểm tra vai trò trên server cho mọi API.
+          <h2>Đăng nhập quản trị</h2>
+
+          <p id="tk-admin-gate-message" role="status">
+            Đang kiểm tra quyền truy cập...
           </p>
-          <button class="tk-primary" id="tk-enter-admin">Vào Admin demo</button>
+
+          <a href="../auth/login.html" class="tk-primary" id="tk-admin-login">
+            Đăng nhập
+          </a>
         </section>
+
         <div id="tk-admin-app" hidden>
           <div class="tk-dashboard" id="tk-kpis"></div>
           <nav
@@ -57,9 +62,10 @@
     <footer id="site-footer"></footer>
     <script src="../common/auth-service.js"></script>
     <script src="../common/header.js"></script>
+    <script src="admin-header.js?v=1"></script>
     <script src="../common/footer.js"></script>
     <script>
-      mountHeader("site-header");
+      mountAdminHeader("site-header");
       mountFooter("site-footer");
     </script>
     <script src="../common/booking-store.js"></script>
@@ -69,6 +75,6 @@
     <script>
       ThreeKData.applyCatalog();
     </script>
-    <script src="admin.js"></script>
+    <script src="admin.js?v=8"></script>
   </body>
 </html>

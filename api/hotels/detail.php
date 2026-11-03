@@ -38,7 +38,9 @@ try {
     }
 
     // 1. Tìm khách sạn
-    $sql = "SELECT * FROM hotels WHERE slug = :slug";
+    $sql = "SELECT * FROM hotels
+        WHERE slug = :slug
+          AND is_active = 1";
 
     $stmt = $pdo->prepare($sql);
 

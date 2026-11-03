@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/../_shared/bootstrap.php';
+require_once __DIR__.'/../shared/bootstrap.php';
 requireMethod('POST');requireAdmin();$v=input();
 $id=filter_var($v['id']??null,FILTER_VALIDATE_INT);$status=$v['status']??'';
 if(!$id || !in_array($status,['approved','rejected'],true))reply(400,['status'=>'error','message'=>'Dữ liệu duyệt đánh giá không hợp lệ.']);

@@ -1,8 +1,6 @@
-/* Admin FRONTEND DEMO ONLY. No authentication or role security: replace with server admin APIs. */
 (function () {
   "use strict";
-  const access = "threek_demo_admin_mode",
-    gate = document.getElementById("tk-admin-gate"),
+  const gate = document.getElementById("tk-admin-gate"),
     app = document.getElementById("tk-admin-app"),
     tabs = document.getElementById("tk-admin-tabs"),
     content = document.getElementById("tk-admin-content"),
@@ -34,18 +32,202 @@
   ];
   let tab = location.hash.slice(1) || "overview";
   if (!ids.some((i) => i[0] === tab)) tab = "overview";
+
+  // Dashboard access is never granted by sessionStorage or localStorage.
+  let adminAuthorized = false;
+
+  let dashboardData = null;
+  let dashboardError = "";
+  let adminHotels = null;
+  let adminHotelsError = "";
+  async function loadDashboard() {
+    dashboardData = null;
+    dashboardError = "";
+
+    try {
+      const response = await fetch(
+        new URL("../api/admin/dashboard.php", location.href),
+        {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+        },
+      );
+
+      if (response.status === 401 || response.status === 403) {
+        adminAuthorized = false;
+        window.setAdminHeaderUser?.(null);
+        app.hidden = true;
+        gate.hidden = false;
+
+        const message = document.getElementById("tk-admin-gate-message");
+
+        if (message) {
+          message.textContent =
+            response.status === 401
+              ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+              : "Tài khoản không có quyền quản trị.";
+        }
+        return;
+      }
+
+      const result = await response.json();
+
+      if (
+        !response.ok ||
+        result.status !== "success" ||
+        !result.data?.metrics ||
+        !Array.isArray(result.data.recentBookings)
+      ) {
+        throw new Error(result.message || "Dữ liệu Dashboard không hợp lệ.");
+      }
+
+      dashboardData = result.data;
+    } catch (error) {
+      console.error("Dashboard API error:", error);
+      dashboardError = error.message || "Không thể tải dữ liệu Dashboard.";
+    }
+  }
+
+  async function loadAdminHotels() {
+    adminHotels = null;
+    adminHotelsError = "";
+
+    try {
+      const response = await fetch(
+        new URL("../api/admin/hotels.php", location.href),
+        {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+        },
+      );
+
+      const result = await response.json().catch(() => null);
+
+      if (response.status === 401 || response.status === 403) {
+        adminAuthorized = false;
+        window.setAdminHeaderUser?.(null);
+        app.hidden = true;
+        gate.hidden = false;
+
+        const message = document.getElementById("tk-admin-gate-message");
+
+        if (message) {
+          message.textContent =
+            response.status === 401
+              ? "Phiên đăng nhập đã hết hạn."
+              : "Tài khoản không có quyền Admin.";
+        }
+        return;
+      }
+
+      if (
+        !response.ok ||
+        result?.status !== "success" ||
+        !Array.isArray(result.data?.hotels)
+      ) {
+        throw new Error(
+          result?.message || "Không thể tải danh sách khách sạn.",
+        );
+      }
+
+      adminHotels = result.data.hotels;
+    } catch (error) {
+      console.error("Hotels API error:", error);
+      adminHotelsError = error.message;
+    }
+  }
+
+  let authRequestId = 0;
+
   function active() {
-    return sessionStorage.getItem(access) === "on";
+    return adminAuthorized;
   }
-  function show() {
-    gate.hidden = active();
-    app.hidden = !active();
-    if (active()) render();
+
+  async function show() {
+    // A later verification result must not be overwritten by an older request.
+
+    window.setAdminHeaderUser?.(null);
+    const requestId = ++authRequestId;
+    adminAuthorized = false;
+    gate.hidden = false;
+    app.hidden = true;
+
+    const message = document.getElementById("tk-admin-gate-message");
+    const loginLink = document.getElementById("tk-admin-login");
+
+    if (loginLink) {
+      const returnPath = location.pathname + location.search + location.hash;
+      loginLink.href =
+        "../auth/login.html?next=" + encodeURIComponent(returnPath);
+    }
+    if (message) message.textContent = "Đang kiểm tra quyền truy cập...";
+
+    // Lưu thông tin đã xác thực để sử dụng sau khối try/catch.
+    let verifiedAdmin = null;
+    try {
+      const response = await fetch(
+        new URL("../api/admin/me.php", location.href),
+        { method: "GET", credentials: "same-origin", cache: "no-store" },
+      );
+      const result = await response.json().catch(() => null);
+      if (requestId !== authRequestId) return;
+
+      if (response.status === 401) {
+        throw new Error("Vui lòng đăng nhập để tiếp tục.");
+      }
+      if (response.status === 403) {
+        throw new Error("Tài khoản không có quyền Admin.");
+      }
+      if (
+        !response.ok ||
+        result?.status !== "success" ||
+        result?.data?.admin?.role !== "admin"
+      ) {
+        throw new Error(
+          result?.message || `Không thể xác thực (HTTP ${response.status}).`,
+        );
+      }
+      verifiedAdmin = result.data.admin;
+    } catch (error) {
+      if (requestId !== authRequestId) return;
+      console.error("Không thể xác minh phiên Admin:", error);
+      adminAuthorized = false;
+      gate.hidden = false;
+      app.hidden = true;
+      if (message)
+        message.textContent = error?.message || "Không thể kết nối máy chủ.";
+      return;
+    }
+
+    // Authentication succeeded. Rendering issues should NOT show login again.
+
+    adminAuthorized = true;
+    window.setAdminHeaderUser?.(verifiedAdmin);
+    gate.hidden = true;
+    app.hidden = false;
+
+    content.textContent = "Đang tải Dashboard...";
+
+    await loadDashboard();
+
+    if (active() && tab === "hotels") {
+      await loadAdminHotels();
+    }
+
+    if (active()) {
+      try {
+        render();
+      } catch (error) {
+        console.error("Dashboard render error:", error);
+
+        content.textContent = "Lỗi hiển thị Dashboard: " + error.message;
+      }
+    }
   }
-  document.getElementById("tk-enter-admin").addEventListener("click", () => {
-    sessionStorage.setItem(access, "on");
-    show();
-  });
+
+  // Removed the obsolete tk-enter-admin demo click handler entirely.
   const hotels = () =>
     Object.entries(CITY_DATA).flatMap(([city, c]) =>
       (c.hotels || []).map((h) => ({
@@ -72,29 +254,30 @@
     el.textContent = message;
     el.scrollIntoView({ block: "nearest" });
   }
+
   function stats() {
-    const all = BookingStore.all(),
-      active = all.filter((b) =>
-        ["pending", "confirmed", "checked_in"].includes(BookingStore.status(b)),
-      ),
-      done = all.filter((b) => BookingStore.status(b) === "completed");
+    const m = dashboardData?.metrics;
+
     return [
       {
-        title: "Khách sạn đang hiển thị",
-        value: hotels().filter((h) => !h.hidden).length,
+        title: "Tổng khách sạn",
+        value: m ? Number(m.hotelCount ?? 0) : "—",
       },
-      { title: "Đơn đang hoạt động", value: active.length },
-      { title: "Đơn hoàn tất", value: done.length },
       {
-        title: "Giá trị đặt phòng demo",
-        value: money(
-          all
-            .filter((b) => b.status !== "cancelled")
-            .reduce((v, b) => v + Number(b.total || 0), 0),
-        ),
+        title: "Đơn đang hoạt động",
+        value: m ? Number(m.activeBookings ?? 0) : "—",
+      },
+      {
+        title: "Đơn hoàn tất",
+        value: m ? Number(m.completedBookings ?? 0) : "—",
+      },
+      {
+        title: "Giá trị đơn hoàn tất",
+        value: m ? money(m.completedValue) : "—",
       },
     ];
   }
+
   function nav() {
     tabs.innerHTML = ids
       .map(
@@ -103,32 +286,175 @@
       )
       .join("");
   }
+
   function overview() {
-    const all = BookingStore.all().slice().reverse().slice(0, 5),
-      review = ThreeKData.reviewsForAdmin().length,
-      tickets = ThreeKData.read().tickets.filter(
-        (t) => t.status === "open",
-      ).length;
-    return `<div class="tk-grid"><div class="tk-surface"><h2>Cần xử lý</h2><p>${tickets} yêu cầu hỗ trợ chưa phản hồi</p><p>${BookingStore.all().filter((x) => x.status === "pending").length} đơn chờ thanh toán</p><p>${review} đánh giá hiện có (xem tab Đánh giá để kiểm tra và xóa nội dung vi phạm)</p><div class="tk-alert">Đây là dữ liệu trên <strong>trình duyệt hiện tại</strong>. Không phải dữ liệu toàn hệ thống và không tự đồng bộ đa thiết bị.</div></div><div class="tk-surface"><h2>Luồng vận hành</h2><p>1. Khách chọn ngày, phòng và tạo đơn.</p><p>2. Admin kiểm tra, xác nhận hoặc xử lý hủy.</p><p>3. Admin cập nhật tồn kho và giá mới.</p><p>4. Khách hoàn tất lưu trú và gửi đánh giá; admin chỉ kiểm tra và xóa nếu vi phạm.</p></div></div><h2 style="margin-top:24px">Đơn gần nhất</h2>${table(["Mã đơn", "Khách sạn", "Khách", "Trạng thái", "Tổng tiền"], all.map((b) => `<tr><td>${esc(b.code)}</td><td>${esc(b.hotelName)}</td><td>${esc(b.guestName)}</td><td>${statusTag(BookingStore.status(b))}</td><td>${money(b.total)}</td></tr>`).join(""))}`;
-  }
-  function hotelTab() {
-    return `<div class="tk-flexcols"><section class="tk-surface"><h2>Thêm khách sạn demo</h2><form id="tk-create-hotel" class="tk-form"><label>Điểm đến<select name="city"><option value="dalat">Đà Lạt</option><option value="vungtau">Vũng Tàu</option></select></label><label>Tên khách sạn<input name="name" required minlength="3" maxlength="100" placeholder="Tên khách sạn"></label><label>Địa chỉ<input name="address" required minlength="5"></label><label>Giá phòng tiêu chuẩn (VNĐ)<input type="number" name="price" min="100000" step="10000" value="850000" required></label><div class="tk-flexcols"><label>Số phòng<input type="number" name="stock" min="0" max="999" value="5" required></label><label>Khách/phòng<input type="number" name="guests" min="1" max="12" value="2" required></label></div><button class="tk-primary">+ Thêm khách sạn</button></form></section><section class="tk-surface"><h2>Chỉnh sửa khách sạn</h2><form id="tk-edit-hotel" class="tk-form"><label>Khách sạn<select id="tk-hotel-picker" name="key">${hotels()
+    if (dashboardError) {
+      return `
+      <div class="tk-surface tk-alert">
+        <h2>Không thể tải Dashboard</h2>
+        <p>${esc(dashboardError)}</p>
+      </div>
+    `;
+    }
+
+    if (!dashboardData) {
+      return `
+      <div class="tk-surface">
+        Đang tải dữ liệu Dashboard...
+      </div>
+    `;
+    }
+
+    const { metrics, recentBookings } = dashboardData;
+
+    const rows = recentBookings
       .map(
-        (h) =>
-          `<option value="${esc(h.city + "/" + h.id)}">${esc(h.name)} · ${h.city === "dalat" ? "Đà Lạt" : "Vũng Tàu"}</option>`,
+        (b) => `
+    <tr>
+      <td><strong>${esc(b.code)}</strong></td>
+      <td>${esc(b.hotelName)}</td>
+      <td>${esc(b.guestName)}</td>
+      <td>${statusTag(b.status)}</td>
+      <td>${money(b.total)}</td>
+    </tr>
+  `,
       )
-      .join(
-        "",
-      )}</select></label><label>Tên hiển thị<input name="name" required minlength="3" maxlength="100"></label><label><input type="checkbox" name="hidden" style="width:auto"> Ẩn khỏi danh sách khách hàng</label><button class="tk-primary">Lưu chỉnh sửa</button><button class="tk-danger" type="button" id="tk-delete-hotel">Xóa khách sạn demo mới (nếu chưa có đơn)</button></form></section></div><h2 style="margin-top:24px">Danh sách khách sạn</h2>${table(
-      ["Khách sạn", "Điểm đến", "Loại phòng", "Từ/đêm", "Hiển thị"],
-      hotels()
-        .map(
-          (h) =>
-            `<tr><td><strong>${esc(h.name)}</strong><span class="tk-mini">${esc(h.id)}</span></td><td>${h.city === "dalat" ? "Đà Lạt" : "Vũng Tàu"}</td><td>${h.roomList.length}</td><td>${money(h.price)}</td><td>${statusTag(h.hidden ? "Đang ẩn" : "Đang hiển thị")}</td></tr>`,
-        )
-        .join(""),
-    )}`;
+      .join("");
+
+    return `
+    <div class="tk-grid">
+      <div class="tk-surface">
+        <h2>Cần xử lý</h2>
+
+        <p>
+          <strong>${Number(metrics.pendingBookings ?? 0)}</strong>
+          đơn chờ thanh toán
+        </p>
+
+        <p class="tk-muted">
+          Số liệu được lấy từ cơ sở dữ liệu MySQL.
+        </p>
+      </div>
+
+      <div class="tk-surface">
+        <h2>Tổng quan hoạt động</h2>
+
+        <p>
+          Khách sạn:
+          <strong>${Number(metrics.hotelCount ?? 0)}</strong>
+        </p>
+
+        <p>
+          Đơn đang hoạt động:
+          <strong>${Number(metrics.activeBookings ?? 0)}</strong>
+        </p>
+
+        <p>
+          Đơn hoàn tất:
+          <strong>${Number(metrics.completedBookings ?? 0)}</strong>
+        </p>
+
+        <p>
+          Giá trị đơn hoàn tất:
+          <strong>${money(metrics.completedValue)}</strong>
+        </p>
+      </div>
+    </div>
+
+    <h2 style="margin-top:24px">
+      5 đơn đặt phòng gần nhất
+    </h2>
+
+    ${table(["Mã đơn", "Khách sạn", "Khách", "Trạng thái", "Tổng tiền"], rows)}
+  `;
   }
+
+  function hotelTab() {
+    if (adminHotelsError) {
+      return `
+      <div class="tk-surface tk-alert">
+        <h2>Lỗi tải khách sạn</h2>
+        <p>${esc(adminHotelsError)}</p>
+      </div>
+    `;
+    }
+
+    if (!adminHotels) {
+      return `
+      <div class="tk-surface">
+        Đang tải danh sách khách sạn...
+      </div>
+    `;
+    }
+
+    const cityName = (city) =>
+      ({
+        dalat: "Đà Lạt",
+        vungtau: "Vũng Tàu",
+      })[city] || city;
+
+    const rows = adminHotels
+      .map(
+        (h) => `
+    <tr>
+      <td>
+        <strong>${esc(h.name)}</strong>
+        <span class="tk-mini">
+          ${esc(h.slug)}
+        </span>
+      </td>
+
+      <td>${esc(cityName(h.city))}</td>
+
+      <td>${esc(h.address)}</td>
+
+      <td>${Number(h.room_type_count || 0)}</td>
+
+      <td>${money(h.price_per_night)}</td>
+
+      <td>
+        <span class="tk-pill ${Number(h.is_active) === 1 ? "" : "bad"}">
+          ${Number(h.is_active) === 1 ? "Đang hiển thị" : "Đang ẩn"}
+        </span>
+      </td>
+    </tr>
+  `,
+      )
+      .join("");
+
+    return `
+    <div class="tk-surface">
+      <h2>Quản lý khách sạn</h2>
+
+      <p class="tk-muted">
+        Tổng cộng: <strong>${adminHotels.length}</strong>
+        khách sạn từ MySQL.
+      </p>
+
+      <p class="tk-muted">
+        Chức năng thêm, sửa và ẩn khách sạn
+        sẽ được hoàn thiện ở bước tiếp theo.
+      </p>
+    </div>
+
+    <h2 style="margin-top:24px">
+      Danh sách khách sạn
+    </h2>
+
+    ${table(
+      [
+        "Khách sạn",
+        "Thành phố",
+        "Địa chỉ",
+        "Loại phòng",
+        "Giá tham khảo",
+        "Trạng thái",
+      ],
+      rows,
+    )}
+  `;
+  }
+
   function roomTab() {
     return `<div class="tk-surface"><h2>Quản lý từng loại phòng</h2><p class="tk-muted">Giá và tồn phòng mới có hiệu lực trên trang khách hàng sau khi lưu. Đơn đã đặt giữ nguyên số tiền tại thời điểm tạo.</p><form id="tk-edit-room" class="tk-form"><label>Khách sạn<select id="tk-room-hotel" name="hotel">${hotels()
       .map(
@@ -240,7 +566,7 @@
         audit: auditTab,
       }[tab] || overview
     )();
-    if (tab === "hotels") fillHotel();
+    // Danh sách khách sạn sử dụng MySQL; form demo cũ không còn trong tab này.
     if (tab === "rooms") fillRoomSelect();
     if (tab === "calendar") {
       const d = new Date(),
@@ -290,13 +616,30 @@
     ThreeKData.applyCatalog();
     render();
   }
-  tabs.addEventListener("click", (e) => {
+
+  tabs.addEventListener("click", async (e) => {
     const el = e.target.closest("[data-tab]");
-    if (!el) return;
+    if (!el || !active()) return;
+
     tab = el.dataset.tab;
+
     history.replaceState(null, "", "#" + tab);
-    render();
+
+    if (tab === "overview") {
+      content.textContent = "Đang cập nhật Dashboard...";
+      await loadDashboard();
+    }
+
+    if (tab === "hotels") {
+      content.textContent = "Đang tải khách sạn...";
+      await loadAdminHotels();
+    }
+
+    if (active()) {
+      render();
+    }
   });
+
   content.addEventListener("change", (e) => {
     if (e.target.id === "tk-hotel-picker") fillHotel();
     if (e.target.id === "tk-room-hotel") fillRoomSelect();
@@ -433,8 +776,13 @@
       feedback(err.message, true);
     }
   });
-  window.addEventListener("storage", () => {
-    if (active()) render();
+  window.addEventListener("storage", show);
+
+  window.addEventListener("threek:auth-updated", show);
+  // Revalidate when returning to a previously cached Admin page.
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) show();
   });
+
   show();
 })();
