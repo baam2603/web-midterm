@@ -10,13 +10,15 @@
       ? "../" + s
       : "";
   }
-  async function loadCity(cityKey) {
+  async function loadCity(cityKey, criteria = {}, signal) {
     const city = window.CITY_DATA?.[cityKey];
     if (!city || !Array.isArray(city.hotels))
       throw new Error("Không có cấu hình thành phố: " + cityKey);
     const url = new URL(API_URL);
     url.searchParams.set("city", cityKey);
-    const response = await fetch(url, { cache: "no-store" });
+    for (const [key, value] of Object.entries(criteria))
+      if (value != null && value !== "") url.searchParams.set(key, value);
+    const response = await fetch(url, { cache: "no-store", signal });
     const json = await response.json().catch(() => null);
     if (
       !response.ok ||
@@ -59,8 +61,8 @@
         lng: Number.isFinite(lng) ? lng : null,
         photo: prev.photo || "",
         coverImage: safePath(h.cover_image),
-        score: typeof prev.score === "number" ? prev.score : null,
-        reviews: Number(prev.reviews || 0),
+        score: h.rating == null ? null : Number(h.rating),
+        reviews: Number(h.review_count || 0),
         hidden: false,
       };
     });

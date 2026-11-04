@@ -1,46 +1,51 @@
-(function () {
+(() => {
   "use strict";
-  const req = document.getElementById("tk-forgot-request"),
+  const requestForm = document.getElementById("tk-forgot-request"),
     reset = document.getElementById("tk-forgot-reset"),
-    otp = document.getElementById("tk-demo-otp"),
-    out = document.getElementById("tk-forgot-feedback");
-  req.addEventListener("submit", (e) => {
-    e.preventDefault();
-    out.textContent = "";
+    out = document.getElementById("tk-forgot-feedback"),
+    otp = document.getElementById("tk-demo-otp");
+  const token = new URLSearchParams(location.hash.slice(1)).get("token");
+  if (otp) otp.hidden = true;
+  if (token) {
+    requestForm.hidden = true;
+    reset.hidden = false;
+    reset.querySelector("[name=otp]")?.closest("label")?.remove();
+    history.replaceState(null, "", location.pathname);
+  } else reset.hidden = true;
+  async function submit(form, body) {
+    const button = form.querySelector("button");
+    button.disabled = true;
+    out.textContent = "Đang xử lý...";
     try {
-      const code = startDemoRecovery(req.elements.email.value);
-      otp.hidden = false;
-      otp.textContent =
-        "Mã DEMO của bạn (không gửi email): " + code + " — hiệu lực 10 phút.";
-      reset.hidden = false;
+      const r = await fetch("../api/auth/recovery.php", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const j = await r.json();
+      if (!r.ok || j.status !== "success")
+        throw Error(j.message || "Không thực hiện được yêu cầu.");
+      out.textContent = j.message;
       out.dataset.error = "false";
-    } catch (err) {
+      if (token) reset.hidden = true;
+    } catch (e) {
+      out.textContent = e.message;
       out.dataset.error = "true";
-      out.textContent = err.message;
+    } finally {
+      button.disabled = false;
     }
-  });
-  reset.addEventListener("submit", async (e) => {
+  }
+  requestForm.onsubmit = (e) => {
     e.preventDefault();
-    out.textContent = "";
+    submit(requestForm, { email: requestForm.elements.email.value });
+  };
+  reset.onsubmit = (e) => {
+    e.preventDefault();
     if (reset.elements.password.value !== reset.elements.confirm.value) {
-      out.dataset.error = "true";
       out.textContent = "Mật khẩu xác nhận chưa khớp.";
       return;
     }
-    try {
-      await finishDemoRecovery(
-        req.elements.email.value,
-        reset.elements.otp.value,
-        reset.elements.password.value,
-      );
-      otp.hidden = true;
-      reset.hidden = true;
-      out.dataset.error = "false";
-      out.innerHTML =
-        'Đã đổi mật khẩu trong dữ liệu demo. <a href="login.html">Đăng nhập</a> bằng mật khẩu mới.';
-    } catch (err) {
-      out.dataset.error = "true";
-      out.textContent = err.message;
-    }
-  });
+    submit(reset, { token, password: reset.elements.password.value });
+  };
 })();

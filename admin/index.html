@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="../common/footer.css" />
     <link rel="stylesheet" href="../common/extension.css" />
     <link rel="stylesheet" href="admin-header.css?v=1" />
+    <link rel="stylesheet" href="admin-hotel-map.css" />
     <title>Quản trị khách sạn | THREEK.COM</title>
   </head>
   <body>
@@ -28,9 +29,7 @@
             <p class="tk-lead">
               Điều hành danh mục khách sạn, phòng, tồn phòng, đơn, phản hồi và
               yêu cầu hỗ trợ.
-              <span class="tk-badge-demo"
-                >LOCAL DEMO — KHÔNG PHẢI ADMIN THẬT</span
-              >
+              <span class="tk-badge-demo">QUẢN TRỊ — DỮ LIỆU MYSQL</span>
             </p>
           </div>
           <a class="tk-outline" href="../index1.html">← Website khách hàng</a>
@@ -68,13 +67,9 @@
       mountAdminHeader("site-header");
       mountFooter("site-footer");
     </script>
-    <script src="../common/booking-store.js"></script>
-    <script src="../common/domain-store.js"></script>
-    <script src="../common/city-data.js"></script>
-    <script src="../hotel/hotel-data.js"></script>
-    <script>
-      ThreeKData.applyCatalog();
-    </script>
-    <script src="admin.js?v=27"></script>
+    <script src="admin-catalog.js?v=1"></script>
+    <script src="admin-operations.js?v=1"></script>
+    <script src="admin.js?v=28"></script>
+    <script src="admin-hotel-map.js?v=2"></script>
   </body>
 </html>

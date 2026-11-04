@@ -1,4 +1,3 @@
-
 /* THREEK.COM - Auth service (PHP sessions + MySQL account APIs) */
 (function () {
   "use strict";
@@ -47,16 +46,15 @@
       response = await fetch(getApiUrl(endpoint), {
         method,
         credentials: "same-origin",
+        cache: "no-store",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        ...(data === undefined
-          ? {}
-          : { body: JSON.stringify(data) })
+        ...(data === undefined ? {} : { body: JSON.stringify(data) }),
       });
     } catch {
       throw new Error(
-        "Không thể kết nối máy chủ. Kiểm tra Apache và đường dẫn API."
+        "Không thể kết nối máy chủ. Kiểm tra Apache và đường dẫn API.",
       );
     }
 
@@ -66,15 +64,14 @@
       json = await response.json();
     } catch {
       throw new Error(
-        "API không trả về JSON hợp lệ (HTTP " +
-        response.status + ")."
+        "API không trả về JSON hợp lệ (HTTP " + response.status + ").",
       );
     }
 
     if (!response.ok || json.status !== "success") {
+      if (response.status === 401) clearSession();
       throw new Error(
-        json.message ||
-        "Yêu cầu thất bại (HTTP " + response.status + ")."
+        json.message || "Yêu cầu thất bại (HTTP " + response.status + ").",
       );
     }
 
@@ -87,9 +84,7 @@
 
   async function registerUser(input) {
     const data = await apiRequest("auth/register.php", "POST", {
-      fullName: String(
-        input?.fullName || input?.name || ""
-      ).trim(),
+      fullName: String(input?.fullName || input?.name || "").trim(),
 
       email: String(input?.email || "")
         .trim()
@@ -97,7 +92,7 @@
 
       password: String(input?.password || ""),
       phone: String(input?.phone || "").trim(),
-      birthday: String(input?.birthday || "")
+      birthday: String(input?.birthday || ""),
     });
 
     if (!data.user) {
@@ -119,7 +114,7 @@
         .trim()
         .toLowerCase(),
 
-      password: String(password || "")
+      password: String(password || ""),
     });
 
     if (!data.user) {
@@ -145,10 +140,7 @@
 
       return setSession(data.user);
     } catch (err) {
-      if (
-        /đăng nhập lại|phiên đăng nhập|không còn hợp lệ/i
-          .test(err.message)
-      ) {
+      if (/đăng nhập lại|phiên đăng nhập|không còn hợp lệ/i.test(err.message)) {
         clearSession();
       }
 
@@ -161,16 +153,12 @@
   // ========================
 
   async function updateProfile(input) {
-    const data = await apiRequest(
-      "account/update-profile.php",
-      "POST",
-      {
-        fullName: String(input?.fullName || "").trim(),
-        displayName: String(input?.displayName || "").trim(),
-        birthday: String(input?.birthday || ""),
-        phone: String(input?.phone || "").trim()
-      }
-    );
+    const data = await apiRequest("account/update-profile.php", "POST", {
+      fullName: String(input?.fullName || "").trim(),
+      displayName: String(input?.displayName || "").trim(),
+      birthday: String(input?.birthday || ""),
+      phone: String(input?.phone || "").trim(),
+    });
 
     if (!data.user) {
       throw new Error("API cập nhật thiếu dữ liệu user.");
@@ -184,14 +172,10 @@
   // ========================
 
   async function changePassword(current, next) {
-    await apiRequest(
-      "account/change-password.php",
-      "POST",
-      {
-        currentPassword: String(current || ""),
-        newPassword: String(next || "")
-      }
-    );
+    await apiRequest("account/change-password.php", "POST", {
+      currentPassword: String(current || ""),
+      newPassword: String(next || ""),
+    });
 
     return true;
   }
@@ -201,20 +185,14 @@
   // ========================
 
   async function deleteCurrentAccount(password) {
-    await apiRequest(
-      "account/delete-account.php",
-      "POST",
-      {
-        password: String(password || "")
-      }
-    );
+    await apiRequest("account/delete-account.php", "POST", {
+      password: String(password || ""),
+    });
 
     const user = getCurrentUser();
 
     if (user) {
-      localStorage.removeItem(
-        "threek_favorites_user_" + user.id
-      );
+      localStorage.removeItem("threek_favorites_user_" + user.id);
     }
 
     clearSession();
@@ -226,11 +204,8 @@
   // ========================
 
   async function logout() {
-    try {
-      await apiRequest("account/logout.php", "POST", {});
-    } finally {
-      clearSession();
-    }
+    await apiRequest("account/logout.php", "POST", {});
+    clearSession();
   }
 
   // ========================
@@ -239,13 +214,13 @@
 
   function startDemoRecovery() {
     throw new Error(
-      "Quên mật khẩu qua email chưa được triển khai trên máy chủ."
+      "Quên mật khẩu qua email chưa được triển khai trên máy chủ.",
     );
   }
 
   async function finishDemoRecovery() {
     throw new Error(
-      "Đặt lại mật khẩu qua email chưa được triển khai trên máy chủ."
+      "Đặt lại mật khẩu qua email chưa được triển khai trên máy chủ.",
     );
   }
 
@@ -265,7 +240,8 @@
     deleteCurrentAccount,
     logout,
     startDemoRecovery,
-    finishDemoRecovery
+    finishDemoRecovery,
   });
 
+  window.authReady = loadProfile().catch(() => null);
 })();

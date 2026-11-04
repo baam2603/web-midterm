@@ -1,0 +1,101 @@
+# Customer + Admin: cài đặt và nghiệm thu
+
+## Nâng cấp database đang có
+
+Sao lưu DB trong phpMyAdmin trước. Giữ database từ SQL_3K.sql của nhóm;
+import theo thứ tự `database/admin_migration.sql`, rồi `database/customer_migration.sql`.
+Nếu đã chạy migration admin, chỉ cần import migration customer. Các migration chạy lặp lại được trên MariaDB 10.4+.
+Không import schema.sql hoặc seed.sql đè lên DB đang dùng.
+
+DB mới: tạo database utf8mb4, import schema.sql → seed.sql → admin_migration.sql → customer_migration.sql.
+PHP 8.1+ (khuyến nghị 8.3), PDO MySQL, mbstring, cURL; cấu hình DB trong biến môi trường như docs/ADMIN_SETUP.md.
+Không mở HTML bằng file:// và không dùng server tĩnh Python.
+
+## Luồng đã kết nối SQL
+
+- Đăng ký/đăng nhập bằng phiên PHP; hồ sơ, đổi mật khẩu, đăng xuất và thu hồi phiên khi đặt lại mật khẩu.
+- Danh sách khách sạn chỉ lấy dữ liệu đang bán, giá và sức chứa từ MySQL.
+  Nút Tìm kiếm kiểm tra tồn theo từng đêm; lọc tên/loại/tiện nghi và sắp xếp giữ bố cục hiện có.
+- Chi tiết và checkout dùng được với khách sạn/phòng mới do admin thêm, không phụ thuộc mã phòng demo.
+- Tiền phòng, coupon, thuế và tồn tính lại trên server. Mã request chống tạo đơn trùng khi thử lại.
+  Nếu giá thay đổi so với báo giá đã xem, khách phải xác nhận báo giá mới.
+- Thông tin khách nhận phòng, email, điện thoại, ghi chú, giá và điều kiện hủy được lưu theo đơn.
+- Thành công/chi tiết/lịch sử/tra cứu chỉ đọc đơn thuộc phiên đăng nhập, tải lại trang vẫn giữ dữ liệu.
+- Yêu thích, thông báo và trạng thái đã đọc lưu trong DB theo tài khoản.
+- Đánh giá chỉ từ đơn đã hoàn tất, duyệt ở admin; hỗ trợ và phản hồi đồng bộ SQL.
+- Thanh toán tại khách sạn hoạt động mà không cần merchant VNPay hoặc dịch vụ email.
+- Website hiện yêu cầu đăng nhập để đặt/tra cứu; không cấp quyền bằng mã đơn + thông tin đoán được.
+
+## VNPay: chưa bật giao dịch thật nếu chưa có merchant
+
+`ONLINE_PAYMENTS_ENABLED=false` là mặc định. Cần đăng ký merchant VNPay và có website HTTPS công khai.
+Thử trên sandbox trước, sau đó nhận cấu hình production từ VNPay. Không đưa khóa vào Git/chat hoặc JavaScript.
+Cấu hình ở môi trường máy chủ hoặc Apache ngoài web root:
+
+| Biến | Ý nghĩa |
+| --- | --- |
+| APP_BASE_URL | URL HTTPS gốc của ứng dụng, bao gồm thư mục con nếu có, không có dấu / cuối |
+| VNPAY_TMN_CODE | Mã merchant do VNPay cấp |
+| VNPAY_HASH_SECRET | Khóa HMAC thực trên server; không dùng placeholder của proxy HTTPS để ký |
+| VNPAY_GATEWAY_URL | Sandbox: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html ; production theo merchant: https://pay.vnpay.vn/vpcpay.html |
+| ONLINE_PAYMENTS_ENABLED | Chỉ đặt true sau khi cấu hình và kiểm thử merchant |
+
+Đăng ký Return URL `APP_BASE_URL/api/payments/return.php`
+và IPN URL `APP_BASE_URL/api/payments/ipn.php` với merchant VNPay.
+IPN phải truy cập được từ Internet; localhost không nhận được IPN của VNPay.
+Phiên thanh toán giữ phòng tối đa 15 phút. Server tạo chữ ký SHA-512 theo tham số VNPay 2.1.0.
+IPN kiểm tra chữ ký, merchant, số tiền và mã đơn; xử lý lặp an toàn.
+Browser return chỉ điều hướng, không được đánh dấu đã thanh toán.
+Giao dịch trễ sau khi phòng đã được bán lại chuyển sang `paid_requires_review`, không tự xác nhận vượt tồn.
+Đơn chờ quá hạn được loại khỏi tính tồn; thao tác mở lại VNPay sẽ báo hết hạn.
+Thanh toán thất bại hủy đơn chờ và giải phóng phòng.
+Khách hủy đơn đã trả tiền hợp lệ sẽ tạo yêu cầu hoàn tiền; admin thực hiện hoàn tiền trên cổng merchant,
+sau đó ghi mã tham chiếu vào tab Thanh toán để đối soát. Ứng dụng chưa gọi API hoàn tiền tự động.
+Dữ liệu kiểm thử có chữ ký không thay thế nghiệm thu một giao dịch sandbox/production thật với VNPay.
+
+Tham khảo chính thức: https://sandbox.vnpayment.vn/apis/docs/thanh-toan-pay/pay.html
+Mạng cloud hiện chặn truy cập tài liệu này; cần đối chiếu cấu hình merchant/callback với VNPay khi kích hoạt.
+
+## Resend: email thật và khôi phục mật khẩu
+
+Cần tài khoản Resend, domain gửi đã xác minh DNS, `RESEND_API_KEY` và `MAIL_FROM` thuộc domain đó.
+`APP_BASE_URL` phải là URL HTTPS thật để tạo liên kết khôi phục. Không dùng giá trị example.invalid của test.
+Resend dùng HTTPS api.resend.com với TLS verification. Trong cloud có thể dùng binding khóa qua proxy HTTPS;
+trên máy chủ riêng, cấu hình khóa trong biến môi trường. PHP nhận CA trust qua CURL_CA_BUNDLE nếu cần.
+
+Email được ghi vào bảng mail_outbox rồi gửi bằng worker CLI (không có endpoint HTTP để gửi hàng loạt):
+
+```sh
+php scripts/mail-worker.php
+```
+
+Chạy worker mỗi phút bằng cron/Task Scheduler với đúng các biến môi trường và cùng database.
+Worker gửi tối đa 20 email mỗi lần, thử lại tối đa 5 lần, cách nhau ít nhất 1 phút,
+và dùng Idempotency-Key của Resend để tránh gửi trùng khi mạng lỗi.
+Kiểm tra status/attempts/last_error trong mail_outbox; nội dung email được xóa sau khi gửi thành công.
+Không bật worker trên DB kiểm thử chứa email giả.
+
+Khôi phục mật khẩu gửi liên kết qua email, hiệu lực 30 phút, dùng một lần; bảng password_resets chỉ lưu hash token.
+Liên kết nằm tạm trong hàng đợi email để worker gửi; nội dung hàng đợi được xóa sau khi gửi thành công.
+Tối đa 3 yêu cầu trong 15 phút/tài khoản; phản hồi không tiết lộ email có tồn tại.
+Thay mật khẩu làm mất hiệu lực các phiên cũ; liên kết khôi phục không trả token qua API công khai.
+Không có chức năng hiển thị OTP công khai như bản demo cũ.
+
+## Kiểm thử đã bổ sung
+
+Chạy trên container/DB kiểm thử riêng, không chạy fixture trên DB của nhóm:
+
+```sh
+sh scripts/start-test-environment.sh
+python3 tests/customer_integration.py
+python3 tests/customer_browser.py
+python3 tests/admin_integration.py
+python3 tests/admin_browser.py
+python3 tests/admin_media.py
+```
+
+Customer integration dùng VNPAY_TMN_CODE=TESTONLY và khóa giả chỉ kiểm thử,
+APP_BASE_URL=https://example.invalid, ONLINE_PAYMENTS_ENABLED=true, Resend key giả để kiểm tra hàng đợi.
+Không có giao dịch hoặc email thật được thực hiện trong các bài test.
+Có thể chạy cùng bộ kiểm tra bằng `npm run test:prepare` rồi `npm test` trong môi trường Linux có Docker, Python 3, Playwright và Chromium.
+Các test admin/demo cũ dùng localStorage không phải bộ nghiệm thu customer hiện tại.

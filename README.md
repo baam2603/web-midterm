@@ -1,3 +1,14 @@
+# Bản tích hợp Admin và Customer
+
+Xem [hướng dẫn customer, VNPay và Resend](docs/CUSTOMER_SETUP.md).
+DB hiện có: sao lưu, giữ dữ liệu và import thêm `database/customer_migration.sql` sau migration admin.
+Thanh toán VNPay/email thật cần tài khoản nhà cung cấp và HTTPS; chưa được bật bằng khóa thử nghiệm.
+
+# Chạy bản admin/API hiện tại
+
+Repository hiện dùng **PHP + MariaDB**, không chỉ HTML tĩnh. Xem [hướng dẫn admin](docs/ADMIN_SETUP.md)
+để import schema/migration, cấu hình DB, chạy máy chủ và kiểm thử. Các mô tả MVP bên dưới là lịch sử bản demo.
+
 # THREEK.COM — bản sửa logic MVP UI
 
 ## Chạy website

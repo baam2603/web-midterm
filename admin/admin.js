@@ -5,7 +5,18 @@
     tabs = document.getElementById("tk-admin-tabs"),
     content = document.getElementById("tk-admin-content"),
     kpis = document.getElementById("tk-kpis");
-  const esc = ThreeKData.esc,
+  const esc = (value) =>
+      String(value ?? "").replace(
+        /[&<>"']/g,
+        (c) =>
+          ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          })[c],
+      ),
     money = (n) => Number(n || 0).toLocaleString("vi-VN") + "₫",
     date = (s) =>
       String(s || "")
@@ -26,6 +37,7 @@
     ["rooms", "Phòng & giá"],
     ["calendar", "Lịch trống"],
     ["bookings", "Đặt phòng"],
+    ["payments", "Thanh toán"],
     ["reviews", "Đánh giá"],
     ["support", "Hỗ trợ"],
     ["audit", "Nhật ký"],
@@ -424,19 +436,10 @@
   }
 
   // Removed the obsolete tk-enter-admin demo click handler entirely.
-  const hotels = () =>
-    Object.entries(CITY_DATA).flatMap(([city, c]) =>
-      (c.hotels || []).map((h) => ({
-        ...h,
-        city,
-        roomList: HOTELS[city]?.[h.id]?.rooms || [],
-      })),
-    );
   const statusTag = (v) =>
     `<span class="tk-pill ${["cancelled", "rejected"].includes(v) ? "bad" : ["pending", "open"].includes(v) ? "warn" : ""}">${esc(labels[v] || v || "—")}</span>`;
-  const hotelName = (city, id) => HOTELS[city]?.[id]?.name || id;
   function table(head, body) {
-    return `<div class="tk-surface tk-tablewrap"><table class="tk-table"><thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${body || `<tr><td colspan="${head.length}" class="tk-empty">Chưa có dữ liệu trong trình duyệt này.</td></tr>`}</tbody></table></div>`;
+    return `<div class="tk-surface tk-tablewrap"><table class="tk-table"><thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${body || `<tr><td colspan="${head.length}" class="tk-empty">Chưa có dữ liệu phù hợp.</td></tr>`}</tbody></table></div>`;
   }
   function feedback(message, error = false) {
     let el = document.getElementById("tk-admin-feedback");
@@ -615,6 +618,7 @@
       </td>
       
 <td>
+  <button type="button" class="tk-outline" data-hotel-edit-db="${Number(h.id)}">Chỉnh sửa</button>
   <button
     type="button"
     class="${Number(h.is_active) === 1 ? "tk-danger" : "tk-primary"}"
@@ -680,7 +684,7 @@
           <select name="type" required>
             <option value="hotel">Khách sạn</option>
             <option value="resort">Resort</option>
-            <option value="homestay">Homestay</option>
+            <option value="homestay">Homestay</option><option value="villa">Villa</option>
           </select>
         </label>
       </div>
@@ -1093,75 +1097,6 @@
     `;
   }
 
-  function calendarTab() {
-    return `<div class="tk-surface"><h2>Kiểm tra tồn phòng theo ngày</h2><p class="tk-muted">Đã trừ số phòng của đơn đang chờ, đã xác nhận hoặc đang lưu trú có ngày giao nhau. Đây không phải hệ thống khóa phòng đồng thời.</p><form id="tk-calendar-form" class="tk-form"><div class="tk-flexcols"><label>Nhận phòng<input name="checkin" type="date" required></label><label>Trả phòng<input name="checkout" type="date" required></label></div><button class="tk-outline">Xem phòng còn trống</button></form><div id="tk-calendar-results"></div></div>`;
-  }
-  function bookingTab() {
-    const all = BookingStore.all()
-      .slice()
-      .sort((a, b) =>
-        String(b.createdAt || "").localeCompare(String(a.createdAt || "")),
-      );
-    return `<div class="tk-surface"><h2>Danh sách và trạng thái đơn</h2><p class="tk-muted">Thao tác xác nhận, nhận phòng, hoàn tất và hủy đơn chỉ là thay đổi trạng thái trong trình duyệt. Không thu hay hoàn tiền thật.</p><label class="tk-form">Tìm theo mã đơn, khách hoặc tên khách sạn<input class="tk-filter" id="tk-booking-filter" placeholder="Tìm đơn..."></label></div><div id="tk-booking-results">${bookingRows(all)}</div>`;
-  }
-  function bookingRows(all) {
-    const next = {
-      pending: [
-        ["confirmed", "Xác nhận"],
-        ["cancelled", "Hủy"],
-      ],
-      confirmed: [
-        ["checked_in", "Nhận phòng"],
-        ["completed", "Hoàn tất"],
-        ["cancelled", "Hủy"],
-      ],
-      checked_in: [["completed", "Hoàn tất"]],
-      completed: [],
-      cancelled: [],
-    };
-    return table(
-      [
-        "Mã đơn / Khách",
-        "Khách sạn / Phòng",
-        "Thời gian",
-        "Trạng thái",
-        "Tổng tiền",
-        "Thao tác",
-      ],
-      all
-        .map((b) => {
-          const st = BookingStore.status(b);
-          return `<tr><td><strong>${esc(b.code)}</strong><span class="tk-mini">${esc(b.guestName || "")}<br>${esc(b.email || "")}</span></td><td>${esc(b.hotelName)}<span class="tk-mini">${esc(b.roomName)} · ${Number(b.rooms) || 1} phòng</span></td><td>${date(b.checkin)} – ${date(b.checkout)}</td><td>${statusTag(st)}${b.refundStatus ? `<span class="tk-mini">Hoàn tiền: ${esc(b.refundStatus)}</span>` : ""}</td><td>${money(b.total)}</td><td><div class="tk-actions">${(next[st] || []).map(([value, label]) => `<button type="button" class="${value === "cancelled" ? "tk-danger" : "tk-outline"}" data-order="${esc(b.code)}" data-next="${value}">${label}</button>`).join("")}${b.changeRequest?.status === "pending" ? `<div class="tk-mini">Yêu cầu đổi: ${date(b.changeRequest.checkin)} – ${date(b.changeRequest.checkout)}</div><button class="tk-outline" data-change="${esc(b.code)}" data-decision="approved">Duyệt đổi ngày</button><button class="tk-danger" data-change="${esc(b.code)}" data-decision="rejected">Từ chối</button>` : ""}${st === "cancelled" && b.refundStatus === "requested" ? `<button class="tk-primary" data-refund="${esc(b.code)}">Đã hoàn tiền demo</button>` : ""}</div></td></tr>`;
-        })
-        .join(""),
-    );
-  }
-  function reviewsTab() {
-    return `<h2>Kiểm tra đánh giá</h2><p class="tk-muted">Chỉ tài khoản có đơn đã lưu trú mới được gửi đánh giá. Đánh giá hiển thị công khai ngay khi gửi; admin chỉ kiểm tra và xóa nội dung vi phạm.</p>${table(
-      ["Người gửi", "Khách sạn", "Đánh giá", "Thao tác"],
-      ThreeKData.reviewsForAdmin()
-        .map(
-          (r) =>
-            `<tr><td>${esc(r.author)}<span class="tk-mini">${date(r.createdAt)}</span></td><td>${esc(hotelName(r.city, r.hotelId))}</td><td><span class="tk-rating">${"★".repeat(r.score)}</span><p>${esc(r.comment)}</p></td><td><div class="tk-actions"><button class="tk-danger" data-delete-review="${esc(r.id)}">Xóa</button></div></td></tr>`,
-        )
-        .join(""),
-    )}`;
-  }
-  function supportTab() {
-    const all = ThreeKData.read().tickets.slice().reverse();
-    return `<h2>Yêu cầu hỗ trợ</h2>${all.length ? all.map((t) => `<article class="tk-surface"><div class="tk-row"><h3>${esc(t.topic)} · ${esc(t.name)}</h3>${statusTag(t.status)}</div><span class="tk-mini">${esc(t.email)} · ${date(t.createdAt)} · ${esc(t.id)}</span><p>${esc(t.message)}</p>${t.code ? `<p>Mã đơn được cung cấp: ${esc(t.code)}</p>` : ""}${t.reply ? `<p><strong>Đã phản hồi:</strong> ${esc(t.reply)}</p>` : `<form class="tk-form" data-ticket="${esc(t.id)}"><label>Phản hồi hỗ trợ demo<textarea name="reply" minlength="5" required placeholder="Nội dung trả lời (không gửi email thật)"></textarea></label><button class="tk-primary">Đánh dấu đã trả lời</button></form>`}</article>`).join("") : '<div class="tk-surface tk-empty">Chưa có yêu cầu hỗ trợ demo nào.</div>'}`;
-  }
-  function auditTab() {
-    return `<h2>Nhật ký thao tác trong trình duyệt</h2>${table(
-      ["Thời gian", "Hành động", "Đối tượng"],
-      ThreeKData.history()
-        .map(
-          (x) =>
-            `<tr><td>${new Date(x.at).toLocaleString("vi-VN")}</td><td>${esc(x.action)}</td><td>${esc(x.ref)}</td></tr>`,
-        )
-        .join(""),
-    )}<p class="tk-muted">Nhật ký demo là dữ liệu có thể bị chỉnh sửa trong trình duyệt, không phải hệ thống audit tin cậy.</p>`;
-  }
   function render() {
     if (!active()) return;
     const st = stats();
@@ -1172,69 +1107,36 @@
       )
       .join("");
     nav();
+    if (window.AdminOperations?.has(tab)) {
+      window.AdminOperations.mount(content, tab, async () => {
+        await loadDashboard();
+        if (active())
+          kpis.innerHTML = stats()
+            .map(
+              (x) =>
+                `<div class="tk-stat"><small>${x.title}</small><strong>${x.value}</strong></div>`,
+            )
+            .join("");
+      });
+      return;
+    }
+    window.AdminOperations?.cancel();
+    delete content.dataset.operation;
     content.innerHTML = (
       {
         overview,
         hotels: hotelTab,
         rooms: roomTab,
-        calendar: calendarTab,
-        bookings: bookingTab,
-        reviews: reviewsTab,
-        support: supportTab,
-        audit: auditTab,
       }[tab] || overview
     )();
-    // Danh sách khách sạn sử dụng MySQL; form demo cũ không còn trong tab này.
-    if (tab === "rooms") fillRoomSelect();
-    if (tab === "calendar") {
-      const d = new Date(),
-        p = (x) =>
-          [
-            x.getFullYear(),
-            String(x.getMonth() + 1).padStart(2, "0"),
-            String(x.getDate()).padStart(2, "0"),
-          ].join("-");
-      content.querySelector('[name="checkin"]').value = p(d);
-      d.setDate(d.getDate() + 1);
-      content.querySelector('[name="checkout"]').value = p(d);
-    }
+    window.AdminCatalog?.mount(content, tab, adminHotels || [], async () => {
+      await Promise.all([loadAdminHotels(), loadDashboard()]);
+      if (active()) {
+        render();
+        feedback("Đã cập nhật khách sạn trong MySQL.");
+      }
+    });
   }
-  function fillHotel() {
-    const f = content.querySelector("#tk-edit-hotel");
-    if (!f || !hotels().length) return;
-    const [city, id] = f.elements.key.value.split("/"),
-      h = hotels().find((x) => x.city === city && x.id === id);
-    if (!h) return;
-    f.elements.name.value = h.name;
-    f.elements.hidden.checked = !!h.hidden;
-  }
-  function fillRoomSelect() {
-    const f = content.querySelector("#tk-edit-room");
-    if (!f || !hotels().length) return;
-    const [city, id] = f.elements.hotel.value.split("/");
-    const roomList = HOTELS[city]?.[id]?.rooms || [];
-    f.elements.room.innerHTML = roomList
-      .map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`)
-      .join("");
-    fillRoom();
-  }
-  function fillRoom() {
-    const f = content.querySelector("#tk-edit-room");
-    if (!f) return;
-    const [city, id] = f.elements.hotel.value.split("/"),
-      room = HOTELS[city]?.[id]?.rooms.find(
-        (r) => r.id === f.elements.room.value,
-      );
-    if (!room) return;
-    f.elements.price.value = room.price;
-    f.elements.stock.value = room.left ?? 5;
-    f.elements.closed.checked = !!room.closed;
-  }
-  function adjustCatalog() {
-    ThreeKData.applyCatalog();
-    render();
-  }
-
   tabs.addEventListener("click", async (e) => {
     const el = e.target.closest("[data-tab]");
     if (!el || !active()) return;
@@ -1251,8 +1153,10 @@
     if (tab === "hotels" || tab === "rooms") {
       content.textContent =
         tab === "rooms" ? "Đang tải loại phòng..." : "Đang tải khách sạn...";
-      await loadAdminHotels();
-      if (active() && tab === "rooms") await loadAdminRooms();
+      await Promise.all([
+        loadAdminHotels(),
+        ...(tab === "rooms" ? [loadAdminRooms()] : []),
+      ]);
     }
 
     if (active()) {
@@ -1284,86 +1188,6 @@
     }
   });
 
-  content.addEventListener("change", (e) => {
-    if (e.target.id === "tk-hotel-picker") fillHotel();
-    if (e.target.id === "tk-room-hotel") fillRoomSelect();
-    if (e.target.id === "tk-room-picker") fillRoom();
-  });
-  content.addEventListener("submit", (e) => {
-    if (!active()) return;
-    const f = e.target;
-    if (
-      !f.matches(
-        "#tk-create-hotel,#tk-edit-hotel,#tk-edit-room,#tk-calendar-form,[data-ticket]",
-      )
-    )
-      return;
-    e.preventDefault();
-    try {
-      if (f.id === "tk-create-hotel") {
-        const input = Object.fromEntries(new FormData(f));
-        ThreeKData.createHotel(input);
-        adjustCatalog();
-        feedback("Đã thêm khách sạn demo.");
-      } else if (f.id === "tk-edit-hotel") {
-        const [city, id] = f.elements.key.value.split("/");
-        ThreeKData.setHotel(city, id, {
-          name: f.elements.name.value,
-          hidden: f.elements.hidden.checked,
-        });
-        adjustCatalog();
-        feedback("Đã cập nhật khách sạn.");
-      } else if (f.id === "tk-edit-room") {
-        const [city, id] = f.elements.hotel.value.split("/");
-        ThreeKData.setRoom(city, id, f.elements.room.value, {
-          price: f.elements.price.value,
-          stock: Number(f.elements.stock.value),
-          closed: f.elements.closed.checked,
-        });
-        adjustCatalog();
-        feedback("Đã lưu giá và tồn phòng.");
-      } else if (f.id === "tk-calendar-form") {
-        const from = f.elements.checkin.value,
-          to = f.elements.checkout.value;
-        if (from >= to) throw Error("Ngày trả phòng phải sau ngày nhận phòng.");
-        const rows = hotels().flatMap((h) =>
-          h.roomList.map(
-            (r) =>
-              `<tr><td>${esc(h.name)}</td><td>${esc(r.name)}</td><td>${Number(r.left ?? 5)}</td><td>${r.closed || h.hidden ? "Ngừng bán" : BookingStore.availability(h.city, h.id, r.id, from, to, r.left ?? 5)}</td></tr>`,
-          ),
-        );
-        document.getElementById("tk-calendar-results").innerHTML =
-          '<h3 style="margin-top:22px">Kết quả ' +
-          date(from) +
-          " – " +
-          date(to) +
-          "</h3>" +
-          table(
-            ["Khách sạn", "Loại phòng", "Tổng phòng", "Còn trống"],
-            rows.join(""),
-          );
-      } else if (f.dataset.ticket) {
-        ThreeKData.answerTicket(f.dataset.ticket, f.elements.reply.value);
-        render();
-        feedback("Đã lưu phản hồi hỗ trợ (demo).");
-      }
-    } catch (err) {
-      feedback(err.message, true);
-    }
-  });
-  content.addEventListener("input", (e) => {
-    if (e.target.id === "tk-booking-filter") {
-      const q = e.target.value.trim().toLowerCase(),
-        data = BookingStore.all().filter((b) =>
-          [b.code, b.guestName, b.hotelName, b.email]
-            .join(" ")
-            .toLowerCase()
-            .includes(q),
-        );
-      document.getElementById("tk-booking-results").innerHTML =
-        bookingRows(data);
-    }
-  });
   content.addEventListener("click", async (e) => {
     if (!active()) return;
     const b = e.target.closest("button");
@@ -1413,57 +1237,14 @@
 
         return;
       }
-
-      if (b.dataset.change) {
-        const booking = BookingStore.find(b.dataset.change);
-        const inventory = HOTELS[booking.city]?.[booking.hotelId]?.rooms.find(
-          (r) => r.id === booking.roomId,
-        );
-        const stock = inventory?.closed ? 0 : (inventory?.left ?? 5);
-        BookingStore.adminChangeDecision(
-          b.dataset.change,
-          b.dataset.decision,
-          stock,
-        );
-        render();
-        feedback("Đã xử lý yêu cầu đổi ngày.");
-      } else if (b.dataset.order) {
-        const next = b.dataset.next;
-        if (
-          !confirm(
-            `Chuyển đơn ${b.dataset.order} sang "${labels[next]}" trong bản demo?`,
-          )
-        )
-          return;
-        BookingStore.adminSetStatus(b.dataset.order, next);
-        render();
-        feedback("Đã cập nhật trạng thái đơn.");
-      } else if (b.dataset.refund) {
-        if (
-          !confirm(
-            "Xác nhận cập nhật trạng thái hoàn tiền MÔ PHỎNG? Không có giao dịch thật.",
-          )
-        )
-          return;
-        BookingStore.adminRefund(b.dataset.refund);
-        render();
-        feedback("Đã ghi nhận hoàn tiền demo.");
-      } else if (b.dataset.deleteReview) {
-        if (!confirm("Xóa đánh giá này? Không thể hoàn tác.")) return;
-        ThreeKData.deleteReview(b.dataset.deleteReview);
-        render();
-        feedback("Đã xóa đánh giá.");
-      } else if (b.id === "tk-delete-hotel") {
-        const f = document.getElementById("tk-edit-hotel"),
-          [city, id] = f.elements.key.value.split("/");
-        if (!confirm("Xóa khách sạn mới tạo này khỏi dữ liệu demo?")) return;
-        ThreeKData.deleteHotel(city, id);
-        adjustCatalog();
-        feedback("Đã xóa khách sạn demo.");
-      }
     } catch (err) {
       feedback(err.message, true);
     }
+  });
+  window.addEventListener("hashchange", () => {
+    const requested = location.hash.slice(1) || "overview";
+    tab = ids.some(([id]) => id === requested) ? requested : "overview";
+    show();
   });
   window.addEventListener("storage", show);
 
@@ -1476,6 +1257,7 @@
 
   // OPENSTREETMAP — QUẢN LÝ ĐỊA ĐIỂM
   let osmSearchVersion = 0;
+  let osmSearchController = null;
 
   function clearOsmSelection(form) {
     form.elements.namedItem("google_place_id").value = "";
@@ -1513,6 +1295,7 @@
 
     if (e.target.id === "tk-maps-search") {
       osmSearchVersion++;
+      osmSearchController?.abort();
       clearOsmSelection(form);
     }
   });
@@ -1523,12 +1306,14 @@
     if (!form) return;
     if (e.target.id === "tk-maps-mode") {
       osmSearchVersion++;
+      osmSearchController?.abort();
       clearOsmSelection(form);
       return;
     }
     if (e.target.name !== "city") return;
 
     osmSearchVersion++;
+    osmSearchController?.abort();
     clearOsmSelection(form);
 
     const searchInput = form.querySelector("#tk-maps-search");
@@ -1563,6 +1348,8 @@
       return;
     }
 
+    osmSearchController?.abort();
+    osmSearchController = new AbortController();
     const version = ++osmSearchVersion;
     clearOsmSelection(form);
 
@@ -1584,6 +1371,7 @@
         method: "GET",
         credentials: "same-origin",
         cache: "no-store",
+        signal: osmSearchController.signal,
       });
 
       const data = await response.json().catch(() => null);
@@ -1727,7 +1515,7 @@
         results.textContent = "Không có địa điểm hợp lệ trong kết quả.";
       }
     } catch (error) {
-      if (version === osmSearchVersion) {
+      if (version === osmSearchVersion && error.name !== "AbortError") {
         console.error("OSM Search Error:", error);
 
         results.textContent = error.message || "Lỗi tìm kiếm bản đồ.";
@@ -1745,7 +1533,7 @@
   content.addEventListener("submit", async (e) => {
     const form = e.target;
 
-    if (form.id !== "tk-create-hotel-db") return;
+    if (form.getAttribute("id") !== "tk-create-hotel-db") return;
 
     e.preventDefault();
 
@@ -1853,7 +1641,7 @@
 
   content.addEventListener("submit", async (event) => {
     const form = event.target;
-    if (form.id !== "tk-create-room-db") return;
+    if (form.getAttribute("id") !== "tk-create-room-db") return;
     event.preventDefault();
     if (!active() || !form.reportValidity()) return;
 
@@ -1926,7 +1714,11 @@
 
   content.addEventListener("submit", async (e) => {
     const form = e.target;
-    if (!["tk-upload-hotel-image", "tk-upload-room-image"].includes(form.id))
+    if (
+      !["tk-upload-hotel-image", "tk-upload-room-image"].includes(
+        form.getAttribute("id"),
+      )
+    )
       return;
     e.preventDefault();
     if (!active() || !form.reportValidity()) return;
@@ -1948,6 +1740,7 @@
         throw Error(json?.message || `Lỗi tải ảnh HTTP ${response.status}`);
       const name = form.elements.namedItem("image");
       name.value = "";
+      form.dispatchEvent(new Event("admin:media-upload"));
       feedback(
         "Đã tải ảnh thành công lên MySQL. Ảnh đầu tiên được dùng làm ảnh bìa.",
       );
@@ -2009,7 +1802,7 @@
   });
   content.addEventListener("submit", async (e) => {
     const form = e.target;
-    if (form.id !== "tk-hotel-extras-form") return;
+    if (form.getAttribute("id") !== "tk-hotel-extras-form") return;
     e.preventDefault();
     if (!active() || !form.reportValidity()) return;
     const submit = form.querySelector('[type="submit"]');
@@ -2156,7 +1949,7 @@
 
   content.addEventListener("submit", async (event) => {
     const form = event.target;
-    if (form.id !== "tk-update-room-db") return;
+    if (form.getAttribute("id") !== "tk-update-room-db") return;
     event.preventDefault();
     if (!active() || !form.reportValidity()) return;
 

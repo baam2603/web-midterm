@@ -1,0 +1,8 @@
+{
+  "overrides": [
+    {
+      "files": "*.php",
+      "options": { "phpVersion": "8.1" }
+    }
+  ]
+}

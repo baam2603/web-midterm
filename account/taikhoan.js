@@ -1,8 +1,8 @@
 /* Account UI demo, using shared local-only service. */
-(function () {
+(async function () {
   "use strict";
   const $ = (id) => document.getElementById(id),
-    user = getCurrentUser();
+    user = await window.authReady;
   if (!user) {
     location.replace(
       "../auth/login.html?next=" +
@@ -28,7 +28,8 @@
     $("phone").value = profile.phone || "";
     $("email").value = profile.email || "";
   }
-  loadProfile().then(fillProfile).catch(err => error(err.message));
+  fillProfile(user);
+  document.querySelector('button[form="profile-form"]').disabled = false;
   /* Original local cache fallback */
   /* $("fullname").value = user.fullName || "";
   $("displayname").value = user.displayName || "";
@@ -39,13 +40,13 @@
     e.preventDefault();
     error("");
     try {
-      await updateProfile({
+      const updated = await updateProfile({
         fullName: $("fullname").value,
         displayName: $("displayname").value,
         birthday: $("birthday").value,
         phone: $("phone").value,
       });
-      fillProfile(updateProfile);
+      fillProfile(updated);
       if (typeof updateLoginState === "function") {
         updateLoginState();
       }
@@ -65,7 +66,11 @@
     if (!confirm("Bạn có chắc muốn xóa vĩnh viễn tài khoản?")) return;
     const password = prompt("Nhập mật khẩu để xác nhận xóa tài khoản:");
     if (password === null) return;
-    try { await deleteCurrentAccount(password); location.href = "../index1.html"; }
-    catch (err) { error(err.message); }
+    try {
+      await deleteCurrentAccount(password);
+      location.href = "../index1.html";
+    } catch (err) {
+      error(err.message);
+    }
   });
 })();

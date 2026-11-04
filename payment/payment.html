@@ -29,8 +29,8 @@
     <header id="site-header"></header>
 
     <div class="tk-alert" style="max-width: 950px; margin: 15px auto">
-      THANH TOÁN MÔ PHỎNG — Không nhập thẻ thật và không chuyển khoản tiền thật.
-      Không có giao dịch ngân hàng được thực hiện.
+      Thanh toán tại khách sạn hoặc qua cổng VNPay. Trạng thái thanh toán chỉ
+      được xác nhận từ hệ thống máy chủ.
     </div>
     <main class="booking-page" id="pay-root"></main>
 
@@ -43,11 +43,27 @@
     </script>
     <script src="../common/city-data.js"></script>
     <script src="../hotel/hotel-data.js"></script>
-    <script src="../common/booking-store.js"></script>
-    <script src="../common/domain-store.js"></script>
+    <script src="../hotel/hotel-detail-api.js"></script>
     <script>
-      ThreeKData.applyCatalog();
+      (async () => {
+        const root = document.getElementById("pay-root");
+        try {
+          const draft = JSON.parse(
+            sessionStorage.getItem("threek_checkout") || "null",
+          );
+          if (!draft)
+            throw Error(
+              "Phiên thanh toán đã hết hạn. Vui lòng chọn phòng lại.",
+            );
+          await loadProfile();
+          await HotelDetailAPI.sync(draft);
+          const script = document.createElement("script");
+          script.src = "payment.js";
+          document.body.append(script);
+        } catch (error) {
+          root.textContent = error.message;
+        }
+      })();
     </script>
-    <script src="payment.js"></script>
   </body>
 </html>

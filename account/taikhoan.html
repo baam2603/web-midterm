@@ -145,7 +145,12 @@
           </section>
 
           <!-- 3. Nút Lưu thay đổi: gần cuối, ngay trước khu Xóa tài khoản -->
-          <button type="submit" form="profile-form" class="auth-submit">
+          <button
+            type="submit"
+            form="profile-form"
+            class="auth-submit"
+            disabled
+          >
             Lưu thay đổi
           </button>
 
@@ -154,8 +159,9 @@
             <div>
               <h3>Xóa tài khoản</h3>
               <p>
-                Hành động này không thể hoàn tác. Toàn bộ dữ liệu đặt phòng và
-                thông tin cá nhân của bạn sẽ bị xóa vĩnh viễn.
+                Hành động này không thể hoàn tác. Tài khoản có đơn đặt phòng
+                liên quan chưa thể tự xóa. Vui lòng liên hệ hỗ trợ nếu cần xử lý
+                dữ liệu đã phát sinh.
               </p>
             </div>
             <button type="button" class="auth-logout" id="delete-account-btn">

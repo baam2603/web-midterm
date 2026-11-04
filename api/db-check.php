@@ -1,4 +1,3 @@
-
 <?php
 
 header("Content-Type: application/json; charset=utf-8");
@@ -14,7 +13,7 @@ try {
     echo json_encode([
         "status" => "success",
         "message" => "MySQL connected successfully",
-        "database" => $database
+        "database" => $database,
     ]);
 } catch (Throwable $e) {
     error_log($e->getMessage());
@@ -23,7 +22,6 @@ try {
 
     echo json_encode([
         "status" => "error",
-        "message" => "Database connection failed"
+        "message" => "Database connection failed",
     ]);
 }
-

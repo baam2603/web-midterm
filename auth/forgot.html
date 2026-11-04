@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Khôi phục mật khẩu demo | THREEK.COM</title>
+    <title>Khôi phục mật khẩu | THREEK.COM</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
       rel="stylesheet"
@@ -19,19 +19,18 @@
         <span class="tk-eyebrow">TÀI KHOẢN</span>
         <h1>Khôi phục mật khẩu</h1>
         <p class="tk-lead">
-          Quy trình demo không gửi email: mã thử nghiệm sẽ hiển thị ngay trên
-          màn hình và hết hạn sau 10 phút. Khi có backend, thay bằng email/OTP
-          bảo mật với rate limit.
+          Nhập email tài khoản để nhận liên kết đặt lại mật khẩu. Liên kết có
+          hiệu lực 30 phút và chỉ dùng một lần.
         </p>
         <div class="tk-surface">
           <form class="tk-form" id="tk-forgot-request">
             <label
-              >Email tài khoản demo<input
+              >Email tài khoản<input
                 name="email"
                 type="email"
                 required
                 autocomplete="email" /></label
-            ><button class="tk-primary">Tạo mã khôi phục demo</button>
+            ><button class="tk-primary">Gửi liên kết khôi phục</button>
           </form>
           <div id="tk-demo-otp" class="tk-alert" hidden role="status"></div>
           <form
