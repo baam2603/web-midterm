@@ -1,3 +1,8 @@
+# Chạy bản admin/API hiện tại
+
+Repository hiện dùng **PHP + MariaDB**, không chỉ HTML tĩnh. Xem [hướng dẫn admin](docs/ADMIN_SETUP.md)
+để import schema/migration, cấu hình DB, chạy máy chủ và kiểm thử. Các mô tả MVP bên dưới là lịch sử bản demo.
+
 # THREEK.COM — bản sửa logic MVP UI
 
 ## Chạy website

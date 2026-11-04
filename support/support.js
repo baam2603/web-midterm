@@ -1,40 +1,72 @@
-(function () {
+(() => {
   "use strict";
-  const u = ThreeKData.current(),
-    f = document.getElementById("tk-ticket-form"),
-    out = document.getElementById("tk-ticket-status"),
+  const form = document.getElementById("tk-ticket-form"),
+    status = document.getElementById("tk-ticket-status"),
     list = document.getElementById("tk-ticket-list");
-  if (u) {
-    f.elements.name.value = u.name || "";
-    f.elements.email.value = u.email || "";
+  const user = window.ThreeKData?.current();
+  if (user) {
+    form.elements.name.value = user.name || "";
+    form.elements.email.value = user.email || "";
   }
-  const esc = ThreeKData.esc;
-  function render() {
-    const t = ThreeKData.ticketsForUser();
-    list.innerHTML = u
-      ? t.length
-        ? t
+  const esc = (x) =>
+    String(x ?? "").replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
+  async function request(body) {
+    const r = await fetch("../api/support/tickets.php", {
+      credentials: "same-origin",
+      cache: "no-store",
+      ...(body
+        ? {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          }
+        : {}),
+    });
+    const j = await r.json();
+    if (!r.ok || j.status !== "success")
+      throw Error(j.message || "Không thể tải yêu cầu hỗ trợ.");
+    return j.data;
+  }
+  async function render() {
+    try {
+      const items = await request();
+      list.innerHTML = items.length
+        ? items
             .map(
-              (x) =>
-                `<article class="tk-rule"><div class="tk-row"><strong>${esc(x.topic)}</strong><span class="tk-pill ${x.status === "open" ? "warn" : ""}">${x.status === "open" ? "Đang chờ" : "Đã phản hồi"}</span></div><p>${esc(x.message)}</p>${x.reply ? `<p><strong>Phản hồi demo:</strong> ${esc(x.reply)}</p>` : ""}<small class="tk-muted">Mã yêu cầu ${esc(x.id)}</small></article>`,
+              (t) =>
+                `<article class="tk-rule"><strong>#${Number(t.id)} · ${esc(t.topic)}</strong><p>${esc(t.message)}</p><small>${esc({ open: "Đang chờ", answered: "Đã phản hồi", closed: "Đã đóng" }[t.status])}</small>${t.reply ? `<p><strong>Phản hồi:</strong> ${esc(t.reply)}</p>` : ""}</article>`,
             )
             .join("")
-        : '<p class="tk-muted">Chưa có yêu cầu nào trên tài khoản này.</p>'
-      : '<p class="tk-muted">Đăng nhập để theo dõi phản hồi yêu cầu của bạn; yêu cầu khách vãng lai vẫn được lưu demo nhưng không có trang theo dõi công khai.</p>';
+        : "<p>Chưa có yêu cầu nào.</p>";
+    } catch (e) {
+      list.textContent = e.message;
+    }
   }
-  f.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const button = form.querySelector('button[type="submit"],button');
+    button.disabled = true;
     try {
-      const ticket = ThreeKData.createTicket(
-        Object.fromEntries(new FormData(f)),
-      );
-      out.dataset.error = "false";
-      out.textContent = "Đã ghi nhận yêu cầu demo " + ticket.id + ".";
-      f.elements.message.value = "";
-      render();
-    } catch (err) {
-      out.dataset.error = "true";
-      out.textContent = err.message;
+      const t = await request(Object.fromEntries(new FormData(form)));
+      status.textContent = `Đã gửi yêu cầu #${t.id}. Phản hồi sẽ xuất hiện bên dưới.`;
+      status.dataset.error = "false";
+      form.elements.message.value = "";
+      await render();
+    } catch (e) {
+      status.textContent = e.message;
+      status.dataset.error = "true";
+    } finally {
+      button.disabled = false;
     }
   });
   render();

@@ -1,65 +1,75 @@
-/* Customer hotel review panel: permitted after a completed, owned stay. */
-(function () {
+/* Approved reviews and eligible stays come from the server. */
+(() => {
   "use strict";
+  const section = document.getElementById("reviews");
+  if (!section) return;
   const params = new URLSearchParams(location.search),
     city = params.get("city") || "dalat",
-    id = params.get("id");
-  const section = document.getElementById("reviews");
-  if (!section || !window.ThreeKData) return;
-  const esc = ThreeKData.esc,
-    user = ThreeKData.current();
-  const orders = user
-    ? BookingStore.visible().filter(
-        (b) =>
-          b.city === city &&
-          b.hotelId === id &&
-          BookingStore.status(b) === "completed",
-      )
-    : [];
-  const reviewed = new Set(
-    ThreeKData.reviewsForAdmin()
-      .filter((r) => r.userId === user?.id)
-      .map((r) => r.code),
-  );
-  function render() {
-    const reviews = ThreeKData.approvedReviews(city, id);
-    section.innerHTML = `<h2>Đánh giá của khách đã lưu trú</h2><p class="tk-muted">Nhận xét từ khách đã hoàn tất đặt phòng trên bản demo. Đánh giá mới cần được quản trị viên duyệt trước khi hiển thị.</p>
-  ${reviews.length ? `<div class="tk-review-grid">${reviews.map((r) => `<article class="tk-surface"><div class="tk-row"><strong>${esc(r.author)}</strong><span class="tk-rating">${"★".repeat(r.score)}${"☆".repeat(5 - r.score)}</span></div><p>${esc(r.comment)}</p><small>${new Date(r.createdAt).toLocaleDateString("vi-VN")} · Khách đã lưu trú (demo)</small></article>`).join("")}</div>` : '<div class="tk-surface tk-muted">Chưa có đánh giá được duyệt trong dữ liệu demo.</div>'}
-  ${
-    user && orders.some((b) => !reviewed.has(b.code))
-      ? `<form id="tk-review-form" class="tk-surface tk-form"><h3>Viết đánh giá sau lưu trú</h3><label>Đơn đặt phòng<select name="code" required>${orders
-          .filter((b) => !reviewed.has(b.code))
-          .map(
-            (b) =>
-              `<option value="${esc(b.code)}">${esc(b.code)} · ${esc(b.roomName)}</option>`,
-          )
-          .join(
-            "",
-          )}</select></label><label>Điểm đánh giá<select name="score" required>${[5, 4, 3, 2, 1].map((n) => `<option value="${n}">${n} / 5 sao</option>`).join("")}</select></label><label>Nội dung<textarea name="comment" minlength="15" maxlength="1500" required placeholder="Chia sẻ trải nghiệm của bạn (ít nhất 15 ký tự)"></textarea></label><p role="status" id="tk-review-feedback"></p><button type="submit" class="tk-primary">Gửi đánh giá để duyệt</button></form>`
-      : user
-        ? '<p class="tk-muted">Bạn có thể đánh giá sau khi đã hoàn tất lưu trú tại đây. Mỗi đơn chỉ được đánh giá một lần.</p>'
-        : '<p class="tk-muted"><a href="../auth/login.html">Đăng nhập</a> để đánh giá sau khi hoàn thành kỳ lưu trú.</p>'
-  }`;
-    const form = document.getElementById("tk-review-form");
-    if (form)
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const data = new FormData(form);
-        try {
-          ThreeKData.submitReview({
-            city,
-            hotelId: id,
-            code: data.get("code"),
-            score: data.get("score"),
-            comment: data.get("comment"),
-          });
-          section.innerHTML =
-            '<h2>Đánh giá của khách</h2><p role="status">Đã gửi đánh giá demo. Quản trị viên có thể duyệt trong trang Admin.</p>';
-        } catch (err) {
-          document.getElementById("tk-review-feedback").textContent =
-            err.message;
-        }
-      });
+    hotelId = params.get("id");
+  if (!hotelId) return;
+  const esc = (x) =>
+    String(x ?? "").replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
+  async function request(path, body) {
+    const r = await fetch(path, {
+      credentials: "same-origin",
+      cache: "no-store",
+      ...(body
+        ? {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          }
+        : {}),
+    });
+    const j = await r.json();
+    if (!r.ok || j.status !== "success")
+      throw Error(j.message || "Không thể tải đánh giá.");
+    return j.data;
+  }
+  async function render() {
+    section.textContent = "Đang tải đánh giá...";
+    const query = new URLSearchParams({ city, hotelId });
+    try {
+      const [data, eligibility] = await Promise.all([
+        request("../api/reviews/index.php?" + query),
+        request("../api/reviews/eligibility.php?" + query).catch(() => ({
+          bookings: [],
+        })),
+      ]);
+      section.innerHTML = `<h2>Đánh giá của khách đã lưu trú</h2>${data.reviews.length ? data.reviews.map((r) => `<article class="tk-surface"><strong>${esc(r.author)} · ${Number(r.score)}/5</strong><p>${esc(r.comment)}</p></article>`).join("") : "<p>Chưa có đánh giá được duyệt.</p>"}${eligibility.bookings.length ? `<form id="tk-review-form" class="tk-form"><label>Đơn đã hoàn tất<select name="code">${eligibility.bookings.map((b) => `<option value="${esc(b.code)}">${esc(b.code)} · ${esc(b.roomName)}</option>`).join("")}</select></label><label>Điểm<select name="score">${[5, 4, 3, 2, 1].map((n) => `<option>${n}</option>`).join("")}</select></label><label>Nội dung<textarea name="comment" minlength="15" maxlength="1500" required></textarea></label><p id="tk-review-feedback" role="status"></p><button class="tk-primary" type="submit">Gửi để duyệt</button></form>` : "<p>Đăng nhập và hoàn tất lưu trú để gửi đánh giá. Mỗi đơn được đánh giá một lần.</p>"}`;
+      const f = section.querySelector("form");
+      if (f)
+        f.onsubmit = async (e) => {
+          e.preventDefault();
+          const button = f.querySelector("button");
+          button.disabled = true;
+          try {
+            const body = Object.fromEntries(new FormData(f));
+            body.score = Number(body.score);
+            await request("../api/reviews/create.php", body);
+            await render();
+            const p = document.createElement("p");
+            p.textContent = "Đã gửi đánh giá, đang chờ quản trị viên duyệt.";
+            section.prepend(p);
+          } catch (e) {
+            f.querySelector("#tk-review-feedback").textContent = e.message;
+          } finally {
+            if (button.isConnected) button.disabled = false;
+          }
+        };
+    } catch (e) {
+      section.textContent = e.message;
+    }
   }
   render();
 })();

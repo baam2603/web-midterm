@@ -1,10 +1,42 @@
 <?php
-require_once __DIR__.'/../_shared/bootstrap.php';
-requireMethod('POST');requireAdmin();$v=input();$code=trim((string)($v['code']??''));
-if(!$code)reply(400,['status'=>'error','message'=>'Thiếu mã đơn.']);
-try{
- $q=connectDB()->prepare("UPDATE bookings SET status='completed',completed_at=NOW() WHERE code=? AND status IN ('confirmed','checked_in') AND checkout<=CURDATE()");
- $q->execute([$code]);
- if(!$q->rowCount())reply(409,['status'=>'error','message'=>'Đơn chưa đến ngày checkout hoặc không ở trạng thái hợp lệ.']);
- reply(200,['status'=>'success','message'=>'Đã xác nhận hoàn tất lưu trú.']);
-}catch(Throwable $e){failServer($e);}
+require_once __DIR__ . "/../shared/bootstrap.php";
+requireMethod("POST");
+requireAdmin();
+requireCsrf();
+$v = input();
+$code = trim((string) ($v["code"] ?? ""));
+if (!$code) {
+    reply(422, ["status" => "error", "message" => "Thiếu mã đơn."]);
+}
+try {
+    $db = connectDB();
+    $db->beginTransaction();
+    $q = $db->prepare(
+        "SELECT id FROM bookings WHERE code=? AND status='checked_in' AND checkout<=CURDATE() FOR UPDATE",
+    );
+    $q->execute([$code]);
+    $id = $q->fetchColumn();
+    if (!$id) {
+        $db->rollBack();
+        reply(409, [
+            "status" => "error",
+            "message" =>
+                "Đơn chưa nhận phòng, chưa đến ngày trả hoặc đã hoàn tất.",
+        ]);
+    }
+    $db->prepare(
+        "UPDATE bookings SET status='completed',completed_at=NOW() WHERE id=?",
+    )->execute([$id]);
+    auditLog($db, "booking.status", "booking", $id, [
+        "from" => "checked_in",
+        "to" => "completed",
+        "code" => $code,
+    ]);
+    $db->commit();
+    reply(200, ["status" => "success", "message" => "Đã hoàn tất lưu trú."]);
+} catch (Throwable $e) {
+    if (isset($db) && $db->inTransaction()) {
+        $db->rollBack();
+    }
+    failServer($e);
+}
