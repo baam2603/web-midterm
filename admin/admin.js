@@ -1187,10 +1187,7 @@
     if (event.persisted) show();
   });
 
-  // ========================================
   // OPENSTREETMAP — QUẢN LÝ ĐỊA ĐIỂM
-  // ========================================
-
   let osmSearchVersion = 0;
 
   function clearOsmSelection(form) {
@@ -1209,11 +1206,7 @@
       results.replaceChildren();
     }
   }
-
-  // ========================================
   // TẠO SLUG + XÓA ĐỊA ĐIỂM KHI THAY ĐỔI
-  // ========================================
-
   content.addEventListener("input", (e) => {
     const form = e.target.closest("#tk-create-hotel-db");
     if (!form) return;
