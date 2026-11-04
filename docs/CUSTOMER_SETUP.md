@@ -129,3 +129,21 @@ Giai đoạn hiện tại dùng thanh toán tại khách sạn; chưa cần cấ
 Các lựa chọn dịch vụ chưa kích hoạt được ẩn, khôi phục email chưa bật sẽ hướng dẫn liên hệ quản trị viên.
 Kiểm thử hồi quy đăng nhập và triển khai thực dưới thư mục con: `npm run test:auth`.
 Khi chưa cấu hình email, đặt phòng tại khách sạn không tạo hàng đợi email; email không phải điều kiện để lưu đơn.
+
+## Giữ giao diện gốc cho đặt phòng, thanh toán và biên nhận
+
+Các bố cục Booking, thanh toán, trang xác nhận và chi tiết đơn được khôi phục theo
+bản trước khi tích hợp customer (commit 86d1214). Các tệp CSS giữ nguyên; thay đổi
+chỉ ở lớp nạp dữ liệu, xử lý nút và thông báo trạng thái thực tế.
+
+Thanh bước, thông tin khách, chính sách hủy, mã giảm giá, bảng chi tiết giá và tóm tắt
+đặt phòng vẫn dùng giao diện cũ. Giá/tồn lấy từ API; tạo đơn, xem lại và hủy đọc/ghi SQL.
+Trang thanh toán có thể tải lại bằng `payment/payment.html?code=...` để xem xác nhận
+đã lưu mà không cần đơn trong localStorage. Trang biên nhận và nút In giữ bố cục cũ.
+
+VNPay và email tạm hoãn. Các lựa chọn thẻ/chuyển khoản/MoMo/ZaloPay trong giao diện gốc
+chỉ là mô phỏng; không thu tiền, không gửi số thẻ/CVV lên server và không ghi nhận đã trả tiền.
+Chỉ nhập thẻ thử nghiệm 4111 1111 1111 1111 khi thử phần giao diện thẻ.
+SQL lưu phương thức minh bạch `card_demo`, `bank_demo`, `momo_demo`, `zalopay_demo`,
+trạng thái thanh toán vẫn `unpaid`. Trả tại khách sạn lưu `hotel`.
+Không cần migration mới cho lần khôi phục UI này; vẫn cần các migration đã bàn giao.

@@ -29,8 +29,7 @@
     <header id="site-header"></header>
 
     <div class="tk-alert" style="max-width: 950px; margin: 15px auto">
-      Đơn được lưu trên hệ thống sau khi xác nhận. Bạn thanh toán tại khách sạn
-      theo chính sách đặt phòng.
+      Thanh toán trực tuyến đang mô phỏng, chưa thu tiền và chưa gửi email. Không nhập thẻ thật hoặc chuyển tiền thật.
     </div>
     <main class="booking-page" id="pay-root"></main>
 
@@ -44,26 +43,6 @@
     <script src="../common/city-data.js"></script>
     <script src="../hotel/hotel-data.js"></script>
     <script src="../hotel/hotel-detail-api.js"></script>
-    <script>
-      (async () => {
-        const root = document.getElementById("pay-root");
-        try {
-          const draft = JSON.parse(
-            sessionStorage.getItem("threek_checkout") || "null",
-          );
-          if (!draft)
-            throw Error(
-              "Phiên thanh toán đã hết hạn. Vui lòng chọn phòng lại.",
-            );
-          await loadProfile();
-          await HotelDetailAPI.sync(draft);
-          const script = document.createElement("script");
-          script.src = "payment.js";
-          document.body.append(script);
-        } catch (error) {
-          root.textContent = error.message;
-        }
-      })();
-    </script>
+    <script src="bootstrap.js?v=20261104-original-ui"></script>
   </body>
 </html>

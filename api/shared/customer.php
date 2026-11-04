@@ -40,7 +40,10 @@ function bookingSelect(): string
  COALESCE(b.guest_name,u.full_name) guestName,COALESCE(b.guest_email,u.email) email,COALESCE(b.guest_phone,u.phone) phone,b.guest_note AS note,
  b.pay_method AS payMethod,b.payment_status AS paymentStatus,COALESCE(b.refundable,r.free_cancellation) refundable,
  b.subtotal,b.discount,b.tax,b.payment_expires_at,
- h.slug hotelId,h.name hotelName,h.city,h.address,r.code roomId,r.name roomName,DATEDIFF(b.checkout,b.checkin) nights
+ h.slug hotelId,h.name hotelName,h.city,h.address,r.code roomId,r.name roomName,
+ (SELECT image_path FROM room_images WHERE room_type_id=r.id ORDER BY is_cover DESC,sort_order,id LIMIT 1) roomImage,
+ (SELECT image_path FROM hotel_images WHERE hotel_id=h.id ORDER BY is_cover DESC,sort_order,id LIMIT 1) hotelImage,
+ DATEDIFF(b.checkout,b.checkin) nights
  FROM bookings b JOIN hotels h ON h.id=b.hotel_id JOIN room_types r ON r.id=b.room_type_id JOIN users u ON u.id=b.user_id";
 }
 function bookingPayload(array $b): array

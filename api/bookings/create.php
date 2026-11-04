@@ -40,7 +40,18 @@ if (
     $guests < 1 ||
     $guests > 19980 ||
     !in_array($coupon, ["", "THREEK10", "WELCOME"], true) ||
-    !in_array($method, ["hotel", "online"], true) ||
+    !in_array(
+        $method,
+        [
+            "hotel",
+            "online",
+            "card_demo",
+            "bank_demo",
+            "momo_demo",
+            "zalopay_demo",
+        ],
+        true,
+    ) ||
     mb_strlen($guestName) < 2 ||
     mb_strlen($guestName) > 120 ||
     !filter_var($email, FILTER_VALIDATE_EMAIL) ||
@@ -197,7 +208,7 @@ try {
         ]);
     }
     $code = "TK" . strtoupper(bin2hex(random_bytes(7)));
-    $status = $method === "hotel" ? "confirmed" : "pending";
+    $status = $method === "online" ? "pending" : "confirmed";
     $q = $db->prepare(
         "INSERT INTO bookings(code,user_id,hotel_id,room_type_id,checkin,checkout,rooms,guests,total,status,guest_name,guest_email,guest_phone,guest_note,pay_method,refundable,subtotal,discount,tax,request_key,request_hash,payment_expires_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
     );
@@ -232,12 +243,12 @@ try {
         "Đơn " .
             $code .
             " đã được lưu. " .
-            ($method === "hotel"
-                ? "Bạn thanh toán tại khách sạn."
-                : "Vui lòng hoàn tất thanh toán trong 15 phút."),
+            ($method === "online"
+                ? "Vui lòng hoàn tất thanh toán trong 15 phút."
+                : "Chưa ghi nhận thanh toán; bạn có thể xem chi tiết đơn."),
         $code,
     );
-    if (mailConfigured()) {
+    if (($v["sendEmail"] ?? false) === true && mailConfigured()) {
         $db->prepare(
             "INSERT INTO mail_outbox(recipient,subject,html_body) VALUES(?,?,?)",
         )->execute([
@@ -252,9 +263,9 @@ try {
             "</p><p>Tổng tiền: " .
             number_format($total, 0, ",", ".") .
             " VND. " .
-            ($method === "hotel"
-                ? "Thanh toán tại khách sạn."
-                : "Đang chờ thanh toán trực tuyến.") .
+            ($method === "online"
+                ? "Đang chờ thanh toán trực tuyến."
+                : "Chưa ghi nhận thanh toán.") .
             "</p>",
         ]);
     }

@@ -36,6 +36,18 @@ try:
  request(b,'/api/account/notifications.php',{'id':notes[0]['id']});assert request(a,'/api/account/notifications.php')['data'][0]['read_at'] is None
  request(a,'/api/account/notifications.php',{'id':notes[0]['id']});assert request(a,'/api/account/notifications.php')['data'][0]['read_at'];passed('notifications owner-only read status')
  request(a,'/api/bookings/cancel.php',{'code':code});request(a,'/api/bookings/cancel.php',{'code':code});assert request(a,'/api/bookings/detail.php?code='+code)['data']['status']=='cancelled';passed('cancellation persists and retries safely')
+ assert request(a,'/api/bookings/detail.php?requestKey='+body['requestKey'])['data']['code']==code
+ request(b,'/api/bookings/detail.php?requestKey='+body['requestKey'],status=404)
+ request(anon,'/api/bookings/detail.php?requestKey='+body['requestKey'],status=401);passed('lost-response resume by request key is owner-only')
+ for method in ['card_demo','bank_demo','momo_demo','zalopay_demo']:
+  demo=request(a,'/api/bookings/create.php',{**body,'payMethod':method,'requestKey':secrets.token_hex(16)},201)['data']
+  persisted=request(a,'/api/bookings/detail.php?code='+demo['code'])['data']
+  assert persisted['payMethod']==method and persisted['status']=='confirmed' and persisted['paymentStatus']=='unpaid'
+  assert sql(f"SELECT COUNT(*) FROM payments p JOIN bookings b ON b.id=p.booking_id WHERE b.code='{demo['code']}'")=='0'
+  request(a,'/api/bookings/cancel.php',{'code':demo['code']})
+ assert sql(f"SELECT COUNT(*) FROM mail_outbox WHERE recipient='{emails[0]}'")=='0'
+ passed('all original demo methods persist unpaid, without payment transactions or email jobs')
+
  online=request(a,'/api/bookings/create.php',{**body,'payMethod':'online','requestKey':secrets.token_hex(16)},201)['data'];onlineCode=online['code'];amount=str(int(float(online['total'])*100))
  start=request(a,'/api/payments/start.php',{'code':onlineCode})['data'];url=urllib.parse.urlparse(start['url']);assert url.hostname=='sandbox.vnpayment.vn';params=dict(urllib.parse.parse_qsl(url.query));signature=params.pop('vnp_SecureHash');assert signature==hmac.new(SECRET.encode(),urllib.parse.urlencode(sorted(params.items())).encode(),hashlib.sha512).hexdigest();passed('hosted VNPay URL signed with server amount')
  ipn={'vnp_TmnCode':'TESTONLY','vnp_TxnRef':onlineCode,'vnp_Amount':amount,'vnp_ResponseCode':'00','vnp_TransactionStatus':'00','vnp_TransactionNo':str(secrets.randbelow(10**12))}
