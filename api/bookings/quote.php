@@ -20,7 +20,7 @@ if (!in_array($city, ['dalat', 'vungtau'], true) || !$slug || !$room || !$validD
 if (!in_array($coupon, ['', 'THREEK10', 'WELCOME'], true)) reply(400, ['status' => 'error', 'message' => 'Mã giảm giá không hợp lệ.']);
 try {
     $db = connectDB();
-    $q = $db->prepare('SELECT r.id,r.capacity,r.total_rooms,r.price_per_night FROM hotels h JOIN room_types r ON r.hotel_id=h.id WHERE h.slug=? AND h.city=? AND r.code=? AND h.is_active=1 LIMIT 1');
+    $q = $db->prepare('SELECT r.id,r.capacity,r.total_rooms,r.price_per_night FROM hotels h JOIN room_types r ON r.hotel_id=h.id WHERE h.slug=? AND h.city=? AND h.is_active=1 AND r.code=? AND r.is_active=1 LIMIT 1');
     $q->execute([$slug, $city, $room]);
     $r = $q->fetch();
     if (!$r) reply(404, ['status' => 'error', 'message' => 'Không tìm thấy khách sạn hoặc loại phòng trong MySQL.']);

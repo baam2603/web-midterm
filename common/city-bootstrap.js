@@ -61,22 +61,25 @@
         const hotels = await window.HotelAPI.loadCity(cityKey);
         console.info("[3K Booking] Đã lấy từ MySQL:", cityKey, hotels.length);
       } catch (error) {
-        console.error("[3K Booking] Không thể tải danh sách khách sạn:", error);
-
-        const notice = document.createElement("p");
-        notice.textContent =
-          "Không thể tải danh sách khách sạn. Vui lòng thử lại sau.";
-
-        notice.style.cssText =
-          "padding:20px;margin:20px;color:#a33;" +
-          "background:#fff;border-radius:10px;";
-
-        (document.querySelector("main") || document.body).prepend(notice);
-
-        return;
+        // Không hiển thị dữ liệu demo khi MySQL gặp sự cố.
+        console.error("[3K Booking] Lỗi API danh sách:", error);
+        window.CITY_DATA[cityKey].hotels = [];
+        const note = document.createElement("p");
+        note.className = "tk-api-error";
+        note.style.cssText =
+          "padding:12px;background:#fff3ee;color:#8b3021;border-radius:8px;margin-bottom:12px";
+        note.textContent =
+          "Không thể tải khách sạn từ hệ thống. Vui lòng thử tải lại trang.";
+        document.querySelector(".results")?.prepend(note);
       }
     } else {
-      console.warn("[3K Booking] Chưa có hotels-api.js, dùng dữ liệu demo");
+      console.error("[3K Booking] Thiếu common/hotels-api.js");
+      window.CITY_DATA[cityKey].hotels = [];
+      const note = document.createElement("p");
+      note.className = "tk-api-error";
+      note.textContent =
+        "Không tải được danh sách khách sạn. Thiếu kết nối API.";
+      document.querySelector(".results")?.prepend(note);
     }
 
     const ready = window.initCityPage(cityKey);

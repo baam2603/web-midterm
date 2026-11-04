@@ -6,6 +6,7 @@ require_once __DIR__ . '/../shared/bootstrap.php';
 require_once __DIR__ . '/places-service.php';
 
 requireMethod('GET');
+set_time_limit(60); // tìm kiếm có thể gọi Nominatim + Overpass nhiều lần (mỗi lần cách nhau >= 1 giây)
 requireAdmin();
 header('Cache-Control: no-store, private');
 
@@ -36,6 +37,7 @@ try {
             'mapsUrl' => osmPlaceUrl($id),
             'kind' => $kind,
             'canSelect' => $kind !== 'location',
+            'distanceMeters' => $p['_distanceMeters'] ?? null,
         ];
     }
     reply(200, ['status' => 'success', 'data' => [

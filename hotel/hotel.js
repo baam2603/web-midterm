@@ -77,28 +77,19 @@
     params.get("checkout") && params.get("checkout") > start
       ? params.get("checkout")
       : toISO(new Date(new Date(start + "T12:00:00").getTime() + 86400000));
-  const leftFor = (r) =>
-    r.closed
-      ? 0
-      : BookingStore.availability(
-          cityKey,
-          hotelId,
-          r.id,
-          start,
-          end,
-          r.left ?? 5,
-        );
+  // Số phòng còn cho khoảng ngày hiện tại đã tính trong MySQL (api/hotels/detail.php).
+  const leftFor = (r) => (r.closed ? 0 : Math.max(0, Number(r.left ?? 0)));
 
   const roomCard = (r) => `
     <article class="room">
       <div class="room__photo">
         ${r.image ? `<img src="${esc(r.image)}" alt="${esc(r.name)}" loading="lazy" onerror="this.remove()" />` : ""}
-        <span class="room__badge">${icon("square_foot")} ${r.area} m²</span>
+        ${r.area ? `<span class="room__badge">${icon("square_foot")} ${r.area} m²</span>` : ""}
         ${leftFor(r) <= 3 ? `<span class="room__badge room__badge--warn">${leftFor(r) ? `Chỉ còn ${leftFor(r)} phòng` : "Hết phòng"}</span>` : ""}
       </div>
       <div class="room__body">
         <h3>${esc(r.name)}</h3>
-        <p class="room__meta">${icon("bed")} ${esc(r.bed)}</p>
+        ${r.bed ? `<p class="room__meta">${icon("bed")} ${esc(r.bed)}</p>` : ""}
         <p class="room__meta">${icon("group")} Tối đa ${r.guests} khách</p>
         <ul class="room__features">
           ${r.features.map((f) => `<li>${icon(f.icon)} ${esc(f.label)}</li>`).join("")}
@@ -159,7 +150,11 @@
               <span class="rating-card__label">${esc(hotel.ratingLabel)}</span>
               <span class="rating-card__count">${hotel.reviewCount} đánh giá</span>
             </div>
-            <span class="score">${hotel.rating.toString().replace(".", ",")}</span>
+            ${
+              Number.isFinite(hotel.rating) && hotel.reviewCount > 0
+                ? `<span class="score">${hotel.rating.toString().replace(".", ",")}</span>`
+                : ""
+            }
           </div>
           <a class="rating-card__link" href="#reviews">Xem tất cả đánh giá ${icon("arrow_forward")}</a>
         </div>
@@ -232,7 +227,7 @@
   `;
 
   /* ---------- Chọn phòng ---------- */
-  
+
   /* ---------- Chọn phòng ---------- */
   function goBooking(roomId) {
     const selected = rooms.find((r) => r.id === roomId);
@@ -260,22 +255,15 @@
     const bookingUrl = `Booking.html?${next.toString()}`;
 
     // Kiểm tra đăng nhập
-    const user =
-      typeof getCurrentUser === "function"
-        ? getCurrentUser()
-        : null;
+    const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
 
     if (!user) {
       // Lưu đường dẫn quay lại sau khi đăng nhập
       const returnUrl = new URL(bookingUrl, location.href);
 
-      const nextPath =
-        returnUrl.pathname +
-        returnUrl.search;
+      const nextPath = returnUrl.pathname + returnUrl.search;
 
-      location.href =
-        "../auth/login.html?next=" +
-        encodeURIComponent(nextPath);
+      location.href = "../auth/login.html?next=" + encodeURIComponent(nextPath);
 
       return;
     }
@@ -329,8 +317,8 @@
         <div class="room-modal__body">
           <h3>${esc(r.name)}</h3>
           <div class="facts">
-            <div class="fact">${icon("square_foot")}<div><span class="fact__label">Diện tích</span><span class="fact__value">${r.area} m²</span></div></div>
-            <div class="fact">${icon("bed")}<div><span class="fact__label">Giường</span><span class="fact__value">${esc(r.bed)}</span></div></div>
+            <div class="fact">${icon("square_foot")}<div><span class="fact__label">Diện tích</span><span class="fact__value">${r.area ? r.area + " m²" : "Chưa cập nhật"}</span></div></div>
+            <div class="fact">${icon("bed")}<div><span class="fact__label">Giường</span><span class="fact__value">${r.bed ? esc(r.bed) : "Chưa cập nhật"}</span></div></div>
             <div class="fact">${icon("group")}<div><span class="fact__label">Sức chứa</span><span class="fact__value">Tối đa ${r.guests} khách</span></div></div>
           </div>
           ${r.desc ? `<p class="room-modal__desc">${esc(r.desc)}</p>` : ""}

@@ -89,23 +89,9 @@
         try {
           await HotelDetailAPI.sync();
         } catch (error) {
-          console.error("Không thể tải khách sạn:", error);
-
-          const root = document.getElementById("hotel-root");
-
-          if (root) {
-            root.innerHTML = `
-      <div class="not-found">
-        <h1>Khách sạn không khả dụng</h1>
-        <p>Khách sạn không tồn tại, đang tạm ẩn
-        hoặc hệ thống chưa thể tải thông tin.</p>
-        <a href="../index1.html">
-          Quay lại trang chủ
-        </a>
-      </div>
-    `;
-          }
-
+          console.error("Không thể tải khách sạn MySQL:", error);
+          document.getElementById("hotel-root").innerHTML =
+            `<div class="not-found"><h1>Khách sạn không khả dụng</h1><p>${String(error.message).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c])}</p><a href="../index1.html">Quay lại trang chủ</a></div>`;
           return;
         }
 

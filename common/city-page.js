@@ -171,6 +171,10 @@
     // Cho CSS đổi bảng màu theo thành phố (xem :root[data-city] trong city-page.css)
     document.documentElement.dataset.city = cityKey;
 
+    // Chỉ lọc theo sức chứa sau khi khách thực sự tìm kiếm hoặc chỉnh số khách.
+    // Trước đó trang thành phố hiển thị toàn bộ khách sạn đang bán từ API.
+    let guestFilterApplied = false;
+
     const state = {
       street: "",
       checkin: null,
@@ -323,8 +327,10 @@
         window.BookingStore
       ) {
         const detail = window.HOTELS[cityKey]?.[h.id];
+        // Loại phòng của khách sạn mới chỉ được tải ở trang chi tiết từ MySQL.
+        // Không dùng dữ liệu demo để loại khách sạn mới khỏi danh sách.
         if (
-          !detail ||
+          detail &&
           !(detail.rooms || []).some(
             (r) =>
               !r.closed &&
@@ -348,7 +354,10 @@
         if (!h.amenities.includes(a)) return false;
       if (state.stars.size && !state.stars.has(h.stars)) return false;
       if (h.price > state.maxPrice) return false;
-      if (state.adults + state.children > h.capacity * state.rooms)
+      if (
+        guestFilterApplied &&
+        state.adults + state.children > h.capacity * state.rooms
+      )
         return false;
       const q = norm(state.street.trim());
       if (q) {
@@ -369,9 +378,12 @@
         )
         .join("");
       const photoClass = h.photo ? ` hotel-card__photo--${h.photo}` : "";
+      const cover = h.coverImage
+        ? `<img src="${esc(h.coverImage)}" alt="${esc(h.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">`
+        : "";
       return `
         <article class="hotel-card tk-fade" data-id="${h.id}">
-          <div class="hotel-card__photo${photoClass}"></div>
+          <div class="hotel-card__photo${photoClass}">${cover}</div>
           <div class="hotel-card__body">
             <div class="hotel-card__top">
               <div>
@@ -379,8 +391,11 @@
                 <span class="hotel-card__addr">${icon("location_on")} ${esc(h.address)}</span>
               </div>
               <div class="hotel-card__rating">
-                <span class="score">${h.score.toFixed(1)}</span>
-                <span class="score-label">${scoreLabel(h.score)} · ${h.reviews} đánh giá</span>
+                ${
+                  Number.isFinite(h.score) && h.reviews > 0
+                    ? `<span class="score">${h.score.toFixed(1)}</span><span class="score-label">${scoreLabel(h.score)} · ${h.reviews} đánh giá</span>`
+                    : `<span class="score-label">Chưa có đánh giá</span>`
+                }
               </div>
             </div>
             <div class="hotel-card__tags">${tags}</div>
@@ -511,22 +526,24 @@
           attribution: "&copy; Google Maps",
         }).addTo(map);
 
-        city.hotels.forEach((h) => {
-          const m = L.marker([h.lat, h.lng], {
-            icon: L.divIcon({
-              className: "",
-              html: `<span class="tk-pin">${icon("location_on")}</span>`,
-              iconSize: [34, 34],
-              iconAnchor: [17, 32],
-              popupAnchor: [0, -28],
-            }),
+        city.hotels
+          .filter((h) => Number.isFinite(h.lat) && Number.isFinite(h.lng))
+          .forEach((h) => {
+            const m = L.marker([h.lat, h.lng], {
+              icon: L.divIcon({
+                className: "",
+                html: `<span class="tk-pin">${icon("location_on")}</span>`,
+                iconSize: [34, 34],
+                iconAnchor: [17, 32],
+                popupAnchor: [0, -28],
+              }),
+            });
+            m.bindPopup(
+              `<div class="tk-map-pop"><strong>${esc(h.name)}</strong><span>${fmtMoney(h.price)} / đêm</span></div>`,
+            );
+            m.on("click", () => highlight(h.id, true));
+            markers[h.id] = m;
           });
-          m.bindPopup(
-            `<div class="tk-map-pop"><strong>${esc(h.name)}</strong><span>${fmtMoney(h.price)} / đêm</span></div>`,
-          );
-          m.on("click", () => highlight(h.id, true));
-          markers[h.id] = m;
-        });
         setTimeout(() => map.invalidateSize(), 200);
         updateMap();
       } catch (err) {
@@ -537,17 +554,19 @@
     function updateMap() {
       if (!map || !window.L) return;
       const L = window.L;
-      const ids = new Set(visible.map((h) => h.id));
+      const mapped = visible.filter(
+        (h) => Number.isFinite(h.lat) && Number.isFinite(h.lng),
+      );
+      const ids = new Set(mapped.map((h) => h.id));
       Object.keys(markers).forEach((id) => {
         const m = markers[id];
         if (ids.has(id)) {
           if (!map.hasLayer(m)) m.addTo(map);
         } else if (map.hasLayer(m)) map.removeLayer(m);
       });
-      if (visible.length === 1)
-        map.setView([visible[0].lat, visible[0].lng], 15);
-      else if (visible.length > 1)
-        map.fitBounds(L.latLngBounds(visible.map((h) => [h.lat, h.lng])), {
+      if (mapped.length === 1) map.setView([mapped[0].lat, mapped[0].lng], 15);
+      else if (mapped.length > 1)
+        map.fitBounds(L.latLngBounds(mapped.map((h) => [h.lat, h.lng])), {
           padding: [24, 24],
           maxZoom: 15,
         });
@@ -868,6 +887,7 @@
           const b = e.target.closest("button[data-k]");
           if (!b || b.disabled) return;
           const k = b.dataset.k;
+          guestFilterApplied = true;
           state[k] += Number(b.dataset.d);
           // Số phòng không được vượt số người lớn
           if (state.rooms > state.adults) {
@@ -893,6 +913,7 @@
         e.preventDefault();
         Popup.close();
         if (streetInput) state.street = streetInput.value;
+        guestFilterApplied = true;
         renderResults();
         if (resultsSection)
           resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });

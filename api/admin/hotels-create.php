@@ -93,11 +93,17 @@ try {
         ]);
     }
 
+    $lat = $place['location']['latitude'] ?? null;
+    $lon = $place['location']['longitude'] ?? null;
+    if (!is_numeric($lat) || !is_numeric($lon)) {
+        reply(422, ['status' => 'error', 'message' => 'Địa điểm thiếu tọa độ.']);
+    }
+
     $pdo = connectDB();
     $stmt = $pdo->prepare(
         'INSERT INTO hotels
-         (slug, name, city, type, stars, address, google_place_id, price_per_night, description, is_active)
-         VALUES (:slug, :name, :city, :type, :stars, :address, :google_place_id, :price, :description, 0)'
+         (slug, name, city, type, stars, address, google_place_id, price_per_night, description, latitude, longitude, is_active)
+         VALUES (:slug, :name, :city, :type, :stars, :address, :google_place_id, :price, :description, :lat, :lon, 0)'
     );
     $stmt->execute([
         'slug' => $slug,
@@ -108,7 +114,9 @@ try {
         'address' => $address,
         'google_place_id' => $placeRef,
         'price' => $price,
-        'description' => $description !== '' ? $description : null
+        'description' => $description !== '' ? $description : null,
+        'lat' => (float) $lat,
+        'lon' => (float) $lon
     ]);
 
     reply(201, [

@@ -163,13 +163,16 @@ function isLodgingPlace(array $place): bool
             'resort',
             'villa'
         ], true),
-        'leisure' => in_array($type, ['resort', 'swimming_pool'], true),
+        'leisure' => $type === 'resort',
+        // Chung cư / tòa căn hộ có tên riêng cũng được coi là nơi lưu trú.
         'building' => in_array($type, [
             'hotel',
             'resort',
             'hostel',
             'guest_house',
-            'motel'
+            'motel',
+            'apartments',
+            'dormitory'
         ], true),
         default => false,
     };
@@ -230,6 +233,162 @@ function osmDistanceMeters(float $lat1, float $lon1, float $lat2, float $lon2): 
     return 6371000.0 * 2.0 * asin(min(1.0, sqrt($a)));
 }
 
+/** Bỏ dấu tiếng Việt, hạ chữ thường, chỉ giữ [a-z0-9] cách nhau bằng 1 khoảng trắng. */
+function osmFold(string $text): string
+{
+    static $map = null;
+    if ($map === null) {
+        $map = [];
+        $groups = [
+            'a' => 'àáảãạăằắẳẵặâầấẩẫậ',
+            'e' => 'èéẻẽẹêềếểễệ',
+            'i' => 'ìíỉĩị',
+            'o' => 'òóỏõọôồốổỗộơờớởỡợ',
+            'u' => 'ùúủũụưừứửữự',
+            'y' => 'ỳýỷỹỵ',
+            'd' => 'đ',
+        ];
+        foreach ($groups as $base => $chars) {
+            foreach (preg_split('//u', $chars, -1, PREG_SPLIT_NO_EMPTY) ?: [] as $ch) {
+                $map[$ch] = $base;
+            }
+        }
+    }
+    $text = function_exists('mb_strtolower') ? mb_strtolower($text, 'UTF-8') : strtolower($text);
+    $text = preg_replace('/\p{Mn}+/u', '', $text) ?? $text; // dấu tổ hợp (NFD)
+    $text = strtr($text, $map);
+    $text = preg_replace('/[^a-z0-9]+/', ' ', $text) ?? $text;
+    return trim($text);
+}
+
+/** Regex (cho Overpass) khớp một từ đã fold, bất kể OSM ghi có dấu hay không dấu. */
+function osmFoldRegexWord(string $foldedWord): string
+{
+    static $classes = [
+        'a' => 'aAàáảãạăằắẳẵặâầấẩẫậÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬ',
+        'e' => 'eEèéẻẽẹêềếểễệÈÉẺẼẸÊỀẾỂỄỆ',
+        'i' => 'iIìíỉĩịÌÍỈĨỊ',
+        'o' => 'oOòóỏõọôồốổỗộơờớởỡợÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢ',
+        'u' => 'uUùúủũụưừứửữựÙÚỦŨỤƯỪỨỬỮỰ',
+        'y' => 'yYỳýỷỹỵỲÝỶỸỴ',
+        'd' => 'dDđĐ',
+    ];
+    $out = '';
+    foreach (str_split($foldedWord) as $ch) {
+        if (!preg_match('/^[a-z0-9]$/D', $ch)) continue; // an toàn khi nhúng vào chuỗi QL
+        $out .= isset($classes[$ch]) ? '[' . $classes[$ch] . ']' : $ch;
+    }
+    return $out;
+}
+
+/** Bỏ các từ chỉ loại hình ("khách sạn", "hotel", "căn hộ"...) vì tên trong OSM thường không chứa chúng. */
+function osmStripGenericWords(string $query): string
+{
+    $tokens = preg_split('/\s+/u', trim($query), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    $folded = array_map('osmFold', $tokens);
+    $two = ['khach san', 'nha nghi', 'can ho', 'chung cu', 'biet thu', 'nha khach', 'guest house', 'nha tro'];
+    $one = ['hotel', 'resort', 'villa', 'apartment', 'apartments', 'homestay', 'hostel', 'motel', 'bungalow', 'condotel'];
+    $kept = [];
+    $n = count($tokens);
+    for ($i = 0; $i < $n; $i++) {
+        if ($i + 1 < $n && in_array($folded[$i] . ' ' . $folded[$i + 1], $two, true)) {
+            $i++;
+            continue;
+        }
+        if (in_array($folded[$i], $one, true)) continue;
+        $kept[] = $tokens[$i];
+    }
+    return implode(' ', $kept);
+}
+
+/** Truy vấn có vẻ là địa chỉ (số nhà + tên đường, hoặc có từ đường/phố/hẻm...). */
+function osmLooksLikeAddress(string $query): bool
+{
+    return preg_match(
+        '/^\s*\d+[\/\-\dA-Za-z]*\s+\p{L}|\b(đường|duong|phố|pho|ngõ|ngo|hẻm|hem|phường|phuong|street|road)\b/iu',
+        $query
+    ) === 1;
+}
+
+/** Các biến thể truy vấn Nominatim, thử lần lượt cho đến khi đủ kết quả (tối đa 4 request). */
+function osmQueryVariants(string $query, string $cityName, string $mode): array
+{
+    $variants = [['q' => $query, 'bounded' => 1]];
+
+    $stripped = osmStripGenericWords($query);
+    if ($stripped !== '' && $stripped !== $query) {
+        $variants[] = ['q' => $stripped, 'bounded' => 1];
+    }
+
+    if ($mode !== 'name') {
+        // 12/3 -> 12 và bỏ chữ "đường/phố/phường/quận" mà OSM thường không ghi trong tên đường.
+        $addr = preg_replace('~(\d)[/\-]\d+[A-Za-z]?~u', '$1', $query) ?? $query;
+        $parts = preg_split('/\s+/u', $addr, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $parts = array_values(array_filter(
+            $parts,
+            static fn(string $t): bool => !in_array(osmFold($t), ['duong', 'pho', 'phuong', 'quan'], true)
+        ));
+        $addr = implode(' ', $parts);
+        if ($addr !== '' && $addr !== $query && $addr !== $stripped) {
+            $variants[] = ['q' => $addr, 'bounded' => 1];
+        }
+    }
+
+    // Phương án cuối: thêm tên thành phố, không giới hạn viewbox.
+    $variants[] = ['q' => $query . ', ' . $cityName . ', Việt Nam', 'bounded' => 0];
+
+    $seen = [];
+    $unique = [];
+    foreach ($variants as $v) {
+        $key = $v['q'] . '|' . $v['bounded'];
+        if (isset($seen[$key])) continue;
+        $seen[$key] = true;
+        $unique[] = $v;
+    }
+    return array_slice($unique, 0, 4);
+}
+
+/** Điểm liên quan: tên (kể cả name:en, alt_name...) khớp từ khóa > loại lưu trú > gần địa chỉ. */
+function osmScore(array $p, string $query, string $mode): float
+{
+    $stripped = osmStripGenericWords($query);
+    $needle = osmFold($stripped !== '' ? $stripped : $query);
+    $tokens = array_values(array_filter(explode(' ', $needle), static fn(string $t): bool => $t !== ''));
+
+    $alt = [];
+    foreach ((array) ($p['namedetails'] ?? []) as $v) {
+        if (is_scalar($v)) $alt[] = (string) $v;
+    }
+    $nameText = osmFold(osmHotelName($p) . ' ' . implode(' ', $alt));
+    $addrText = osmFold((string) ($p['display_name'] ?? ''));
+
+    $cover = static function (string $text) use ($tokens, $needle): float {
+        if ($tokens === [] || $text === '') return 0.0;
+        $padded = ' ' . $text . ' ';
+        $hit = 0;
+        foreach ($tokens as $t) {
+            if (str_contains($padded, ' ' . $t)) $hit++; // khớp đầu từ
+        }
+        $score = $hit / count($tokens);
+        if (str_contains($padded, ' ' . $needle)) $score += 0.5; // khớp cả cụm
+        return $score;
+    };
+
+    $relevance = max($cover($nameText), 0.8 * $cover($addrText));
+    $kind = (string) ($p['_kind'] ?? 'location');
+    $kindWeight = match ($kind) {
+        'lodging' => 0.6,
+        'address' => 0.3,
+        default => 0.0,
+    };
+    if ($mode === 'address' && $kind === 'address') $kindWeight += 0.3;
+    $distance = isset($p['_distanceMeters'])
+        ? min((int) $p['_distanceMeters'], 1000) / 1000 * 0.5
+        : 0.0;
+
+    return $relevance * 2 + $kindWeight - $distance;
+}
+
 function isNearSelectedCity(float $latitude, float $longitude, string $city): bool
 {
     $area = cityArea($city);
@@ -279,60 +438,21 @@ function osmLookupIds(array $ids, string $city): array
     return filterLodgingPlaces($items, $city);
 }
 
-/** Choose one meaningful word for fuzzy name search, not AND across every word. */
+/** Chọn 1 từ đặc trưng nhất để tìm tên trên Overpass; trả về regex không phân biệt dấu. */
 function osmOverpassKeyword(string $query): ?string
 {
-    $clean = preg_replace('/[^\p{L}\p{N}\s]/u', ' ', $query);
-    if ($clean === null) return null;
-    $words = preg_split('/\s+/u', trim($clean), -1, PREG_SPLIT_NO_EMPTY) ?: [];
     $stop = [
-        'hotel',
-        'khach',
-        'sạn',
-        'san',
-        'khách',
-        'nha',
-        'nhà',
-        'nghi',
-        'nghỉ',
-        'resort',
-        'homestay',
-        'hostel',
-        'guest',
-        'house',
-        'da',
-        'dalat',
-        'lat',
-        'lạt',
-        'đà',
-        'vung',
-        'vũng',
-        'tau',
-        'tàu',
-        'đường',
-        'duong',
-        'phuong',
-        'phường',
-        'quan',
-        'quận',
-        'thanh',
-        'thành',
-        'pho',
-        'phố',
-        'street',
-        'road',
-        'viet',
-        'nam'
+        'hotel', 'khach', 'san', 'nha', 'nghi', 'resort', 'homestay', 'hostel', 'guest', 'house',
+        'apartment', 'villa', 'dalat', 'da', 'lat', 'vung', 'tau', 'vungtau', 'viet', 'nam',
+        'duong', 'pho', 'phuong', 'quan', 'street', 'road',
     ];
-    $choice = '';
-    foreach ($words as $word) {
-        $length = preg_match_all('/./us', $word);
-        if ($length === false || $length < 3 || in_array(function_exists('mb_strtolower') ? mb_strtolower($word, 'UTF-8') : strtolower($word), $stop, true)) continue;
-        if ($length > (preg_match_all('/./us', $choice) ?: 0)) $choice = $word;
+    $stripped = osmStripGenericWords($query);
+    $best = '';
+    foreach (explode(' ', osmFold($stripped !== '' ? $stripped : $query)) as $w) {
+        if (strlen($w) < 2 || ctype_digit($w) || in_array($w, $stop, true)) continue;
+        if (strlen($w) > strlen($best)) $best = $w;
     }
-    if ($choice === '') return null;
-    // Remove regex metacharacters so OSM names are queried as literal substrings.
-    return preg_quote($choice, '/');
+    return $best === '' ? null : osmFoldRegexWord($best);
 }
 
 function osmOverpassIdsFromElements(array $elements, int $limit = 30): array
@@ -350,18 +470,23 @@ function osmOverpassIdsFromElements(array $elements, int $limit = 30): array
     return array_slice(array_keys($ids), 0, $limit);
 }
 
+/** Bộ lọc lưu trú dùng chung cho các truy vấn Overpass. */
+function osmLodgingQl(string $extraFilter, string $area): string
+{
+    return 'nwr["tourism"~"^(hotel|motel|guest_house|hostel|apartment|chalet|resort|villa)$"]' . $extraFilter . $area . ';'
+        . 'nwr["leisure"="resort"]' . $extraFilter . $area . ';'
+        . 'nwr["building"~"^(hotel|resort|hostel|guest_house|motel|apartments|dormitory)$"]' . $extraFilter . $area . ';';
+}
+
 function osmFindByName(string $query, string $city): array
 {
-    $word = osmOverpassKeyword($query);
+    $regex = osmOverpassKeyword($query);
     $bbox = cityBbox($city);
-    if ($word === null || $bbox === null) return [];
+    if ($regex === null || $bbox === null) return [];
     $box = vsprintf('(%.5F,%.5F,%.5F,%.5F)', $bbox);
-    $regex = '"' . $word . '"';
-    $ql = '[out:json][timeout:20];('
-        . 'nwr["tourism"~"^(hotel|motel|guest_house|hostel|apartment|chalet|resort)$"]["name"~' . $regex . ',i]' . $box . ';'
-        . 'nwr["leisure"="resort"]["name"~' . $regex . ',i]' . $box . ';'
-        . 'nwr["building"~"^(hotel|resort|hostel|guest_house|motel)$"]["name"~' . $regex . ',i]' . $box . ';'
-        . ');out ids 30;';
+    // Tìm cả name, name:vi, name:en, alt_name, old_name, short_name.
+    $nameFilter = '[~"^(name|name:vi|name:en|alt_name|old_name|short_name)$"~"' . $regex . '",i]';
+    $ql = '[out:json][timeout:20];(' . osmLodgingQl($nameFilter, $box) . ');out ids 30;';
     $response = overpassRequest($ql);
     return osmLookupIds(osmOverpassIdsFromElements($response['elements'] ?? []), $city);
 }
@@ -370,14 +495,8 @@ function osmFindByName(string $query, string $city): array
 function osmFindNearAddress(float $lat, float $lon, string $city, int $radiusMeters = 700): array
 {
     if (!isNearSelectedCity($lat, $lon, $city)) return [];
-    $latText = sprintf('%.6F', $lat);
-    $lonText = sprintf('%.6F', $lon);
-    $around = '(around:' . $radiusMeters . ',' . $latText . ',' . $lonText . ')';
-    $ql = '[out:json][timeout:20];('
-        . 'nwr["tourism"~"^(hotel|motel|guest_house|hostel|apartment|chalet|resort)$"]' . $around . ';'
-        . 'nwr["leisure"="resort"]' . $around . ';'
-        . 'nwr["building"~"^(hotel|resort|hostel|guest_house|motel)$"]' . $around . ';'
-        . ');out ids 40;';
+    $around = '(around:' . $radiusMeters . ',' . sprintf('%.6F', $lat) . ',' . sprintf('%.6F', $lon) . ')';
+    $ql = '[out:json][timeout:20];(' . osmLodgingQl('["name"]', $around) . ');out ids 40;';
     $response = overpassRequest($ql);
     $places = osmLookupIds(osmOverpassIdsFromElements($response['elements'] ?? []), $city);
     foreach ($places as &$p) {
@@ -499,97 +618,115 @@ function osmParseReference(string $input): ?string
     return null;
 }
 
-/**
- * Prefer Nominatim's raw free-form search (as on openstreetmap.org).
- * Never turn a successfully found address into HTTP 502 because Overpass is down.
- * Overpass is an optional fallback ONLY when name search did not find tagged lodging.
- */
 function searchLodgingPlaces(string $query, string $city, string $cityName, string $mode = 'auto'): array
 {
     $bbox = cityBbox($city);
     if ($bbox === null) return [];
 
-    // Bypass fuzzy name search when the admin supplies an exact OSM object link.
-    $osmId = osmParseReference($query);
-    if ($osmId !== null) {
-        return osmSearchCandidates(osmRequest('lookup', [
-            'osm_ids' => $osmId,
-            'format' => 'jsonv2',
-            'addressdetails' => 1,
-            'namedetails' => 1,
-            'accept-language' => 'vi',
-        ]), $city);
-    }
-
-    $viewbox = sprintf('%.5F,%.5F,%.5F,%.5F', $bbox[1], $bbox[2], $bbox[3], $bbox[0]);
-    $params = [
-        'q' => $query,
+    $lookupParams = [
         'format' => 'jsonv2',
         'addressdetails' => 1,
         'namedetails' => 1,
         'accept-language' => 'vi',
-        'countrycodes' => 'vn',
-        'limit' => 40,
-        'viewbox' => $viewbox,
-        'bounded' => 0,
     ];
 
-    // First call keeps the user's exact text intact; never force a city suffix.
-    $geo = osmRequest('search', $params);
-    $candidates = osmSearchCandidates($geo, $city);
-
-    // Nominatim may rank only the street. A city-qualified second attempt
-    // is useful only if the first returns NO in-area results.
-    if ($candidates === []) {
-        $params['q'] = $query . ', ' . $cityName . ', Việt Nam';
-        $geo = osmRequest('search', $params);
-        $candidates = osmSearchCandidates($geo, $city);
+    // Admin dán link OSM / osm-W123: tra thẳng, không cần tìm mờ.
+    $osmId = osmParseReference($query);
+    if ($osmId !== null) {
+        return osmSearchCandidates(osmRequest('lookup', ['osm_ids' => $osmId] + $lookupParams), $city);
     }
 
-    $lodging = array_values(array_filter(
-        $candidates,
-        static fn(array $p): bool => $p['_kind'] === 'lodging'
-    ));
-    $addresses = array_values(array_filter(
-        $candidates,
-        static fn(array $p): bool => $p['_kind'] === 'address'
-    ));
-    $locations = array_values(array_filter(
-        $candidates,
-        static fn(array $p): bool => $p['_kind'] === 'location'
-    ));
+    $viewbox = sprintf('%.5F,%.5F,%.5F,%.5F', $bbox[1], $bbox[2], $bbox[3], $bbox[0]);
+    $looksLikeAddress = osmLooksLikeAddress($query);
 
-    // Put exact street addresses first in address mode.
-    if ($mode === 'address') {
-        $ordered = array_merge($addresses, $lodging, $locations);
-    } else {
-        $ordered = array_merge($lodging, $addresses, $locations);
+    $countKinds = static function (array $items): array {
+        $c = ['lodging' => 0, 'address' => 0, 'location' => 0];
+        foreach ($items as $p) {
+            $c[$p['_kind'] ?? 'location'] = ($c[$p['_kind'] ?? 'location'] ?? 0) + 1;
+        }
+        return $c;
+    };
+    $enough = static function (array $items) use ($countKinds, $mode, $looksLikeAddress): bool {
+        $c = $countKinds($items);
+        return match ($mode) {
+            'name' => $c['lodging'] > 0,
+            'address' => ($c['address'] + $c['lodging']) > 0,
+            default => $c['lodging'] > 0 || ($looksLikeAddress && $c['address'] > 0),
+        };
+    };
+
+    // 1) Nominatim: thử lần lượt các biến thể truy vấn, giới hạn trong khung thành phố (bounded=1)
+    //    để các tên phổ biến ở tỉnh khác không chiếm hết 40 kết quả.
+    $all = [];
+    foreach (osmQueryVariants($query, $cityName, $mode) as $variant) {
+        $geo = osmRequest('search', [
+            'q' => $variant['q'],
+            'format' => 'jsonv2',
+            'addressdetails' => 1,
+            'namedetails' => 1,
+            'accept-language' => 'vi',
+            'countrycodes' => 'vn',
+            'limit' => 40,
+            'viewbox' => $viewbox,
+            'bounded' => $variant['bounded'],
+        ]);
+        foreach (osmSearchCandidates($geo, $city) as $c) {
+            $all[osmPlaceId($c)] ??= $c;
+        }
+        if ($enough($all)) break;
     }
 
-    // No need to query often-overloaded Overpass if Nominatim returned actual
-    // matching POIs or exact street addresses. For partial name searches only,
-    // Overpass can recover tagged hotels Nominatim did not rank highly.
-    $looksLikeAddress = preg_match('/[0-9]|đường|duong|phố|pho\s|street|road|phường|phuong|hẻm|hem|ngõ|ngo\s/iu', $query) === 1;
-    if ($mode !== 'address' && !$looksLikeAddress && $lodging === []) {
+    // 2) Overpass theo tên (name/name:en/alt_name..., không phân biệt dấu) khi còn ít cơ sở lưu trú.
+    if ($mode !== 'address' && $countKinds($all)['lodging'] < 5) {
         try {
-            $extra = osmFindByName($query, $city);
-            $known = [];
-            foreach ($extra as $p) {
+            foreach (osmFindByName($query, $city) as $p) {
+                $id = osmPlaceId($p);
+                if ($id === null) continue;
                 $p['_kind'] = 'lodging';
                 $p['name'] = osmHotelName($p);
-                $known[osmPlaceId($p)] = $p;
+                $all[$id] = ($all[$id] ?? []) + $p; // giữ dữ liệu Nominatim nếu đã có
+                $all[$id]['_kind'] = 'lodging';
             }
-            foreach ($ordered as $p) {
-                $known[osmPlaceId($p)] = $p;
-            }
-            $ordered = array_values($known);
         } catch (Throwable $e) {
-            // Overpass is an *optional* fallback; don't discard valid results.
-            error_log('[3K OSM optional Overpass] ' . $e->getMessage());
+            error_log('[3K OSM optional Overpass name] ' . $e->getMessage());
         }
     }
 
-    return array_slice($ordered, 0, 25);
+    // 3) Truy vấn theo địa chỉ: tìm khách sạn/căn hộ nằm ngay tại hoặc quanh địa chỉ đó.
+    if (($mode === 'address' || $looksLikeAddress) && $countKinds($all)['lodging'] < 3) {
+        $anchor = null;
+        foreach ($all as $p) {
+            if (($p['_kind'] ?? '') === 'lodging') continue;
+            if ($anchor === null || (($p['_kind'] ?? '') === 'address' && ($anchor['_kind'] ?? '') !== 'address')) {
+                $anchor = $p;
+            }
+        }
+        if ($anchor !== null) {
+            $exact = !empty($anchor['address']['house_number']);
+            try {
+                $near = osmFindNearAddress((float) $anchor['lat'], (float) $anchor['lon'], $city, $exact ? 150 : 400);
+                foreach ($near as $p) {
+                    $id = osmPlaceId($p);
+                    if ($id === null) continue;
+                    $p['_kind'] = 'lodging';
+                    $all[$id] = ($all[$id] ?? []) + $p;
+                    $all[$id]['_kind'] = 'lodging';
+                    $all[$id]['_distanceMeters'] = $p['_distanceMeters'] ?? null;
+                }
+            } catch (Throwable $e) {
+                error_log('[3K OSM optional Overpass near] ' . $e->getMessage());
+            }
+        }
+    }
+
+    // 4) Xếp hạng theo độ liên quan thay vì chỉ theo loại.
+    $ranked = [];
+    foreach ($all as $p) {
+        $ranked[] = ['p' => $p, 'score' => osmScore($p, $query, $mode)];
+    }
+    usort($ranked, static fn(array $a, array $b): int => $b['score'] <=> $a['score']);
+
+    return array_slice(array_column($ranked, 'p'), 0, 25);
 }
 
 /** Server-side verification of a selected OSM object before INSERT. */
