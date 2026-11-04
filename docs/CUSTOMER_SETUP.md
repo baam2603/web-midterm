@@ -99,3 +99,33 @@ APP_BASE_URL=https://example.invalid, ONLINE_PAYMENTS_ENABLED=true, Resend key g
 Không có giao dịch hoặc email thật được thực hiện trong các bài test.
 Có thể chạy cùng bộ kiểm tra bằng `npm run test:prepare` rồi `npm test` trong môi trường Linux có Docker, Python 3, Playwright và Chromium.
 Các test admin/demo cũ dùng localStorage không phải bộ nghiệm thu customer hiện tại.
+
+## Chạy trên XAMPP và xử lý vòng đăng nhập
+
+Website trong thư mục con được hỗ trợ, ví dụ:
+`http://localhost:8083/3kbooking_midterm/`.
+Chưa đăng nhập mà chọn phòng sẽ mở login với `next` chứa đúng phòng/ngày đã chọn;
+sau đăng nhập thành công phải quay lại chính phòng đó.
+Dùng nhất quán cùng hostname/cổng/thư mục, không đổi giữa localhost và 127.0.0.1.
+Không mở trang bằng Live Server hoặc file:// vì các API PHP cần Apache.
+
+Mở `api/setup-status.php` dưới URL gốc của project để kiểm tra PHP, pdo_mysql,
+mbstring, kết nối DB và các cột/bảng còn thiếu. Kết quả `ready=true` xác nhận các
+prerequisite được kiểm tra đã đủ; trang không trả mật khẩu hoặc dữ liệu tài khoản.
+Nếu thiếu migration, sao lưu DB và import admin_migration.sql rồi customer_migration.sql.
+Không xóa DB hoặc nhập schema.sql đè lên dữ liệu.
+Nếu kết nối DB lỗi, đối chiếu port MySQL thực tế trong XAMPP với DB_PORT (mặc định 3308).
+Tài khoản đăng nhập phải tồn tại trong bảng users; tài khoản chỉ có trong localStorage
+của demo cũ không phải tài khoản SQL và không thể dùng để đăng nhập bản này.
+
+PHP session dùng cookie riêng THREEKSESSID, giới hạn theo thư mục ứng dụng để tránh
+lẫn phiên với project PHP khác. Sau lần cập nhật này, đăng nhập lại một lần.
+JavaScript có phiên bản mới để tránh browser tiếp tục dùng bản cũ trong cache.
+Lỗi API/migration không bị biến thành trạng thái chưa đăng nhập; nút chọn phòng chờ
+server xác minh phiên. Phản hồi 401 cũ không được xóa phiên mới vừa đăng nhập.
+Không cần localStorage để xác thực: cookie PHP vẫn là nguồn xác thực phía server.
+
+Giai đoạn hiện tại dùng thanh toán tại khách sạn; chưa cần cấu hình VNPay hoặc email.
+Các lựa chọn dịch vụ chưa kích hoạt được ẩn, khôi phục email chưa bật sẽ hướng dẫn liên hệ quản trị viên.
+Kiểm thử hồi quy đăng nhập và triển khai thực dưới thư mục con: `npm run test:auth`.
+Khi chưa cấu hình email, đặt phòng tại khách sạn không tạo hàng đợi email; email không phải điều kiện để lưu đơn.

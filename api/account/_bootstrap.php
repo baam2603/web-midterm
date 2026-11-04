@@ -2,6 +2,8 @@
 header("Content-Type: application/json; charset=utf-8");
 header("Cache-Control: no-store");
 require_once __DIR__ . "/../config/database.php";
+require_once __DIR__ . "/../shared/errors.php";
+set_exception_handler("outputApiFailure");
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -90,7 +92,7 @@ function run(callable $f): void
     try {
         $f(connectDB());
     } catch (Throwable $e) {
-        error_log($e->getMessage());
-        respond(500, "Lỗi hệ thống máy chủ.");
+        outputApiFailure($e);
+        exit();
     }
 }

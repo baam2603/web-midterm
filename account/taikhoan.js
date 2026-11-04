@@ -2,7 +2,12 @@
 (async function () {
   "use strict";
   const $ = (id) => document.getElementById(id),
-    user = await window.authReady;
+    user = await window.authReady.catch((error) => {
+      document.getElementById("profile-error").textContent = error.message;
+      document.getElementById("profile-error").classList.add("show");
+      return undefined;
+    });
+  if (user === undefined) return;
   if (!user) {
     location.replace(
       "../auth/login.html?next=" +

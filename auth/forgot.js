@@ -12,6 +12,24 @@
     reset.querySelector("[name=otp]")?.closest("label")?.remove();
     history.replaceState(null, "", location.pathname);
   } else reset.hidden = true;
+  if (!token) {
+    requestForm.hidden = true;
+    fetch("../api/health-config.php", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.data?.email) requestForm.hidden = false;
+        if (!j.data?.email) {
+          requestForm.hidden = true;
+          out.textContent =
+            "Khôi phục mật khẩu qua email sẽ được bổ sung sau. Nếu quên mật khẩu, vui lòng liên hệ quản trị viên để được hỗ trợ tài khoản.";
+        }
+      })
+      .catch(() => {
+        requestForm.hidden = true;
+        out.textContent =
+          "Chưa kiểm tra được chức năng khôi phục mật khẩu. Vui lòng liên hệ quản trị viên.";
+      });
+  }
   async function submit(form, body) {
     const button = form.querySelector("button");
     button.disabled = true;

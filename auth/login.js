@@ -7,6 +7,7 @@
 
   const status = document.createElement("p");
   status.setAttribute("role", "alert");
+  status.id = "login-status";
   status.style.marginTop = "12px";
   status.style.color = "#b83b37";
   form.appendChild(status);
@@ -105,6 +106,17 @@
       );
     } catch (error) {
       status.textContent = error?.message || "Đăng nhập không thành công.";
+      if (
+        ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) &&
+        error?.status !== 401
+      ) {
+        const link = document.createElement("a");
+        link.href = "../api/setup-status.php";
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = " Kiểm tra cài đặt PHP/MySQL";
+        status.append(link);
+      }
     } finally {
       if (submitButton) submitButton.disabled = false;
     }

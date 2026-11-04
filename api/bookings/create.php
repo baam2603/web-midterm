@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . "/../shared/customer.php";
+require_once __DIR__ . "/../shared/email.php";
 require_once __DIR__ . "/../shared/inventory.php";
 requireMethod("POST");
 $uid = requireUser();
@@ -236,25 +237,27 @@ try {
                 : "Vui lòng hoàn tất thanh toán trong 15 phút."),
         $code,
     );
-    $db->prepare(
-        "INSERT INTO mail_outbox(recipient,subject,html_body) VALUES(?,?,?)",
-    )->execute([
-        $email,
-        "Thông tin đặt phòng " . $code,
-        "<p>Đơn " .
-        htmlspecialchars($code) .
-        " đã được ghi nhận.</p><p>Ngày ở: " .
-        htmlspecialchars($from) .
-        " – " .
-        htmlspecialchars($to) .
-        "</p><p>Tổng tiền: " .
-        number_format($total, 0, ",", ".") .
-        " VND. " .
-        ($method === "hotel"
-            ? "Thanh toán tại khách sạn."
-            : "Đang chờ thanh toán trực tuyến.") .
-        "</p>",
-    ]);
+    if (mailConfigured()) {
+        $db->prepare(
+            "INSERT INTO mail_outbox(recipient,subject,html_body) VALUES(?,?,?)",
+        )->execute([
+            $email,
+            "Thông tin đặt phòng " . $code,
+            "<p>Đơn " .
+            htmlspecialchars($code) .
+            " đã được ghi nhận.</p><p>Ngày ở: " .
+            htmlspecialchars($from) .
+            " – " .
+            htmlspecialchars($to) .
+            "</p><p>Tổng tiền: " .
+            number_format($total, 0, ",", ".") .
+            " VND. " .
+            ($method === "hotel"
+                ? "Thanh toán tại khách sạn."
+                : "Đang chờ thanh toán trực tuyến.") .
+            "</p>",
+        ]);
+    }
     $db->commit();
     reply(201, [
         "status" => "success",

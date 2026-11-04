@@ -1,237 +1,161 @@
-/* THREEK.COM - Auth service (PHP sessions + MySQL account APIs) */
-(function () {
+/* PHP session is authoritative. Browser storage is only an optional UI cache. */
+(() => {
   "use strict";
-
-  const SESSION = "threek_demo_session_v1";
-  const GUEST = "threek_guest_access_v2";
-  const SCRIPT_URL = document.currentScript?.src || location.href;
-
-  function getApiUrl(endpoint) {
-    return new URL("../api/" + endpoint, SCRIPT_URL).href;
-  }
-
-  function getCurrentUser() {
+  const KEY = "threek_demo_session_v1";
+  const script = document.currentScript?.src || location.href;
+  let user = null,
+    generation = 0;
+  try {
+    const cached = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (cached?.id != null) user = cached;
+  } catch {}
+  const getApiUrl = (endpoint) => new URL("../api/" + endpoint, script).href;
+  const getCurrentUser = () => user;
+  function publish(value) {
+    user = value;
     try {
-      const user = JSON.parse(localStorage.getItem(SESSION) || "null");
-      return user && user.id != null ? user : null;
-    } catch {
-      return null;
-    }
-  }
-
-  function setSession(user) {
-    if (!user || user.id == null) {
-      throw new Error("Thông tin tài khoản không hợp lệ.");
-    }
-
-    localStorage.setItem(SESSION, JSON.stringify(user));
+      if (value) localStorage.setItem(KEY, JSON.stringify(value));
+      else localStorage.removeItem(KEY);
+    } catch {}
     window.dispatchEvent(new Event("threek:auth-updated"));
     return user;
   }
-
-  function clearSession() {
-    localStorage.removeItem(SESSION);
-    sessionStorage.removeItem(GUEST);
-    window.dispatchEvent(new Event("threek:auth-updated"));
+  function setSession(value) {
+    if (!value || value.id == null)
+      throw Error("Thông tin tài khoản không hợp lệ.");
+    return publish(value);
   }
-
-  // ========================
-  // API REQUEST
-  // ========================
-
-  async function apiRequest(endpoint, method = "GET", data) {
+  function clearSession() {
+    publish(null);
+    try {
+      sessionStorage.removeItem("threek_guest_access_v2");
+    } catch {}
+  }
+  async function request(endpoint, method = "GET", data) {
+    const controller = new AbortController(),
+      timer = setTimeout(() => controller.abort(), 12000);
     let response;
-
     try {
       response = await fetch(getApiUrl(endpoint), {
         method,
         credentials: "same-origin",
         cache: "no-store",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        signal: controller.signal,
+        headers: { "Content-Type": "application/json" },
         ...(data === undefined ? {} : { body: JSON.stringify(data) }),
       });
-    } catch {
-      throw new Error(
-        "Không thể kết nối máy chủ. Kiểm tra Apache và đường dẫn API.",
+    } catch (e) {
+      const error = Error(
+        e.name === "AbortError"
+          ? "Máy chủ phản hồi quá lâu. Vui lòng thử lại."
+          : "Không kết nối được máy chủ. Hãy mở website bằng Apache/XAMPP, không dùng Live Server.",
       );
+      error.code = "connection_error";
+      throw error;
+    } finally {
+      clearTimeout(timer);
     }
-
-    let json;
-
-    try {
-      json = await response.json();
-    } catch {
-      throw new Error(
-        "API không trả về JSON hợp lệ (HTTP " + response.status + ").",
+    const json = await response.json().catch(() => null);
+    if (!json) {
+      const error = Error(
+        "Không nhận được phản hồi PHP hợp lệ. Hãy chạy Apache/XAMPP và mở website bằng http://localhost/...; kiểm tra trang api/setup-status.php.",
       );
+      error.status = response.status;
+      error.code = "invalid_api_response";
+      throw error;
     }
-
     if (!response.ok || json.status !== "success") {
-      if (response.status === 401) clearSession();
-      throw new Error(
-        json.message || "Yêu cầu thất bại (HTTP " + response.status + ").",
-      );
+      const error = Error(json.message || "Yêu cầu thất bại.");
+      error.status = response.status;
+      error.code = json.code;
+      throw error;
     }
-
     return json.data || {};
   }
-
-  // ========================
-  // REGISTER
-  // ========================
-
-  async function registerUser(input) {
-    const data = await apiRequest("auth/register.php", "POST", {
+  async function loadProfile() {
+    const started = generation;
+    try {
+      const data = await request("account/profile.php");
+      if (started !== generation) return user;
+      if (!data.user) throw Error("Máy chủ thiếu thông tin tài khoản.");
+      return setSession(data.user);
+    } catch (error) {
+      if (started !== generation) return user;
+      if (error.status === 401) clearSession();
+      throw error;
+    }
+  }
+  async function authenticate(endpoint, body) {
+    const started = ++generation;
+    const data = await request(endpoint, "POST", body);
+    if (started !== generation)
+      throw Error("Yêu cầu đăng nhập đã thay đổi. Vui lòng thử lại.");
+    // Verify that the browser actually kept the PHP session before navigating.
+    let profile;
+    try {
+      profile = await request("account/profile.php");
+    } catch (error) {
+      if (error.status === 401) {
+        clearSession();
+        throw Error(
+          "Không giữ được phiên đăng nhập. Hãy bật cookie và dùng cùng một địa chỉ website (không đổi qua lại localhost và 127.0.0.1).",
+        );
+      }
+      throw error;
+    }
+    if (!profile.user || String(profile.user.id) !== String(data.user?.id))
+      throw Error(
+        "Không xác minh được phiên tài khoản. Vui lòng đăng nhập lại.",
+      );
+    const verified = setSession(profile.user);
+    window.authReady = Promise.resolve(verified);
+    return verified;
+  }
+  const registerUser = (input) =>
+    authenticate("auth/register.php", {
       fullName: String(input?.fullName || input?.name || "").trim(),
-
       email: String(input?.email || "")
         .trim()
         .toLowerCase(),
-
       password: String(input?.password || ""),
       phone: String(input?.phone || "").trim(),
       birthday: String(input?.birthday || ""),
     });
-
-    if (!data.user) {
-      throw new Error("API đăng ký thiếu dữ liệu user.");
-    }
-
-    sessionStorage.removeItem(GUEST);
-
-    return setSession(data.user);
-  }
-
-  // ========================
-  // LOGIN
-  // ========================
-
-  async function loginUser(email, password) {
-    const data = await apiRequest("auth/login.php", "POST", {
+  const loginUser = (email, password) =>
+    authenticate("auth/login.php", {
       email: String(email || "")
         .trim()
         .toLowerCase(),
-
       password: String(password || ""),
     });
-
-    if (!data.user) {
-      throw new Error("API đăng nhập thiếu dữ liệu user.");
-    }
-
-    sessionStorage.removeItem(GUEST);
-
-    return setSession(data.user);
-  }
-
-  // ========================
-  // LOAD PROFILE
-  // ========================
-
-  async function loadProfile() {
-    try {
-      const data = await apiRequest("account/profile.php");
-
-      if (!data.user) {
-        throw new Error("API hồ sơ thiếu dữ liệu user.");
-      }
-
-      return setSession(data.user);
-    } catch (err) {
-      if (/đăng nhập lại|phiên đăng nhập|không còn hợp lệ/i.test(err.message)) {
-        clearSession();
-      }
-
-      throw err;
-    }
-  }
-
-  // ========================
-  // UPDATE PROFILE
-  // ========================
-
   async function updateProfile(input) {
-    const data = await apiRequest("account/update-profile.php", "POST", {
-      fullName: String(input?.fullName || "").trim(),
-      displayName: String(input?.displayName || "").trim(),
-      birthday: String(input?.birthday || ""),
-      phone: String(input?.phone || "").trim(),
-    });
-
-    if (!data.user) {
-      throw new Error("API cập nhật thiếu dữ liệu user.");
-    }
-
+    const data = await request("account/update-profile.php", "POST", input);
     return setSession(data.user);
   }
-
-  // ========================
-  // CHANGE PASSWORD
-  // ========================
-
   async function changePassword(current, next) {
-    await apiRequest("account/change-password.php", "POST", {
-      currentPassword: String(current || ""),
-      newPassword: String(next || ""),
+    await request("account/change-password.php", "POST", {
+      currentPassword: current,
+      newPassword: next,
     });
-
     return true;
   }
-
-  // ========================
-  // DELETE ACCOUNT
-  // ========================
-
   async function deleteCurrentAccount(password) {
-    await apiRequest("account/delete-account.php", "POST", {
-      password: String(password || ""),
-    });
-
-    const user = getCurrentUser();
-
-    if (user) {
-      localStorage.removeItem("threek_favorites_user_" + user.id);
-    }
-
+    await request("account/delete-account.php", "POST", { password });
+    generation++;
     clearSession();
+    window.authReady = Promise.resolve(null);
     return true;
   }
-
-  // ========================
-  // LOGOUT
-  // ========================
-
   async function logout() {
-    await apiRequest("account/logout.php", "POST", {});
+    await request("account/logout.php", "POST", {});
+    generation++;
     clearSession();
+    window.authReady = Promise.resolve(null);
   }
-
-  // ========================
-  // PASSWORD RECOVERY
-  // ========================
-
-  function startDemoRecovery() {
-    throw new Error(
-      "Quên mật khẩu qua email chưa được triển khai trên máy chủ.",
-    );
-  }
-
-  async function finishDemoRecovery() {
-    throw new Error(
-      "Đặt lại mật khẩu qua email chưa được triển khai trên máy chủ.",
-    );
-  }
-
-  // ========================
-  // GLOBAL FUNCTIONS
-  // ========================
-
   Object.assign(window, {
+    getApiUrl,
     getCurrentUser,
     setSession,
-    getApiUrl,
     registerUser,
     loginUser,
     loadProfile,
@@ -239,9 +163,22 @@
     changePassword,
     deleteCurrentAccount,
     logout,
-    startDemoRecovery,
-    finishDemoRecovery,
   });
-
-  window.authReady = loadProfile().catch(() => null);
+  window.authReady = loadProfile().catch((error) => {
+    if (error.status === 401) return null;
+    window.authError = error;
+    throw error;
+  });
+  // Pages that do not need a session should still render on a backend failure.
+  window.authReady.catch(() => {});
+  window.addEventListener("storage", (event) => {
+    if (event.key !== KEY) return;
+    generation++;
+    const p = loadProfile().catch((error) => {
+      if (error.status === 401) return null;
+      throw error;
+    });
+    window.authReady = p;
+    p.catch(() => {});
+  });
 })();

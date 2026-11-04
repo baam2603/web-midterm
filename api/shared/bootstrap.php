@@ -3,6 +3,8 @@ declare(strict_types=1);
 date_default_timezone_set("Asia/Ho_Chi_Minh");
 header("Content-Type: application/json; charset=utf-8");
 require_once __DIR__ . "/../config/database.php";
+require_once __DIR__ . "/../shared/errors.php";
+set_exception_handler("outputApiFailure");
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -60,8 +62,8 @@ function requireAdmin(): int
 }
 function failServer(Throwable $e): never
 {
-    error_log("[THREEK API] " . $e->getMessage());
-    reply(500, ["status" => "error", "message" => "Lỗi hệ thống máy chủ."]);
+    outputApiFailure($e);
+    exit();
 }
 
 function requireCsrf(): void

@@ -229,7 +229,7 @@
   /* ---------- Chọn phòng ---------- */
 
   /* ---------- Chọn phòng ---------- */
-  function goBooking(roomId) {
+  async function goBooking(roomId) {
     const selected = rooms.find((r) => r.id === roomId);
 
     // Không tìm thấy phòng hoặc phòng đã hết
@@ -255,7 +255,21 @@
     const bookingUrl = `Booking.html?${next.toString()}`;
 
     // Kiểm tra đăng nhập
-    const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
+    let user;
+    try {
+      user = await window.authReady;
+    } catch (error) {
+      let notice = document.getElementById("booking-session-error");
+      if (!notice) {
+        notice = document.createElement("p");
+        notice.id = "booking-session-error";
+        notice.setAttribute("role", "alert");
+        document.getElementById("rooms").prepend(notice);
+      }
+      notice.textContent = error.message;
+      notice.scrollIntoView({ block: "center" });
+      return;
+    }
 
     if (!user) {
       // Lưu đường dẫn quay lại sau khi đăng nhập

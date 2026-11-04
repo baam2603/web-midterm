@@ -1,7 +1,7 @@
 """Real UI customer booking on SQL-only hotel/room codes. No live payment/email."""
 import json,secrets,subprocess,urllib.request,os
 from playwright.sync_api import sync_playwright
-URL='http://127.0.0.1:8001';DB='web-midterm-admin-db'
+URL=os.environ.get('CUSTOMER_TEST_URL','http://127.0.0.1:8001');DB='web-midterm-admin-db'
 def sql(q):return subprocess.check_output(['docker','exec','-i',DB,'mariadb','-uroot','-N','threek_booking'],input=q.encode()).decode().strip()
 def api(path,body):
  req=urllib.request.Request(URL+path,data=json.dumps(body).encode(),headers={'Content-Type':'application/json'})
@@ -14,11 +14,17 @@ try:
  with sync_playwright() as p:
   browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox']);ctx=browser.new_context();ctx.route('**/*',lambda r:r.continue_() if r.request.url.startswith(URL) else r.abort());page=ctx.new_page();page.set_default_timeout(12000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   page.goto(URL+'/auth/login.html',wait_until='domcontentloaded');page.locator('#email').fill(email);page.locator('#password').fill(pw);page.locator('button[type=submit]').click();page.wait_for_url('**/index1.html')
+  prefix=urllib.parse.urlsplit(URL).path.rstrip('/')
+  if prefix:
+   assert any(cookie['name']=='THREEKSESSID' and cookie['path']==prefix+'/' for cookie in ctx.cookies());print('PASS PHP session cookie is scoped to the real project subdirectory')
   page.goto(URL+'/destinations/dalat.html',wait_until='domcontentloaded');card=page.locator(f'.hotel-card[data-id="customer-browser-{run}"]');card.wait_for();card.locator('.btn-fav').click();page.wait_for_function("document.querySelector('.btn-fav.is-saved') !== null")
   page.goto(URL+'/account/favorites.html',wait_until='domcontentloaded');page.get_by_text('SQL Browser Hotel '+run,exact=True).wait_for();print('PASS customer catalog and SQL favorites persist across pages')
   page.goto(URL+f'/hotel/hotel.html?city=dalat&id=customer-browser-{run}&checkin=2099-03-01&checkout=2099-03-03',wait_until='domcontentloaded');page.locator('[data-room=sql-only-room]').first.click();page.wait_for_url('**/hotel/Booking.html?*')
   page.locator('#booking-form').wait_for();page.locator('[name=phone]').fill('0912345678');page.locator('#booking-form button[type=submit]').click();page.wait_for_url('**/payment/payment.html')
-  page.locator('#confirm-booking:not([disabled])').wait_for();page.locator('[name=terms]').check();page.locator('#confirm-booking').click();page.wait_for_url('**/payment/success.html?code=*');page.get_by_role('heading',name='Đã ghi nhận đặt phòng').wait_for();code=page.url.split('code=')[1]
+  page.locator('#confirm-booking:not([disabled])').wait_for();
+  if os.environ.get('CUSTOMER_TEST_OFFLINE')=='1':
+   assert not page.locator('[name=method][value=online]').is_visible();print('PASS operation-only mode shows no online-payment option')
+  page.locator('[name=terms]').check();page.locator('#confirm-booking').click();page.wait_for_url('**/payment/success.html?code=*');page.get_by_role('heading',name='Đã ghi nhận đặt phòng').wait_for();code=page.url.split('code=')[1]
   assert sql(f"SELECT COUNT(*) FROM bookings WHERE code='{code}' AND user_id={uid}")=='1';print('PASS SQL-only hotel → room → checkout → persistent success page')
   page.reload(wait_until='domcontentloaded');page.get_by_text(code,exact=True).wait_for();print('PASS success survives reload without localStorage booking')
   page.goto(URL+'/booking/detail.html?code='+code,wait_until='domcontentloaded');page.locator('#cancel-detail').wait_for();page.once('dialog',lambda d:d.accept());page.locator('#cancel-detail').click();page.wait_for_function("document.querySelector('.badge')?.textContent.includes('Đã hủy')")

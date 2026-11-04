@@ -1,5 +1,10 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) {
+    $scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+    $apiPosition = strrpos($scriptPath, '/api/');
+    $cookiePath = $apiPosition === false ? '/' : substr($scriptPath, 0, $apiPosition + 1);
+    session_name('THREEKSESSID');
+    ini_set('session.cookie_path', $cookiePath);
     ini_set("session.use_strict_mode", "1");
     ini_set("session.cookie_httponly", "1");
     ini_set("session.cookie_samesite", "Lax");
@@ -36,6 +41,6 @@ function connectDB(): PDO
         return $connection;
     } catch (PDOException $e) {
         error_log($e->getMessage());
-        throw new RuntimeException("Database connection failed");
+        throw new RuntimeException("Database connection failed", 0, $e);
     }
 }

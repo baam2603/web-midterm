@@ -64,7 +64,7 @@
     guests: Number(draft.guests),
     coupon: draft.coupon || "",
   });
-  root.innerHTML = `<h1 class="booking-title">Xác nhận đặt phòng</h1><div class="booking-grid"><section class="card booking-left"><h2>${esc(hotel.name)}</h2><p>${esc(room.name)} · ${Number(draft.rooms)} phòng · ${Number(draft.guests)} khách</p><p>${esc(draft.checkin)} → ${esc(draft.checkout)}</p><p>Người nhận phòng: ${esc(draft.lastName)} ${esc(draft.firstName)}</p><p>${esc(draft.email)} · ${esc(draft.phone)}</p><p>Yêu cầu: ${esc(draft.note || "Không có")}</p><form id="checkout-confirm"><label><input type="radio" name="method" value="hotel" checked> Thanh toán tại khách sạn</label><br><label><input type="radio" name="method" value="online"> Thanh toán trực tuyến qua VNPay</label><p>VNPay xử lý thanh toán trên trang của nhà cung cấp. Website không thu thập số thẻ hoặc CVV.</p><label><input type="checkbox" name="terms" required> Tôi đồng ý với điều kiện đặt phòng và chính sách hủy.</label><p id="checkout-message" role="status">Đang lấy giá...</p><button type="submit" class="btn-solid" disabled id="confirm-booking">Xác nhận đặt phòng</button></form><p><a id="checkout-back">Quay lại sửa thông tin</a></p></section><aside class="card" id="checkout-price"></aside></div>`;
+  root.innerHTML = `<h1 class="booking-title">Xác nhận đặt phòng</h1><div class="booking-grid"><section class="card booking-left"><h2>${esc(hotel.name)}</h2><p>${esc(room.name)} · ${Number(draft.rooms)} phòng · ${Number(draft.guests)} khách</p><p>${esc(draft.checkin)} → ${esc(draft.checkout)}</p><p>Người nhận phòng: ${esc(draft.lastName)} ${esc(draft.firstName)}</p><p>${esc(draft.email)} · ${esc(draft.phone)}</p><p>Yêu cầu: ${esc(draft.note || "Không có")}</p><form id="checkout-confirm"><label><input type="radio" name="method" value="hotel" checked> Thanh toán tại khách sạn</label><br><label><input type="radio" name="method" value="online"> Thanh toán trực tuyến qua VNPay</label><p>Bạn xác nhận đơn và thanh toán tại khách sạn theo chính sách đặt phòng.</p><label><input type="checkbox" name="terms" required> Tôi đồng ý với điều kiện đặt phòng và chính sách hủy.</label><p id="checkout-message" role="status">Đang lấy giá...</p><button type="submit" class="btn-solid" disabled id="confirm-booking">Xác nhận đặt phòng</button></form><p><a id="checkout-back">Quay lại sửa thông tin</a></p></section><aside class="card" id="checkout-price"></aside></div>`;
   root.querySelector("#checkout-back").href = back.href;
   const form = root.querySelector("form"),
     message = root.querySelector("#checkout-message"),
@@ -156,13 +156,14 @@
     const online = form.querySelector("[value=online]");
     if (!j.data?.onlinePayments) {
       online.disabled = true;
-      online.closest("label").append(" — Chưa được kích hoạt");
+      online.closest("label").hidden = true;
     } else if (j.data.gatewayMode === "sandbox")
       online
         .closest("label")
         .append(" — Môi trường thử nghiệm VNPay, không phải giao dịch thật");
   } catch (e) {
     form.querySelector("[value=online]").disabled = true;
+    form.querySelector("[value=online]").closest("label").hidden = true;
   }
   if (bookingCode) {
     try {
