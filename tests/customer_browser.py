@@ -19,9 +19,31 @@ try:
    assert any(cookie['name']=='THREEKSESSID' and cookie['path']==prefix+'/' for cookie in ctx.cookies());print('PASS PHP session cookie is scoped to the real project subdirectory')
   page.goto(URL+'/destinations/dalat.html',wait_until='domcontentloaded');card=page.locator(f'.hotel-card[data-id="customer-browser-{run}"]');card.wait_for();card.locator('.btn-fav').click();page.wait_for_function("document.querySelector('.btn-fav.is-saved') !== null")
   page.goto(URL+'/account/favorites.html',wait_until='domcontentloaded');page.get_by_text('SQL Browser Hotel '+run,exact=True).wait_for();print('PASS customer catalog and SQL favorites persist across pages')
-  page.goto(URL+f'/hotel/hotel.html?city=dalat&id=customer-browser-{run}&checkin=2099-03-01&checkout=2099-03-03',wait_until='domcontentloaded');page.locator('[data-room=sql-only-room]').first.click();page.wait_for_url('**/hotel/Booking.html?*')
+  search_query=urllib.parse.urlencode({'street':'SQL Browser Hotel '+run,'checkin':'2099-03-01','checkout':'2099-03-03','adults':2,'rooms':1,'sort':1,'stars':'4','maxPrice':1400000,'guestFilter':1})
+  page.goto(URL+'/destinations/dalat.html?'+search_query,wait_until='domcontentloaded')
+  page.locator(f'.hotel-card[data-id="customer-browser-{run}"] .btn-view').click();page.wait_for_url('**/hotel/hotel.html?*')
+  page.locator('#back-to-hotels').click();page.wait_for_url('**/destinations/dalat.html?*')
+  page.locator(f'.hotel-card[data-id="customer-browser-{run}"]').wait_for()
+  assert page.locator('#street').input_value()=='SQL Browser Hotel '+run
+  assert page.locator('[data-group=stars][value="4"]').is_checked()
+  assert page.locator('.results-head select').evaluate('(el)=>el.selectedIndex')==1
+  assert '2099' in urllib.parse.unquote(page.url)
+  page.locator(f'.hotel-card[data-id="customer-browser-{run}"] .btn-view').click();page.wait_for_url('**/hotel/hotel.html?*')
+  page.locator('[data-room=sql-only-room]').first.click();page.wait_for_url('**/hotel/Booking.html?*')
+  page.locator('[name=phone]').fill('0912345678');page.locator('[data-f=note]').fill('Keep my navigation draft')
+  page.locator('[data-hotel-return]').last.click();page.wait_for_url('**/hotel/hotel.html?*')
+  assert urllib.parse.parse_qs(urllib.parse.urlsplit(page.url).query)['checkin']==['2099-03-01']
+  page.locator('[data-room=sql-only-room]').first.click();page.wait_for_url('**/hotel/Booking.html?*')
+  page.locator('#booking-form').wait_for();assert page.locator('[name=phone]').input_value()=='0912345678' and page.locator('[data-f=note]').input_value()=='Keep my navigation draft'
+  print('PASS explicit list/hotel return links preserve filters, dates and booking draft')
   page.locator('#booking-form').wait_for();page.locator('[name=phone]').fill('0912345678');page.locator('#bkLeft [data-next]').click();page.locator('[name=pay][value=hotel]').check();page.locator('#bkLeft [data-next]').click();page.wait_for_url('**/payment/payment.html')
   page.locator('[data-pay]:not([disabled])').wait_for();assert page.locator('#pPrice .price-lines').count()==1 and page.locator('#pSummary .summary-list').count()==1;assert page.locator('#pStepper li').count()==3;print('PASS original checkout stepper, price breakdown and sidebar retained');
+  first_key=page.evaluate("JSON.parse(sessionStorage.getItem('threek_checkout')).requestKey")
+  page.get_by_role('button',name='Sửa thông tin đặt phòng').click();page.wait_for_url('**/hotel/Booking.html?*');page.locator('#booking-form').wait_for()
+  assert page.locator('[data-f=note]').input_value()=='Keep my navigation draft'
+  page.locator('#bkLeft [data-next]').click();page.locator('#bkLeft [data-next]').click();page.wait_for_url('**/payment/payment.html');page.locator('[data-pay]:not([disabled])').wait_for()
+  assert page.evaluate("JSON.parse(sessionStorage.getItem('threek_checkout')).requestKey")==first_key
+  print('PASS edit-details navigation retains draft and stable request key')
   checkout_draft=page.evaluate("JSON.parse(sessionStorage.getItem('threek_checkout'))")
   assert page.locator('[name=pay]').count()==4 and page.locator('[name=wallet][value=vnpay]').count()==0
   if os.environ.get('CUSTOMER_TEST_OFFLINE')=='1':

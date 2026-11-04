@@ -147,3 +147,16 @@ Chỉ nhập thẻ thử nghiệm 4111 1111 1111 1111 khi thử phần giao di�
 SQL lưu phương thức minh bạch `card_demo`, `bank_demo`, `momo_demo`, `zalopay_demo`,
 trạng thái thanh toán vẫn `unpaid`. Trả tại khách sạn lưu `hotel`.
 Không cần migration mới cho lần khôi phục UI này; vẫn cần các migration đã bàn giao.
+
+
+## Điều hướng giữ thông tin thao tác
+
+- Chi tiết khách sạn có nút về danh sách; URL mang theo ngày, số khách/phòng,
+  từ khóa, sắp xếp và bộ lọc để khôi phục khi quay lại (không phụ thuộc history).
+- Đặt phòng có nút về khách sạn; lưu bản nháp biểu mẫu trong sessionStorage.
+  Thanh toán có nút sửa thông tin, giữ request key khi thông tin đơn không đổi.
+  Không lưu số thẻ/CVV vào bản nháp.
+- Sau khi xác nhận có đường dẫn trực tiếp đến chi tiết đơn.
+- Biểu mẫu admin có nút về danh sách ở đầu; giữ từ khóa lọc khi đóng/chuyển tab
+  hoặc lưu. Khi rời chỉnh sửa khách sạn/loại phòng có dữ liệu chưa lưu sẽ hỏi lại.
+- Giữ CSS và cấu trúc trang hiện tại; không thay đổi SQL hoặc cấu hình email/VNPay.

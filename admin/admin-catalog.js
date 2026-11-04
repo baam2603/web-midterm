@@ -41,6 +41,7 @@
       throw Error(j.message || "Không thể lưu dữ liệu.");
     return j.data;
   }
+  const queries = new Map();
   function mount(root, tab, hotels, onSaved) {
     if (!["hotels", "rooms"].includes(tab)) return;
     const tables = [...root.querySelectorAll(".tk-tablewrap")];
@@ -57,12 +58,15 @@
       input.maxLength = 100;
       label.append(input);
       w.before(label);
+      input.value = queries.get(tab) || "";
       input.oninput = () => {
+        queries.set(tab, input.value);
         const q = fold(input.value.trim());
         w.querySelectorAll("tbody tr").forEach(
           (r) => (r.hidden = !fold(r.textContent).includes(q)),
         );
       };
+      input.oninput();
     });
     if (tab === "hotels") {
       const editor = document.createElement("section");
@@ -78,9 +82,23 @@
             );
             if (!h) return;
             editor.hidden = false;
-            editor.innerHTML = `<h2>Chỉnh sửa ${esc(h.name)}</h2><form class="tk-form" id="admin-hotel-edit-form"><input type="hidden" name="id" value="${Number(h.id)}"><label>Tên khách sạn<input name="name" minlength="3" maxlength="150" required value="${esc(h.name)}"></label><label>Loại hình<select name="type">${["hotel", "resort", "homestay", "villa"].map((v) => `<option ${v === h.type ? "selected" : ""}>${v}</option>`).join("")}</select></label><label>Số sao<input name="stars" type="number" min="1" max="5" required value="${Number(h.stars)}"></label><label>Giá tham khảo/đêm<input name="price_per_night" type="number" min="100000" max="100000000" step="1" required value="${Number(h.price_per_night)}"></label><label>Mô tả<textarea name="description" maxlength="3000">${esc(h.description)}</textarea></label><p>Địa chỉ: ${esc(h.address)}. Mã khách sạn và liên kết đơn được giữ nguyên.</p><p role="status"></p><div class="tk-actions"><button type="submit" class="tk-primary">Lưu khách sạn</button><button type="button" data-cancel class="tk-outline">Hủy</button></div></form>`;
-            editor.querySelector("[data-cancel]").onclick = () =>
-              (editor.hidden = true);
+            editor.innerHTML = `<p><button type="button" class="tk-outline" data-editor-back>← Về danh sách khách sạn</button></p><h2>Chỉnh sửa ${esc(h.name)}</h2><form class="tk-form" id="admin-hotel-edit-form"><input type="hidden" name="id" value="${Number(h.id)}"><label>Tên khách sạn<input name="name" minlength="3" maxlength="150" required value="${esc(h.name)}"></label><label>Loại hình<select name="type">${["hotel", "resort", "homestay", "villa"].map((v) => `<option ${v === h.type ? "selected" : ""}>${v}</option>`).join("")}</select></label><label>Số sao<input name="stars" type="number" min="1" max="5" required value="${Number(h.stars)}"></label><label>Giá tham khảo/đêm<input name="price_per_night" type="number" min="100000" max="100000000" step="1" required value="${Number(h.price_per_night)}"></label><label>Mô tả<textarea name="description" maxlength="3000">${esc(h.description)}</textarea></label><p>Địa chỉ: ${esc(h.address)}. Mã khách sạn và liên kết đơn được giữ nguyên.</p><p role="status"></p><div class="tk-actions"><button type="submit" class="tk-primary">Lưu khách sạn</button><button type="button" data-cancel class="tk-outline">Hủy</button></div></form>`;
+            const closeEditor = () => {
+              const form = editor.querySelector("form");
+              if (
+                form.dataset.original !==
+                  JSON.stringify([...new FormData(form)]) &&
+                !confirm("Bạn có thay đổi chưa lưu. Rời phần chỉnh sửa?")
+              )
+                return;
+              editor.hidden = true;
+              button.focus();
+              button.scrollIntoView({ block: "center" });
+            };
+            const form = editor.querySelector("form");
+            form.dataset.original = JSON.stringify([...new FormData(form)]);
+            editor.querySelector("[data-cancel]").onclick = closeEditor;
+            editor.querySelector("[data-editor-back]").onclick = closeEditor;
             editor.querySelector("form").onsubmit = async (e) => {
               e.preventDefault();
               const f = e.target,

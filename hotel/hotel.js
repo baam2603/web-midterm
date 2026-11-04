@@ -14,7 +14,7 @@
   document.body.dataset.city = city ? city.theme : "dalat";
 
   mountHeader("site-header", {
-    logoHref: "index1.html",
+    logoHref: "../index1.html",
     middle: `<div class="text-booking">Booking - Đặt phòng khách sạn</div>`,
   });
 
@@ -110,14 +110,26 @@
       </div>
     </article>`;
 
+  const listPage = new URL("../" + city.listHref, location.href);
+  let listUrl = listPage.href;
+  try {
+    const candidate = new URL(params.get("list") || listUrl, location.href);
+    if (
+      candidate.origin === listPage.origin &&
+      candidate.pathname === listPage.pathname
+    )
+      listUrl = candidate.href;
+  } catch (_) {}
+
   /* ---------- Render ---------- */
   root.innerHTML = `
     <nav class="breadcrumb" aria-label="Điều hướng">
       <a href="../index1.html">Trang chủ</a>${icon("chevron_right")}
-      <a href="../${city.listHref}">${esc(city.name)}</a>${icon("chevron_right")}
+      <a href="${esc(listUrl)}">${esc(city.name)}</a>${icon("chevron_right")}
       <span class="current">${esc(hotel.name)}</span>
     </nav>
 
+    <p><a class="tk-outline" href="${esc(listUrl)}" id="back-to-hotels">← Về danh sách khách sạn</a></p>
     <section class="hotel-title">
       <div class="hotel-title__stars" aria-label="${hotel.stars} sao">${icon("star").repeat(hotel.stars)}</div>
       <h1>${esc(hotel.name)}</h1>
@@ -242,6 +254,12 @@
       room: roomId,
     });
 
+    next.set(
+      "list",
+      new URL(listUrl).pathname +
+        new URL(listUrl).search +
+        new URL(listUrl).hash,
+    );
     next.set("checkin", start);
     next.set("checkout", end);
 

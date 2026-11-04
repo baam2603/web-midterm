@@ -63,7 +63,7 @@
     window.paymentDraft = draft;
     window.paymentBooking = booking;
     const script = document.createElement("script");
-    script.src = "payment.js?v=20261104-original-ui";
+    script.src = "payment.js?v=20261104-nav";
     document.body.append(script);
   } catch (error) {
     root.textContent = error.message;

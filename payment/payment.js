@@ -154,7 +154,7 @@
     <nav class="breadcrumb" aria-label="Điều hướng">
       <a href="../index1.html">Trang chủ</a>${icon("chevron_right")}
       <a href="../hotel/hotel.html?city=${encodeURIComponent(draft.city)}&id=${encodeURIComponent(draft.hotelId)}">${esc(hotel.name)}</a>${icon("chevron_right")}
-      <a href="${esc(backUrl)}">Đặt phòng</a>${icon("chevron_right")}
+      <a href="${esc(backUrl)}" data-back>Đặt phòng</a>${icon("chevron_right")}
       <span class="current">Thanh toán</span>
     </nav>
     <h1 class="booking-title">Thanh toán mô phỏng</h1>
@@ -303,7 +303,7 @@
         ${detailHTML()}
       </div>
       <div class="actions">
-        <button type="button" class="btn btn--ghost" data-back>${icon("arrow_back")} Quay lại</button>
+        <button type="button" class="btn btn--ghost" data-back>${icon("arrow_back")} Sửa thông tin đặt phòng</button>
         <button type="button" class="btn btn--primary" data-pay>${icon("lock")} ${payLabel()}</button>
       </div>
       <p class="secure">${icon("verified_user")} THANH TOÁN DEMO — không trừ tiền, không gửi email. Chỉ dùng số thẻ thử nghiệm, không nhập thẻ thật.</p>`;
@@ -328,6 +328,7 @@
         ${paid ? "Đã thanh toán" : "Số tiền cần thanh toán"}: <b>${money(total)}</b></p>
         <div class="done__actions">
           <a class="btn btn--ghost" href="../index1.html">Về trang chủ</a>
+          <a class="btn btn--ghost" href="../booking/detail.html?code=${encodeURIComponent(draft.code)}">Xem chi tiết đơn</a>
           <a class="btn btn--primary" href="../booking/myBooking.html">Xem đặt phòng của tôi</a>
         </div>
       </div>`;
@@ -534,6 +535,19 @@
 
   root.addEventListener("click", (e) => {
     if (e.target.closest("[data-back]")) {
+      e.preventDefault();
+      if (saving) return;
+      if (state.phase === "pay") {
+        draft.pay = state.method;
+        try {
+          sessionStorage.setItem(KEY, JSON.stringify(draft));
+        } catch (_) {
+          alert(
+            "Không lưu được thông tin để quay lại. Vui lòng cho phép lưu dữ liệu trong trình duyệt.",
+          );
+          return;
+        }
+      }
       location.href = backUrl;
       return;
     }

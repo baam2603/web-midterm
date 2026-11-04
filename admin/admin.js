@@ -660,6 +660,7 @@
   </div>
 
   <div id="tk-create-hotel-panel" hidden>
+    <p><button type="button" class="tk-outline" data-create-hotel-back>← Về danh sách khách sạn</button></p>
     <h3>Thông tin khách sạn mới</h3>
 
     <p class="tk-muted">
@@ -971,6 +972,7 @@
         ${
           hotelOptions
             ? `
+        <p><a class="tk-outline" href="#tk-room-list" data-room-list>↓ Đến danh sách loại phòng</a></p>
         <form id="tk-create-room-db" class="tk-form">
           <label>Khách sạn *
             <select name="hotel_id" required>
@@ -1044,6 +1046,7 @@
         <h2>Chỉnh sửa loại phòng — MySQL</h2>
         <p id="tk-edit-room-caption" class="tk-muted"></p>
         <p id="tk-room-edit-validation" class="tk-muted" role="status" aria-live="polite" hidden></p>
+        <p><button type="button" class="tk-outline" data-room-back>← Về danh sách loại phòng</button></p>
         <form id="tk-update-room-db" class="tk-form">
           <input type="hidden" name="id">
           <label>Tên loại phòng *
@@ -1092,7 +1095,7 @@
           </div>
         </form>
       </section>
-      <h2 style="margin-top:24px">Danh sách loại phòng (${adminRooms.length})</h2>
+      <h2 id="tk-room-list" tabindex="-1" style="margin-top:24px">Danh sách loại phòng (${adminRooms.length})</h2>
       ${table(["Khách sạn", "Loại phòng / Mã", "Sức chứa", "Số lượng", "Giá/đêm", "Trạng thái", "Thao tác"], rows)}
     `;
   }
@@ -1166,7 +1169,9 @@
 
   content.addEventListener("click", (e) => {
     const openBtn = e.target.closest("#tk-open-create-hotel");
-    const closeBtn = e.target.closest("#tk-close-create-hotel");
+    const closeBtn = e.target.closest(
+      "#tk-close-create-hotel,[data-create-hotel-back]",
+    );
 
     if (!openBtn && !closeBtn) return;
 
@@ -1179,6 +1184,8 @@
       panel.hidden = !panel.hidden;
     } else {
       panel.hidden = true;
+      toggle.focus();
+      toggle.scrollIntoView({ block: "center" });
     }
 
     toggle.setAttribute("aria-expanded", String(!panel.hidden));
@@ -1846,15 +1853,36 @@
     }
   });
 
+  content.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-room-list]")) return;
+    event.preventDefault();
+    const target = content.querySelector("#tk-room-list");
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+    target?.focus({ preventScroll: true });
+  });
+
   // Bài 4H: mở/đóng form bằng ID lấy từ danh sách MySQL.
   content.addEventListener("click", (event) => {
     const editButton = event.target.closest("[data-room-edit]");
-    const cancelButton = event.target.closest("#tk-cancel-room-edit");
+    const cancelButton = event.target.closest(
+      "#tk-cancel-room-edit,[data-room-back]",
+    );
     if (!editButton && !cancelButton) return;
 
     const panel = content.querySelector("#tk-edit-room-panel");
     if (!panel) return;
     if (cancelButton) {
+      const form = panel.querySelector("form");
+      if (
+        form.dataset.original !== JSON.stringify([...new FormData(form)]) &&
+        !confirm("Bạn có thay đổi chưa lưu. Rời phần chỉnh sửa?")
+      )
+        return;
+      const button = content.querySelector(
+        `[data-room-edit="${Number(form.elements.namedItem("id").value)}"]`,
+      );
+      button?.focus();
+      button?.scrollIntoView({ block: "center" });
       panel.hidden = true;
       panel.style.display = "none";
       return;
@@ -1913,6 +1941,7 @@
       note.textContent = "";
       note.hidden = true;
     }
+    form.dataset.original = JSON.stringify([...new FormData(form)]);
     panel.scrollIntoView({ behavior: "smooth", block: "start" });
     const firstMissing = missingLegacyFields[0]?.[0];
     form.elements

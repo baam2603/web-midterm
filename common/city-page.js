@@ -190,6 +190,38 @@
       sort: 0,
     };
 
+    const search = new URLSearchParams(location.search);
+    const bounded = (key, fallback, min, max) => {
+      const n = Number(search.get(key));
+      return search.has(key) && Number.isInteger(n) && n >= min && n <= max
+        ? n
+        : fallback;
+    };
+    state.street = (search.get("street") || "").slice(0, 200);
+    state.adults = bounded("adults", 2, 1, 30);
+    state.children = bounded("children", 0, 0, 30);
+    state.rooms = bounded("rooms", 1, 1, state.adults);
+    state.sort = bounded("sort", 0, 0, 2);
+    state.maxPrice = bounded("maxPrice", Infinity, 500000, 5000000);
+    for (const key of ["types", "zones", "amenities", "stars"]) {
+      state[key] = new Set(
+        (search.get(key) || "")
+          .split(",")
+          .filter(Boolean)
+          .map((v) => (key === "stars" ? Number(v) : v)),
+      );
+    }
+    for (const key of ["checkin", "checkout"]) {
+      const value = search.get(key) || "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        const d = parseKey(value);
+        if (dateKey(d) === value && d >= startOfDay(new Date())) state[key] = d;
+      }
+    }
+    if (!state.checkin || !state.checkout || state.checkout <= state.checkin)
+      state.checkin = state.checkout = null;
+    guestFilterApplied = search.get("guestFilter") === "1";
+
     const $ = (sel, root) => (root || document).querySelector(sel);
     const resultsSection = $(".results");
     const filterSection = $(".panel-section--filter");
@@ -315,6 +347,19 @@
       if (state.checkout) p.set("checkout", dateKey(state.checkout));
       p.set("guests", state.adults + state.children);
       p.set("rooms", state.rooms);
+      const back = new URL(location.pathname, location.origin);
+      for (const key of ["street", "adults", "children", "rooms", "sort"])
+        back.searchParams.set(key, state[key]);
+      for (const key of ["types", "zones", "amenities", "stars"])
+        if (state[key].size)
+          back.searchParams.set(key, [...state[key]].join(","));
+      if (Number.isFinite(state.maxPrice))
+        back.searchParams.set("maxPrice", state.maxPrice);
+      for (const key of ["checkin", "checkout"])
+        if (state[key]) back.searchParams.set(key, dateKey(state[key]));
+      if (guestFilterApplied) back.searchParams.set("guestFilter", "1");
+      back.hash = "hotel-results";
+      p.set("list", back.pathname + back.search + back.hash);
       return "../hotel/hotel.html?" + p.toString();
     }
 
@@ -940,7 +985,28 @@
     initDates();
     initGuests();
     initSearchSubmit();
+    if (resultsSection) resultsSection.id = "hotel-results";
+    if (streetInput) streetInput.value = state.street;
+    updateDateInput();
+    if (sortEl) sortEl.selectedIndex = state.sort;
+    filterSection?.querySelectorAll("[data-group]").forEach((input) => {
+      input.checked = state[input.dataset.group].has(
+        input.dataset.group === "stars" ? Number(input.value) : input.value,
+      );
+    });
+    if (Number.isFinite(state.maxPrice)) {
+      const range = $("#tk-price");
+      if (range) range.value = (state.maxPrice - 500000) / 45000;
+      const out = $("#tk-price-out");
+      if (out)
+        out.textContent = "Tối đa " + fmtMoney(state.maxPrice) + " / đêm";
+    }
     renderResults();
+    if (state.checkin && state.checkout) refreshCatalog();
+    if (location.hash === "#hotel-results")
+      requestAnimationFrame(() =>
+        resultsSection?.scrollIntoView({ block: "start" }),
+      );
     loadWeather();
     initMap();
     return true;

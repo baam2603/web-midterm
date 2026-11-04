@@ -160,7 +160,12 @@
   let previousDraft = null;
   try {
     const d = JSON.parse(sessionStorage.getItem("threek_checkout") || "null");
-    if (d && d.hotelId === hotelId && d.roomId === roomId) {
+    if (
+      d &&
+      d.city === cityKey &&
+      d.hotelId === hotelId &&
+      d.roomId === roomId
+    ) {
       previousDraft = d;
       [
         "lastName",
@@ -210,13 +215,27 @@
     return { nights, base, discount, tax, total: taxable + tax };
   }
 
+  function hotelUrl() {
+    const query = new URLSearchParams({
+      city: cityKey,
+      id: hotelId,
+      checkin: state.checkin,
+      checkout: state.checkout,
+      guests: state.guests,
+      rooms: state.rooms,
+    });
+    if (params.has("list")) query.set("list", params.get("list"));
+    return "hotel.html?" + query.toString();
+  }
+
   /* ---------- Khung trang ---------- */
   root.innerHTML = `
     <nav class="breadcrumb" aria-label="Điều hướng">
       <a href="../index1.html">Trang chủ</a>${icon("chevron_right")}
-      <a href="hotel.html?city=${encodeURIComponent(cityKey)}&id=${encodeURIComponent(hotelId)}">${esc(hotel.name)}</a>${icon("chevron_right")}
+      <a data-hotel-return href="${esc(hotelUrl())}">${esc(hotel.name)}</a>${icon("chevron_right")}
       <span class="current">Đặt phòng</span>
     </nav>
+    <p><a class="btn btn--ghost" data-hotel-return href="${esc(hotelUrl())}">← Về chi tiết khách sạn</a></p>
     <h1 class="booking-title">Đặt phòng an toàn</h1>
     <ol class="stepper" id="bkStepper"></ol>
     <div class="booking-grid">
@@ -554,7 +573,7 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function goCheckout() {
+  function saveDraft() {
     const draft = {
       city: cityKey,
       hotelId,
@@ -604,8 +623,23 @@
       );
       return;
     }
-    location.href = "../payment/payment.html";
+    previousDraft = draft;
+    return true;
   }
+
+  function goCheckout() {
+    if (saveDraft()) location.href = "../payment/payment.html";
+  }
+
+  root.addEventListener("click", (e) => {
+    const link = e.target.closest("[data-hotel-return]");
+    if (!link) return;
+    if (!saveDraft()) {
+      e.preventDefault();
+      return;
+    }
+    link.href = hotelUrl();
+  });
 
   function showQuoteError(message) {
     let el = document.getElementById("booking-quote-error");

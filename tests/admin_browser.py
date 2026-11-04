@@ -41,6 +41,13 @@ try:
   for name,value in {'code':'browser-room','name':'Browser Room','capacity':'2','total_rooms':'3','price_per_night':'900000','area_m2':'28','bed_type':'Double'}.items():form.locator(f'[name={name}]').fill(value)
   form.locator('button[type=submit]').click();page.locator('#tk-admin-feedback').filter(has_text='Đã thêm').wait_for()
   room=int(sql(f'SELECT id FROM room_types WHERE hotel_id={hotel};'))
+  search=page.get_by_placeholder('Nhập từ khóa để lọc danh sách...');search.fill('Browser Room')
+  page.locator(f'[data-room-edit="{room}"]').click();page.locator('[data-room-back]').click();assert search.input_value()=='Browser Room'
+  page.locator(f'[data-room-edit="{room}"]').click();page.locator('#tk-update-room-db [name=name]').fill('Not saved')
+  page.once('dialog',lambda dialog:dialog.dismiss());page.locator('[data-room-back]').click();assert page.locator('#tk-edit-room-panel').is_visible()
+  page.once('dialog',lambda dialog:dialog.accept());page.locator('[data-room-back]').click();assert not page.locator('#tk-edit-room-panel').is_visible()
+  assert page.locator(f'[data-room-edit="{room}"]').is_visible() and search.input_value()=='Browser Room'
+  print('PASS admin return keeps room search and confirms unsaved changes')
   page.locator(f'[data-room-edit="{room}"]').click();edit=page.locator('#tk-update-room-db');edit.locator('[name=name]').fill('Updated Browser Room');edit.locator('[name=price_per_night]').fill('1350000');edit.locator('button[type=submit]').click()
   try:page.locator('#tk-admin-feedback').filter(has_text='Đã cập nhật').wait_for()
   except Exception:
@@ -50,6 +57,9 @@ try:
   assert sql(f'SELECT price_per_night FROM room_types WHERE id={room};')=='1350000.00'
   assert page.get_by_text('Updated Browser Room',exact=True).count()>=1;print('PASS browser room create/edit → SQL persists after reload')
   page.locator('[data-tab=hotels]').click();page.locator(f'[data-hotel-edit-db="{hotel}"]').click()
+  search=page.get_by_placeholder('Nhập từ khóa để lọc danh sách...');search.fill('Browser OSM Hotel')
+  page.locator('[data-editor-back]').click();assert not page.locator('#admin-hotel-editor').is_visible() and search.input_value()=='Browser OSM Hotel'
+  page.locator(f'[data-hotel-edit-db="{hotel}"]').click()
   editHotel=page.locator('#admin-hotel-edit-form');editHotel.locator('[name=name]').fill('Edited Browser Hotel');editHotel.locator('[name=type]').select_option('villa');editHotel.locator('[type=submit]').click()
   page.locator('#tk-admin-feedback').filter(has_text='Đã cập nhật khách sạn').wait_for()
   assert sql(f'SELECT type FROM hotels WHERE id={hotel};')=='villa';print('PASS browser hotel editor saves SQL')
