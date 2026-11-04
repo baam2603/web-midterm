@@ -55,6 +55,11 @@ try {
         ]);
     }
     $hotelId = (int) $hotel["id"];
+    $reviewStats = $pdo->prepare(
+        "SELECT ROUND(AVG(score),2) rating,COUNT(*) review_count FROM reviews WHERE hotel_id=? AND status='approved'",
+    );
+    $reviewStats->execute([$hotelId]);
+    $hotel = array_merge($hotel, $reviewStats->fetch());
 
     $q = $pdo->prepare('SELECT image_path,sort_order,is_cover FROM hotel_images
                         WHERE hotel_id=? ORDER BY is_cover DESC,sort_order,id');
@@ -81,7 +86,7 @@ try {
     }
 
     $used = $pdo->prepare(
-        "SELECT b.room_type_id,b.checkin,b.checkout,b.rooms FROM bookings b JOIN room_types r ON r.id=b.room_type_id WHERE r.hotel_id=? AND b.status IN ('pending','confirmed','checked_in') AND b.checkin < ? AND b.checkout > ?",
+        "SELECT b.room_type_id,b.checkin,b.checkout,b.rooms FROM bookings b JOIN room_types r ON r.id=b.room_type_id WHERE r.hotel_id=? AND b.status IN ('pending','confirmed','checked_in') AND (b.status<>'pending' OR b.payment_expires_at IS NULL OR b.payment_expires_at>NOW()) AND b.checkin < ? AND b.checkout > ?",
     );
     $used->execute([$hotelId, $checkout, $checkin]);
     $occupancy = [];

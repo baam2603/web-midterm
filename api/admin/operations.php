@@ -1,6 +1,6 @@
 <?php
 // One bounded, role-checked API for administrative operations.
-require_once __DIR__ . "/../shared/bootstrap.php";
+require_once __DIR__ . "/../shared/customer.php";
 require_once __DIR__ . "/../shared/inventory.php";
 requireAdmin();
 header("Cache-Control: no-store, private");
@@ -60,6 +60,18 @@ try {
                         "Trạng thái đơn đã thay đổi hoặc thao tác không hợp lệ. Hãy tải lại danh sách.",
                 ]);
             }
+            if (
+                $next === "confirmed" &&
+                $b["pay_method"] === "online" &&
+                $b["payment_status"] !== "paid"
+            ) {
+                $db->rollBack();
+                reply(409, [
+                    "status" => "error",
+                    "message" =>
+                        "Chỉ VNPay IPN được xác nhận thanh toán trực tuyến.",
+                ]);
+            }
             $today = date("Y-m-d");
             if (
                 ($next === "checked_in" &&
@@ -76,6 +88,21 @@ try {
                 "UPDATE bookings SET status=?, completed_at=IF(?='completed',NOW(),completed_at) WHERE id=?",
             );
             $q->execute([$next, $next, $id]);
+            if ($next === "cancelled" && $b["payment_status"] === "paid") {
+                $db->prepare(
+                    "UPDATE bookings SET payment_status='refund_requested' WHERE id=?",
+                )->execute([$id]);
+                $db->prepare(
+                    "UPDATE payments SET status='refund_requested' WHERE booking_id=? AND status='paid'",
+                )->execute([$id]);
+            }
+            notifyUser(
+                $db,
+                (int) $b["user_id"],
+                "Cập nhật đặt phòng",
+                "Đơn " . $b["code"] . " chuyển sang trạng thái " . $next . ".",
+                $b["code"],
+            );
             auditLog($db, "booking.status", "booking", $id, [
                 "from" => $b["status"],
                 "to" => $next,
@@ -103,6 +130,16 @@ try {
                 ]);
             }
             if ($old !== $next) {
+                $owner = $db->prepare("SELECT user_id FROM reviews WHERE id=?");
+                $owner->execute([$id]);
+                notifyUser(
+                    $db,
+                    (int) $owner->fetchColumn(),
+                    "Kết quả đánh giá",
+                    $next === "approved"
+                        ? "Đánh giá của bạn đã được duyệt."
+                        : "Đánh giá của bạn chưa được duyệt.",
+                );
                 $db->prepare(
                     "UPDATE reviews SET status=?,moderated_at=NOW() WHERE id=?",
                 )->execute([$next, $id]);
@@ -139,6 +176,16 @@ try {
             $db->prepare(
                 "UPDATE support_tickets SET reply=?,status=?,replied_by=?,replied_at=NOW() WHERE id=?",
             )->execute([$reply, $next, $_SESSION["user"]["id"], $id]);
+            $owner = $db->prepare(
+                "SELECT user_id FROM support_tickets WHERE id=?",
+            );
+            $owner->execute([$id]);
+            notifyUser(
+                $db,
+                (int) $owner->fetchColumn(),
+                "Phản hồi hỗ trợ",
+                "Yêu cầu #" . $id . " đã có phản hồi. Xem tại mục Hỗ trợ.",
+            );
             auditLog($db, "support.reply", "ticket", $id, ["status" => $next]);
         } else {
             $db->rollBack();
@@ -171,7 +218,7 @@ try {
             )
             ->fetchAll();
         $q = $db->prepare(
-            "SELECT room_type_id,checkin,checkout,rooms FROM bookings WHERE status IN ('pending','confirmed','checked_in') AND checkin < ? AND checkout > ?",
+            "SELECT room_type_id,checkin,checkout,rooms FROM bookings WHERE status IN ('pending','confirmed','checked_in') AND (status<>'pending' OR payment_expires_at IS NULL OR payment_expires_at>NOW()) AND checkin < ? AND checkout > ?",
         );
         $q->execute([$to, $from]);
         $byRoom = [];
@@ -208,7 +255,7 @@ try {
         $source =
             "bookings b JOIN hotels h ON h.id=b.hotel_id JOIN room_types r ON r.id=b.room_type_id JOIN users u ON u.id=b.user_id";
         $fields =
-            "b.*,h.name hotelName,r.name roomName,u.full_name guestName,u.email,u.phone";
+            "b.*,h.name hotelName,r.name roomName,COALESCE(b.guest_name,u.full_name) guestName,COALESCE(b.guest_email,u.email) email,COALESCE(b.guest_phone,u.phone) phone";
         $order = "b.created_at DESC,b.id DESC";
         $prefix = "b";
         $statuses = [

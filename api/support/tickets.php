@@ -1,10 +1,11 @@
 <?php
-require_once __DIR__ . "/../shared/bootstrap.php";
+require_once __DIR__ . "/../shared/customer.php";
 $uid = requireUser();
 header("Cache-Control: no-store, private");
 try {
     $db = connectDB();
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
+        guardCustomerWrite();
         $type = strtolower(
             trim(explode(";", $_SERVER["CONTENT_TYPE"] ?? "")[0]),
         );

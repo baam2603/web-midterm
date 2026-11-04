@@ -37,6 +37,7 @@
     ["rooms", "Phòng & giá"],
     ["calendar", "Lịch trống"],
     ["bookings", "Đặt phòng"],
+    ["payments", "Thanh toán"],
     ["reviews", "Đánh giá"],
     ["support", "Hỗ trợ"],
     ["audit", "Nhật ký"],

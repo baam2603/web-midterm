@@ -4,7 +4,11 @@
   "description": "",
   "main": "header.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:prepare": "sh scripts/start-test-environment.sh",
+    "test:unit": "docker exec web-midterm-admin-web php /app/tests/admin_units.php",
+    "test:customer": "python3 tests/customer_integration.py && python3 tests/customer_browser.py",
+    "test:admin": "python3 tests/admin_integration.py && python3 tests/admin_browser.py && python3 tests/admin_media.py",
+    "test": "npm run test:unit && npm run test:customer && npm run test:admin"
   },
   "repository": {
     "type": "git",

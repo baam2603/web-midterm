@@ -147,7 +147,7 @@ try {
         ))->format("Y-m-d");
         $bookings = $pdo->prepare(
             "SELECT checkin, checkout, rooms, guests FROM bookings
-             WHERE room_type_id = ? AND status IN ('pending', 'confirmed', 'checked_in')
+             WHERE room_type_id = ? AND status IN ('pending', 'confirmed', 'checked_in') AND (status<>'pending' OR payment_expires_at IS NULL OR payment_expires_at>NOW())
                AND checkout > ?",
         );
         $bookings->execute([$id, $today]);

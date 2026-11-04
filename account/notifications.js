@@ -1,32 +1,55 @@
-(function () {
+(async () => {
   "use strict";
   const root = document.getElementById("tk-notifications");
-  if (!getCurrentUser()) {
-    root.innerHTML =
-      '<div class="tk-surface"><p>Đăng nhập để xem thông báo dành riêng cho tài khoản của bạn.</p><a class="tk-primary" href="../auth/login.html?next=%2Faccount%2Fnotifications.html">Đăng nhập</a></div>';
-    return;
+  const esc = (x) =>
+    String(x ?? "").replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
+  async function load(body) {
+    const r = await fetch("../api/account/notifications.php", {
+      credentials: "same-origin",
+      cache: "no-store",
+      ...(body
+        ? {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          }
+        : {}),
+    });
+    const j = await r.json();
+    if (!r.ok || j.status !== "success")
+      throw Error(j.message || "Không tải được thông báo.");
+    return j.data;
   }
-  const esc = ThreeKData.esc;
-  function render() {
-    const all = ThreeKData.notifications();
-    root.innerHTML = all.length
-      ? all
-          .map(
-            (n) =>
-              `<article class="tk-surface"><div class="tk-row"><strong>${esc(n.title)}</strong><span class="tk-pill ${n.read ? "" : "warn"}">${n.read ? "Đã đọc" : "Mới"}</span></div><p>${esc(n.message)}</p><div class="tk-row"><small class="tk-muted">${new Date(n.at).toLocaleString("vi-VN")}</small><div class="tk-actions">${n.code ? `<a class="tk-outline" href="../booking/detail.html?code=${encodeURIComponent(n.code)}">Xem đơn</a>` : ""}${!n.read ? `<button class="tk-quiet" data-read="${esc(n.id)}">Đánh dấu đã đọc</button>` : ""}</div></div></article>`,
-          )
-          .join("")
-      : '<div class="tk-surface tk-empty">Bạn chưa có thông báo nào.</div>';
-  }
-  root.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-read]");
-    if (!btn) return;
+  async function render(body) {
     try {
-      ThreeKData.markRead(btn.dataset.read);
-      render();
-    } catch (err) {
-      alert(err.message);
+      const all = await load(body);
+      root.innerHTML = all.length
+        ? all
+            .map(
+              (n) =>
+                `<article class="tk-surface"><h3>${esc(n.title)}</h3><p>${esc(n.message)}</p><p>${esc(n.created_at)} · ${n.read_at ? "Đã đọc" : "Mới"}</p>${n.code ? `<a class="tk-outline" href="../booking/detail.html?code=${encodeURIComponent(n.code)}">Xem đơn</a>` : ""}${!n.read_at ? `<button class="tk-outline" data-read="${Number(n.id)}">Đánh dấu đã đọc</button>` : ""}</article>`,
+            )
+            .join("")
+        : "<p>Bạn chưa có thông báo nào.</p>";
+    } catch (e) {
+      root.textContent = e.message;
     }
-  });
-  render();
+  }
+  root.onclick = async (e) => {
+    const b = e.target.closest("[data-read]");
+    if (!b) return;
+    b.disabled = true;
+    await render({ id: Number(b.dataset.read) });
+  };
+  await render();
 })();

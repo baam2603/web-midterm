@@ -1,20 +1,28 @@
-(function () {
+(async () => {
   "use strict";
   const f = document.getElementById("tk-lookup-form"),
     out = document.getElementById("tk-lookup-status");
-  f.addEventListener("submit", (e) => {
+  f.onsubmit = async (e) => {
     e.preventDefault();
-    const d = new FormData(f);
+    const button = f.querySelector("button");
+    button.disabled = true;
+    out.textContent = "";
     try {
-      const b = BookingStore.verifyGuest(
-        d.get("code"),
-        d.get("email"),
-        d.get("phone"),
+      await loadProfile();
+      const code = f.elements.code.value.trim();
+      const r = await fetch(
+        "../api/bookings/detail.php?code=" + encodeURIComponent(code),
+        { credentials: "same-origin", cache: "no-store" },
       );
-      location.href = "detail.html?code=" + encodeURIComponent(b.code);
-    } catch (err) {
+      const j = await r.json();
+      if (!r.ok || j.status !== "success")
+        throw Error(j.message || "Không tìm thấy đơn của bạn.");
+      location.assign("detail.html?code=" + encodeURIComponent(code));
+    } catch (e) {
+      out.textContent = e.message;
       out.dataset.error = "true";
-      out.textContent = err.message;
+    } finally {
+      button.disabled = false;
     }
-  });
+  };
 })();

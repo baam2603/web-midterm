@@ -20,12 +20,11 @@
     <header id="site-header"></header>
     <main class="tk-page">
       <div class="tk-container tk-container--narrow">
-        <span class="tk-eyebrow">ĐẶT PHÒNG KHÔNG CẦN TÀI KHOẢN</span>
+        <span class="tk-eyebrow">TRA CỨU ĐƠN CỦA BẠN</span>
         <h1>Tra cứu đơn đặt phòng</h1>
         <p class="tk-lead">
-          Nhập đủ mã đặt phòng, email và số điện thoại đã dùng khi đặt. Chỉ tra
-          cứu được đơn của khách chưa đăng nhập trong bản demo trên trình duyệt
-          này.
+          Đăng nhập bằng tài khoản đã đặt phòng và nhập mã đơn. Chỉ chủ tài
+          khoản được xem thông tin đặt phòng.
         </p>
         <div class="tk-surface">
           <form class="tk-form" id="tk-lookup-form">
@@ -35,14 +34,7 @@
                 autocomplete="off"
                 required
                 maxlength="80"
-                placeholder="Ví dụ: 3K..." /></label
-            ><label
-              >Email đặt phòng<input
-                type="email"
-                name="email"
-                required /></label
-            ><label
-              >Số điện thoại đặt phòng<input type="tel" name="phone" required
+                placeholder="Ví dụ: 3K..."
             /></label>
             <p id="tk-lookup-status" class="tk-feedback" role="status"></p>
             <button class="tk-primary">Tra cứu đơn</button>
@@ -62,8 +54,6 @@
       mountHeader("site-header");
       mountFooter("site-footer");
     </script>
-    <script src="../common/booking-store.js"></script>
-    <script src="../common/domain-store.js"></script>
     <script src="lookup.js"></script>
   </body>
 </html>

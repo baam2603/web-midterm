@@ -1,8 +1,20 @@
 /* Server-backed operations. No administrative state is stored in localStorage. */
 (() => {
   "use strict";
-  const sections = ["bookings", "calendar", "reviews", "support", "audit"];
+  const sections = [
+    "bookings",
+    "payments",
+    "calendar",
+    "reviews",
+    "support",
+    "audit",
+  ];
   const labels = {
+    paid: "Đã thanh toán",
+    failed: "Thất bại",
+    review: "Cần đối soát",
+    refund_requested: "Chờ hoàn tiền",
+    refunded: "Đã hoàn tiền",
     pending: "Chờ xác nhận",
     confirmed: "Đã xác nhận",
     checked_in: "Đang lưu trú",
@@ -16,6 +28,7 @@
   };
   const names = {
     bookings: "Quản lý đặt phòng",
+    payments: "Đối soát thanh toán VNPay",
     calendar: "Tồn phòng theo ngày",
     reviews: "Duyệt đánh giá",
     support: "Yêu cầu hỗ trợ",
@@ -40,7 +53,12 @@
   const table = (heads, rows) =>
     `<div class="tk-surface tk-tablewrap"><table class="tk-table"><thead><tr>${heads.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows || `<tr><td colspan="${heads.length}">Chưa có dữ liệu phù hợp.</td></tr>`}</tbody></table></div>`;
   async function request(section, params = {}, body, signal) {
-    const url = new URL("../api/admin/operations.php", location.href);
+    const url = new URL(
+      section === "payments"
+        ? "../api/admin/payments.php"
+        : "../api/admin/operations.php",
+      location.href,
+    );
     url.search = new URLSearchParams({ section, ...params });
     const options = { credentials: "same-origin", cache: "no-store", signal };
     if (body) {
@@ -83,6 +101,22 @@
       .join(" ");
   }
   function rows(section, items) {
+    if (section === "payments")
+      return table(
+        [
+          "Đơn / khách",
+          "Số tiền",
+          "Trạng thái",
+          "Giao dịch VNPay",
+          "Đối soát / hoàn tiền",
+        ],
+        items
+          .map(
+            (p) =>
+              `<tr><td>${esc(p.code)}<br>${esc(p.guestName)}</td><td>${money(p.amount)}</td><td>${esc(labels[p.status] || p.status)}</td><td>${esc(p.provider_transaction || "—")}</td><td>${["review", "refund_requested"].includes(p.status) ? `<form data-op-refund="${Number(p.id)}" class="tk-form"><p>Chỉ ghi nhận sau khi đã hoàn tiền thật trên cổng merchant VNPay. Thao tác này không chuyển tiền.</p><input name="reference" minlength="5" maxlength="120" placeholder="Mã giao dịch hoàn tiền" required><button type="submit" class="tk-outline">Ghi nhận đã hoàn tiền</button></form>` : esc(p.refund_reference || "—")}</td></tr>`,
+          )
+          .join(""),
+      );
     if (section === "bookings")
       return table(
         [
@@ -96,7 +130,7 @@
         items
           .map(
             (b) =>
-              `<tr><td><strong>${esc(b.code)}</strong><br>${esc(b.guestName)}<br>${esc(b.email)}<br>${esc(b.phone)}</td><td>${esc(b.hotelName)}<br>${esc(b.roomName)}</td><td>${esc(b.checkin)} → ${esc(b.checkout)}</td><td>${Number(b.rooms)} phòng / ${Number(b.guests)} khách</td><td>${money(b.total)}</td><td>${esc(labels[b.status] || b.status)}<div class="tk-actions">${actions(b)}</div><button class="tk-outline" data-op-detail="${Number(b.id)}">Chi tiết</button></td></tr>`,
+              `<tr><td><strong>${esc(b.code)}</strong><br>${esc(b.guestName)}<br>${esc(b.email)}<br>${esc(b.phone)}</td><td>${esc(b.hotelName)}<br>${esc(b.roomName)}</td><td>${esc(b.checkin)} → ${esc(b.checkout)}</td><td>${Number(b.rooms)} phòng / ${Number(b.guests)} khách</td><td>${money(b.total)}</td><td>${esc(labels[b.status] || b.status)}<p>${esc({ paid: "Đã thanh toán", unpaid: "Chưa thanh toán", failed: "Thanh toán lỗi", expired: "Hết hạn thanh toán", refund_requested: "Chờ hoàn tiền", refunded: "Đã hoàn tiền", paid_requires_review: "Cần đối soát" }[b.payment_status] || "")}</p><div class="tk-actions">${actions(b)}</div><button class="tk-outline" data-op-detail="${Number(b.id)}">Chi tiết</button></td></tr>`,
           )
           .join(""),
       );
@@ -168,6 +202,14 @@
       root.dataset.operation === section;
     root.dataset.operation = section;
     const statuses = {
+      payments: [
+        "pending",
+        "paid",
+        "failed",
+        "review",
+        "refund_requested",
+        "refunded",
+      ],
       bookings: [
         "pending",
         "confirmed",
@@ -228,7 +270,7 @@
               (x) => Number(x.id) === Number(b.dataset.opDetail),
             );
             root.querySelector("#admin-op-detail").innerHTML =
-              `<article class="tk-surface"><h3>Chi tiết ${esc(item.code)}</h3><p>${esc(item.guestName)} · ${esc(item.email)} · ${esc(item.phone)}</p><p>${esc(item.hotelName)} / ${esc(item.roomName)}</p><p>${esc(item.checkin)} → ${esc(item.checkout)} · ${Number(item.rooms)} phòng · ${Number(item.guests)} khách</p><p>Tạo lúc ${esc(item.created_at)} · Hoàn tất: ${esc(item.completed_at || "—")}</p><p>Tổng tiền đã chốt: ${money(item.total)}</p></article>`;
+              `<article class="tk-surface"><h3>Chi tiết ${esc(item.code)}</h3><p>${esc(item.guestName)} · ${esc(item.email)} · ${esc(item.phone)}</p><p>${esc(item.hotelName)} / ${esc(item.roomName)}</p><p>${esc(item.checkin)} → ${esc(item.checkout)} · ${Number(item.rooms)} phòng · ${Number(item.guests)} khách</p><p>Tạo lúc ${esc(item.created_at)} · Hoàn tất: ${esc(item.completed_at || "—")}</p><p>Yêu cầu đặc biệt: ${esc(item.guest_note || "Không có")}</p><p>Tổng tiền đã chốt: ${money(item.total)}</p></article>`;
           }),
       );
       const save = async (button, body) => {
@@ -254,6 +296,22 @@
               save(b, {
                 id: Number(b.dataset.opId),
                 status: b.dataset.opStatus,
+              });
+          }),
+      );
+      root.querySelectorAll("[data-op-refund]").forEach(
+        (f) =>
+          (f.onsubmit = (e) => {
+            e.preventDefault();
+            if (
+              f.reportValidity() &&
+              confirm(
+                "Bạn đã hoàn tiền thật trên cổng merchant và có mã tham chiếu?",
+              )
+            )
+              save(f.querySelector("button"), {
+                id: Number(f.dataset.opRefund),
+                reference: f.elements.reference.value,
               });
           }),
       );

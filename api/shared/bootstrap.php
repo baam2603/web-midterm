@@ -29,6 +29,19 @@ function requireUser(): int
     if (!$id) {
         reply(401, ["status" => "error", "message" => "Vui lòng đăng nhập."]);
     }
+    $q = connectDB()->prepare("SELECT session_version FROM users WHERE id=?");
+    $q->execute([$id]);
+    $version = $q->fetchColumn();
+    if (
+        $version === false ||
+        (int) $version !== (int) ($_SESSION["version"] ?? 1)
+    ) {
+        $_SESSION = [];
+        reply(401, [
+            "status" => "error",
+            "message" => "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.",
+        ]);
+    }
     return $id;
 }
 function requireAdmin(): int
@@ -47,7 +60,7 @@ function requireAdmin(): int
 }
 function failServer(Throwable $e): never
 {
-    error_log("[THREEK reviews] " . $e->getMessage());
+    error_log("[THREEK API] " . $e->getMessage());
     reply(500, ["status" => "error", "message" => "Lỗi hệ thống máy chủ."]);
 }
 

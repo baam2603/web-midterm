@@ -38,20 +38,24 @@
     </script>
     <script src="../common/city-data.js"></script>
     <script src="hotel-data.js"></script>
-    <script src="../common/booking-store.js"></script>
-    <script src="../common/domain-store.js"></script>
-    <script>
-      ThreeKData.applyCatalog();
-    </script>
 
     <script src="hotel-detail-api.js"></script>
 
     <script>
       async function startBooking() {
         try {
+          const user = await window.authReady;
+          if (!user) {
+            location.replace(
+              "../auth/login.html?next=" +
+                encodeURIComponent(location.pathname + location.search),
+            );
+            return;
+          }
           await HotelDetailAPI.sync();
         } catch (error) {
-          console.warn("Không tải được dữ liệu MySQL:", error.message);
+          document.getElementById("booking-root").textContent = error.message;
+          return;
         }
 
         const script = document.createElement("script");

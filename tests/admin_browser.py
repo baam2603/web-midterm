@@ -59,7 +59,7 @@ try:
   page.once('dialog',lambda dialog:dialog.accept());page.locator(f'[data-op-id="{booking}"][data-op-status="completed"]').click()
   page.wait_for_function("document.querySelector('#admin-op-message')?.textContent.includes('kết quả') && !document.querySelector('[data-op-status=completed]')")
   assert sql(f'SELECT status FROM bookings WHERE id={booking}')=='completed';print('PASS browser completes a stay in SQL')
-  for tab in ['bookings','calendar','reviews','support','audit']:
+  for tab in ['bookings','payments','calendar','reviews','support','audit']:
    page.locator(f'[data-tab={tab}]').click();page.locator('#admin-op-message').wait_for();page.wait_for_function("!document.querySelector('#admin-op-message').textContent.includes('Đang tải')")
    assert 'Lỗi' not in page.locator('#admin-op-message').inner_text();print('PASS browser tab',tab)
   assert not errors,errors

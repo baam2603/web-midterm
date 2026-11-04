@@ -320,33 +320,6 @@
 
     function matches(h) {
       if (h.hidden) return false;
-      if (
-        state.checkin &&
-        state.checkout &&
-        window.HOTELS &&
-        window.BookingStore
-      ) {
-        const detail = window.HOTELS[cityKey]?.[h.id];
-        // Loại phòng của khách sạn mới chỉ được tải ở trang chi tiết từ MySQL.
-        // Không dùng dữ liệu demo để loại khách sạn mới khỏi danh sách.
-        if (
-          detail &&
-          !(detail.rooms || []).some(
-            (r) =>
-              !r.closed &&
-              r.guests * state.rooms >= state.adults + state.children &&
-              BookingStore.availability(
-                cityKey,
-                h.id,
-                r.id,
-                dateKey(state.checkin),
-                dateKey(state.checkout),
-                r.left ?? 5,
-              ) >= state.rooms,
-          )
-        )
-          return false;
-      }
       if (state.types.size && !state.types.has(h.type)) return false;
       if (state.zones.size && !h.zones.some((z) => state.zones.has(z)))
         return false;
@@ -412,6 +385,46 @@
     }
 
     let visible = [];
+    let catalogVersion = 0,
+      catalogController = null;
+    async function refreshCatalog() {
+      catalogController?.abort();
+      catalogController = new AbortController();
+      const version = ++catalogVersion;
+      const button =
+        document.getElementById("search-btn") ||
+        document.querySelector(".search-btn");
+      if (button) button.disabled = true;
+      try {
+        await window.HotelAPI.loadCity(
+          cityKey,
+          {
+            checkin: state.checkin ? dateKey(state.checkin) : "",
+            checkout: state.checkout ? dateKey(state.checkout) : "",
+            guests: state.adults + state.children,
+            rooms: state.rooms,
+          },
+          catalogController.signal,
+        );
+        if (version !== catalogVersion) return;
+        document.getElementById("customer-search-error")?.remove();
+        renderResults();
+      } catch (error) {
+        if (error.name === "AbortError" || version !== catalogVersion) return;
+        city.hotels = [];
+        renderResults();
+        let p = document.getElementById("customer-search-error");
+        if (!p) {
+          p = document.createElement("p");
+          p.id = "customer-search-error";
+          p.setAttribute("role", "alert");
+          resultsSection?.prepend(p);
+        }
+        p.textContent = error.message;
+      } finally {
+        if (button) button.disabled = false;
+      }
+    }
     function renderResults() {
       visible = city.hotels.filter(matches);
       if (state.sort === 1) visible.sort((a, b) => a.price - b.price);
@@ -914,7 +927,7 @@
         Popup.close();
         if (streetInput) state.street = streetInput.value;
         guestFilterApplied = true;
-        renderResults();
+        refreshCatalog();
         if (resultsSection)
           resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
       });

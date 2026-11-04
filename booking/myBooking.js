@@ -44,19 +44,13 @@
       hotel: b.hotelName,
       checkIn: b.checkin,
       checkOut: b.checkout,
-      addr:
-        ((window.CITY_DATA || {})[b.city]?.hotels || []).find(
-          (h) => h.id === b.hotelId,
-        )?.address || "",
+      addr: b.address || "",
       photo: b.city === "vungtau" ? "sea" : "pine",
     }));
   }
   function renderCard(b) {
     const isUpcoming = upcoming.includes(b.status),
-      allowed =
-        isUpcoming &&
-        b.checkIn > new Date().toISOString().slice(0, 10) &&
-        b.refundable !== false;
+      allowed = b.canCancel;
     const actions =
       `<a class="btn-ghost" href="detail.html?code=${encodeURIComponent(b.code)}">Xem chi tiết</a>` +
       (allowed
@@ -124,29 +118,45 @@
   listEl.addEventListener("click", async (e) => {
     const b = e.target.closest('[data-action="cancel"]');
     if (!b) return;
-    const order = serverBookings.find(x => x.code === b.dataset.id);
-    if (!order || !confirm(`Hủy đặt phòng ${order.code} tại ${order.hotelName}?`)) return;
+    const order = serverBookings.find((x) => x.code === b.dataset.id);
+    if (
+      !order ||
+      !confirm(`Hủy đặt phòng ${order.code} tại ${order.hotelName}?`)
+    )
+      return;
     b.disabled = true;
     try {
       const response = await fetch("../api/bookings/cancel.php", {
-        method: "POST", credentials: "same-origin",
+        method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: order.code })
+        body: JSON.stringify({ code: order.code }),
       });
       const result = await response.json();
-      if (!response.ok || result.status !== "success") throw Error(result.message || "Hủy thất bại");
+      if (!response.ok || result.status !== "success")
+        throw Error(result.message || "Hủy thất bại");
       await loadBookings();
       showToast("Đã hủy đặt phòng " + order.code);
       setTab("history");
-    } catch (err) { showToast(err.message); }
-    finally { b.disabled = false; }
+    } catch (err) {
+      showToast(err.message);
+    } finally {
+      b.disabled = false;
+    }
   });
   async function loadBookings() {
     listEl.innerHTML = '<div class="empty">Đang tải dữ liệu từ MySQL...</div>';
     try {
-      const response = await fetch("../api/bookings/list.php", {credentials:"same-origin",cache:"no-store"});
+      const response = await fetch("../api/bookings/list.php", {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
       const result = await response.json();
-      if (!response.ok || result.status !== "success" || !Array.isArray(result.data))
+      if (
+        !response.ok ||
+        result.status !== "success" ||
+        !Array.isArray(result.data)
+      )
         throw Error(result.message || "Không tải được đặt phòng");
       serverBookings = result.data;
       render();

@@ -15,6 +15,7 @@ Sao lưu DB trước khi cập nhật. Với DB từ SQL_3K.sql đã có của n
 
 ```sh
 mariadb -u root -p threek_booking < database/admin_migration.sql
+mariadb -u root -p threek_booking < database/customer_migration.sql
 ```
 
 Migration chỉ bổ sung cột, bảng và index; không xóa đơn hoặc tài khoản; chạy lặp lại được trên MariaDB.
@@ -26,6 +27,7 @@ mariadb -u root -p -e 'CREATE DATABASE threek_booking CHARACTER SET utf8mb4'
 mariadb -u root -p threek_booking < database/schema.sql
 mariadb -u root -p threek_booking < database/seed.sql
 mariadb -u root -p threek_booking < database/admin_migration.sql
+mariadb -u root -p threek_booking < database/customer_migration.sql
 ```
 
 `schema.sql` chỉ chứa cấu trúc, không chứa thông tin tài khoản từ SQL người dùng.
@@ -68,7 +70,7 @@ Giá đã chốt ở đơn cũ giữ nguyên khi sửa giá phòng; giảm tồn
 Các thao tác admin ghi audit trong DB cùng transaction. Nhật ký không có API sửa/xóa từ admin UI.
 Hỗ trợ yêu cầu đăng nhập để bảo vệ quyền xem phản hồi; chưa tích hợp gửi email.
 Đánh giá chỉ tạo từ đơn của chính khách đã hoàn tất và chỉ công khai sau khi duyệt.
-Thanh toán/hoàn tiền thật không thuộc phần quản trị này.
+Xem docs/CUSTOMER_SETUP.md cho VNPay, Resend và đối soát hoàn tiền.
 
 ## Kiểm thử
 

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../shared/bootstrap.php';
+require_once __DIR__ . "/../shared/bootstrap.php";
 
-requireMethod('GET');
+requireMethod("GET");
 requireAdmin();
 
-header('Cache-Control: no-store, private');
+header("Cache-Control: no-store, private");
 
 try {
     $db = connectDB();
@@ -47,7 +47,7 @@ try {
             b.total,
             b.created_at AS createdAt,
             h.name AS hotelName,
-            u.full_name AS guestName
+            COALESCE(b.guest_name,u.full_name) AS guestName
         FROM bookings b
         INNER JOIN hotels h
             ON b.hotel_id = h.id
@@ -61,17 +61,17 @@ try {
     $recentBookings = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
 
     reply(200, [
-        'status' => 'success',
-        'data' => [
-            'metrics' => [
-                'hotelCount' => (int)$metrics['hotelCount'],
-                'activeBookings' => (int)$metrics['activeBookings'],
-                'completedBookings' => (int)$metrics['completedBookings'],
-                'pendingBookings' => (int)$metrics['pendingBookings'],
-                'completedValue' => (float)$metrics['completedValue']
+        "status" => "success",
+        "data" => [
+            "metrics" => [
+                "hotelCount" => (int) $metrics["hotelCount"],
+                "activeBookings" => (int) $metrics["activeBookings"],
+                "completedBookings" => (int) $metrics["completedBookings"],
+                "pendingBookings" => (int) $metrics["pendingBookings"],
+                "completedValue" => (float) $metrics["completedValue"],
             ],
-            'recentBookings' => $recentBookings
-        ]
+            "recentBookings" => $recentBookings,
+        ],
     ]);
 } catch (Throwable $e) {
     failServer($e);

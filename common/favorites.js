@@ -1,23 +1,47 @@
-const FAV_KEY = "threek_favorites"; // legacy guest data
-function favoriteKey() {
-  const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
-  return user ? "threek_favorites_user_" + user.id : FAV_KEY;
-}
-
+let favoriteItems = [];
+let favoriteOwner = null;
 function getFavorites() {
-  try {
-    return JSON.parse(localStorage.getItem(favoriteKey())) || [];
-  } catch {
+  return favoriteItems.slice();
+}
+async function loadFavorites() {
+  await window.authReady;
+  const user = getCurrentUser();
+  if (!user) {
+    favoriteItems = [];
+    favoriteOwner = null;
+    syncFavButtons();
     return [];
   }
+  const response = await fetch(getApiUrl("account/favorites.php"), {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+  const json = await response.json();
+  if (!response.ok || json.status !== "success")
+    throw Error(json.message || "Không tải được yêu thích.");
+  favoriteOwner = user.id;
+  favoriteItems = json.data;
+  syncFavButtons();
+  return getFavorites();
 }
-
-function setFavorites(list) {
-  localStorage.setItem(favoriteKey(), JSON.stringify(list));
+async function saveFavorite(item, saved) {
+  await window.authReady;
+  if (!getCurrentUser()) throw Error("Vui lòng đăng nhập để lưu khách sạn.");
+  const response = await fetch(getApiUrl("account/favorites.php"), {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: item.id, city: item.city, saved }),
+  });
+  const json = await response.json();
+  if (!response.ok || json.status !== "success")
+    throw Error(json.message || "Không lưu được yêu thích.");
+  favoriteItems = json.data;
+  syncFavButtons();
+  return getFavorites();
 }
-
 function isFavorite(id) {
-  return getFavorites().some((h) => h.id === id);
+  return favoriteItems.some((h) => h.id === id);
 }
 
 /* ---------- Toast: tự mất sau 3 giây ---------- */
@@ -58,20 +82,18 @@ function syncFavButtons() {
 }
 
 /* ---------- Bấm tim: lưu / bỏ lưu ---------- */
-function toggleFavorite(btn) {
-  const { id, name, city } = btn.dataset;
-  let list = getFavorites();
-
-  if (list.some((h) => h.id === id)) {
-    list = list.filter((h) => h.id !== id);
-    setFavorites(list);
-    showFavToast(`Đã bỏ lưu "${name}"`, false);
-  } else {
-    list.push({ id, name, city, savedAt: Date.now() });
-    setFavorites(list);
-    showFavToast(`Đã lưu "${name}" vào danh sách yêu thích`, true);
+async function toggleFavorite(btn) {
+  if (btn.disabled) return;
+  btn.disabled = true;
+  try {
+    const saved = !isFavorite(btn.dataset.id);
+    await saveFavorite(btn.dataset, saved);
+    showFavToast((saved ? "Đã lưu " : "Đã bỏ lưu ") + btn.dataset.name, saved);
+  } catch (e) {
+    showFavToast(e.message, false);
+  } finally {
+    if (btn.isConnected) btn.disabled = false;
   }
-  syncFavButtons();
 }
 
 /* ---------- Tự chèn tim vào mọi .hotel-card (kể cả card render bằng JS) ---------- */
@@ -142,6 +164,7 @@ function initFavorites() {
   });
 
   injectFavButtons();
+  loadFavorites().catch((e) => showFavToast(e.message, false));
 
   // Theo dõi khi city-page.js vẽ lại danh sách (lọc, sắp xếp, tải dữ liệu...)
   let queued = false;
@@ -154,3 +177,12 @@ function initFavorites() {
     });
   }).observe(document.body, { childList: true, subtree: true });
 }
+
+window.addEventListener("threek:auth-updated", () => {
+  const owner = getCurrentUser()?.id ?? null;
+  if (owner !== favoriteOwner) {
+    favoriteItems = [];
+    syncFavButtons();
+    loadFavorites().catch(() => {});
+  }
+});

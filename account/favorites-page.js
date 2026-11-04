@@ -54,14 +54,19 @@ function renderFavEmpty() {
   `;
 }
 
-function renderFavoritesPage() {
+async function renderFavoritesPage() {
   const listEl = document.getElementById("fav-list");
   const countEl = document.getElementById("fav-count");
   if (!listEl) return;
 
-  const list = getFavorites().sort(
-    (a, b) => (b.savedAt || 0) - (a.savedAt || 0),
-  );
+  let loaded;
+  try {
+    loaded = await loadFavorites();
+  } catch (e) {
+    listEl.textContent = e.message;
+    return;
+  }
+  const list = loaded.sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
 
   countEl.textContent = list.length ? `${list.length} khách sạn` : "";
   listEl.innerHTML = list.length
@@ -70,11 +75,21 @@ function renderFavoritesPage() {
 }
 
 /* Bỏ lưu ngay trên trang này */
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
   const btn = e.target.closest(".fav-item__remove");
   if (!btn) return;
 
-  setFavorites(getFavorites().filter((h) => h.id !== btn.dataset.id));
+  btn.disabled = true;
+  try {
+    await saveFavorite(
+      getFavorites().find((h) => h.id === btn.dataset.id),
+      false,
+    );
+  } catch (e) {
+    showFavToast(e.message, false);
+    btn.disabled = false;
+    return;
+  }
   showFavToast(`Đã bỏ lưu "${btn.dataset.name}"`, false);
   renderFavoritesPage();
 });

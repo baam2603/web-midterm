@@ -29,7 +29,7 @@ function availableRooms(
     string $to,
 ): int {
     $q = $db->prepare(
-        "SELECT checkin,checkout,rooms FROM bookings WHERE room_type_id=? AND status IN ('pending','confirmed','checked_in') AND checkin < ? AND checkout > ?",
+        "SELECT checkin,checkout,rooms FROM bookings WHERE room_type_id=? AND status IN ('pending','confirmed','checked_in') AND (status<>'pending' OR payment_expires_at IS NULL OR payment_expires_at>NOW()) AND checkin < ? AND checkout > ?",
     );
     $q->execute([$roomId, $to, $from]);
     return max(0, $stock - peakOccupied($q->fetchAll(), $from, $to));
