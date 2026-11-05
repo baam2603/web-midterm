@@ -58,7 +58,7 @@ Dùng tài khoản/email thử do bạn sở hữu:
 3. Cấp role admin cho tài khoản được chỉ định qua quản trị DB; đăng nhập phải vào dashboard. Customer không được truy cập API admin.
 4. Yêu cầu quên mật khẩu: nhận email, mở link HTTPS đúng domain, đặt mật khẩu mới.
 5. Mật khẩu cũ không đăng nhập được; mật khẩu mới được; phiên đăng nhập trước đó bị thu hồi.
-6. Link đã dùng bị từ chối. Kiểm tra link hết hạn bằng cách chờ hơn 30 phút; không sửa trực tiếp DB đang dùng để giả lập.
+6. Link đã dùng bị từ chối. Kiểm tra link hết hạn bằng cách chờ hơn 5 phút; không sửa trực tiếp DB đang dùng để giả lập.
 7. Kiểm tra đăng nhập trên điện thoại và giao diện khi CDN ngoài không tải được.
 8. Đặt phòng thanh toán tại khách sạn, tải lại trang xác nhận, xem đơn và hủy theo quyền.
 

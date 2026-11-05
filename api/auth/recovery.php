@@ -81,13 +81,13 @@ try {
                 "UPDATE password_resets SET used_at=NOW() WHERE user_id=? AND used_at IS NULL",
             )->execute([$uid]);
             $db->prepare(
-                "INSERT INTO password_resets(user_id,token_hash,expires_at) VALUES(?,?,DATE_ADD(NOW(),INTERVAL 30 MINUTE))",
+                "INSERT INTO password_resets(user_id,token_hash,expires_at) VALUES(?,?,DATE_ADD(NOW(),INTERVAL 5 MINUTE))",
             )->execute([$uid, hash("sha256", $token)]);
             queueMail(
                 $db,
                 $email,
                 "Khôi phục mật khẩu THREEK.COM",
-                '<p>Liên kết có hiệu lực 30 phút và chỉ dùng một lần.</p><a href="' .
+                '<p>Liên kết có hiệu lực 5 phút và chỉ dùng một lần.</p><a href="' .
                     htmlspecialchars(
                         $base . "/auth/forgot.html#token=" . $token,
                         ENT_QUOTES,

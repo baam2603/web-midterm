@@ -75,7 +75,7 @@ và dùng Idempotency-Key của Resend để tránh gửi trùng khi mạng lỗ
 Kiểm tra status/attempts/last_error trong mail_outbox; nội dung email được xóa sau khi gửi thành công.
 Không bật worker trên DB kiểm thử chứa email giả.
 
-Khôi phục mật khẩu gửi liên kết qua email, hiệu lực 30 phút, dùng một lần; bảng password_resets chỉ lưu hash token.
+Khôi phục mật khẩu gửi liên kết qua email, hiệu lực 5 phút, dùng một lần; bảng password_resets chỉ lưu hash token.
 Liên kết nằm tạm trong hàng đợi email để worker gửi; nội dung hàng đợi được xóa sau khi gửi thành công.
 Tối đa 3 yêu cầu trong 15 phút/tài khoản; phản hồi không tiết lộ email có tồn tại.
 Thay mật khẩu làm mất hiệu lực các phiên cũ; liên kết khôi phục không trả token qua API công khai.
