@@ -39,7 +39,7 @@ function authId(): int
         $version === false ||
         (int) $version !== (int) ($_SESSION["version"] ?? 1)
     ) {
-        $_SESSION = [];
+        endUserSession();
         respond(401, "Phiên đăng nhập đã hết hạn.");
     }
     return $id;

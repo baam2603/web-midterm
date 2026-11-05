@@ -46,8 +46,7 @@ try {
             "UPDATE password_resets SET used_at=NOW() WHERE user_id=? AND used_at IS NULL",
         )->execute([$reset["user_id"]]);
         $db->commit();
-        $_SESSION = [];
-        session_regenerate_id(true);
+        endUserSession();
         reply(200, [
             "status" => "success",
             "message" =>

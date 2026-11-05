@@ -1,5 +1,6 @@
 <?php
 header("Content-Type: application/json; charset=utf-8");
+header("Cache-Control: no-store, private");
 
 require_once __DIR__ . "/../config/database.php";
 require_once __DIR__ . "/../shared/errors.php";
@@ -183,6 +184,7 @@ try {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
+    $_SESSION = [];
     session_regenerate_id(true);
     $_SESSION["user"] = $userPayload;
     $_SESSION["version"] = 1;

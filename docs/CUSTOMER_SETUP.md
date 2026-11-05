@@ -160,3 +160,31 @@ Không cần migration mới cho lần khôi phục UI này; vẫn cần các mi
 - Biểu mẫu admin có nút về danh sách ở đầu; giữ từ khóa lọc khi đóng/chuyển tab
   hoặc lưu. Khi rời chỉnh sửa khách sạn/loại phòng có dữ liệu chưa lưu sẽ hỏi lại.
 - Giữ CSS và cấu trúc trang hiện tại; không thay đổi SQL hoặc cấu hình email/VNPay.
+
+
+## Cookie và phiên đăng nhập
+
+THREEK đã dùng PHP session phía server, không dùng localStorage để cấp quyền.
+`api/config/session.php` tập trung cấu hình cookie `THREEKSESSID`:
+
+- Chỉ nhận ID phiên qua cookie; strict mode từ chối ID không tồn tại, không truyền ID qua URL.
+- `HttpOnly`, `SameSite=Lax`, cookie host-only và Path theo thư mục cài đặt
+  (ví dụ `/3kbooking_midterm/` trên XAMPP).
+- `Secure` bật khi PHP nhận request HTTPS; HTTP local vẫn đăng nhập được.
+- Cookie lifetime = 0 (session cookie), chưa có chức năng ghi nhớ đăng nhập dài hạn.
+  Thời gian lưu session phía server do PHP/hosting quản lý; đây không phải tính năng
+  tự đăng xuất sau một số phút cố định. Trình duyệt có thể khôi phục session cookie
+  khi bật tính năng khôi phục phiên; dùng Đăng xuất để kết thúc phiên ngay.
+- Đăng ký/đăng nhập đổi mã phiên và xóa trạng thái xác thực/CSRF của lần đăng nhập trước.
+- Đăng xuất, xóa tài khoản và phát hiện session_version hết hiệu lực đều hủy dữ liệu phiên
+  và xóa cookie với cùng Path/SameSite. Đổi mật khẩu giữ phiên hiện tại và vô hiệu phiên khác.
+- API đăng nhập/đăng ký không cho cache phản hồi chứa thông tin người dùng.
+
+Khi deploy sau reverse proxy kết thúc TLS, cần cấu hình web server/FastCGI để PHP
+nhận đúng HTTPS từ proxy đáng tin cậy. Ứng dụng không tự tin các header forwarded
+mà người dùng Internet có thể tự gửi. Giữ tất cả trang và API cùng origin;
+không đổi qua lại `localhost`/`127.0.0.1` khi đang đăng nhập.
+
+Không cần migration SQL mới. Kiểm thử: `npm run test:auth`, bao gồm HTTP API thực,
+cấu hình PHP cho HTTPS và luồng chạy dưới thư mục con. Kiểm tra HTTPS end-to-end
+trên hosting vẫn cần thực hiện sau khi bật SSL.

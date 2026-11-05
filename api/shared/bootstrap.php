@@ -38,7 +38,7 @@ function requireUser(): int
         $version === false ||
         (int) $version !== (int) ($_SESSION["version"] ?? 1)
     ) {
-        $_SESSION = [];
+        endUserSession();
         reply(401, [
             "status" => "error",
             "message" => "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.",

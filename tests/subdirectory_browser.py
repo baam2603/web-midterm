@@ -19,6 +19,7 @@ try:
     import json;assert json.load(response)['data']['ready'];ready=True;break
   except Exception:time.sleep(.1)
  if not ready:raise RuntimeError('Subdirectory test server did not become ready')
+ subprocess.run(['python3',str(ROOT/'tests/session_integration.py')],env={**os.environ,'SESSION_TEST_URL':base,'SESSION_TEST_WEB':name,'SESSION_TEST_ROOT':'/app/3kbooking_midterm'},cwd=ROOT,check=True)
  subprocess.run(['python3',str(ROOT/'tests/customer_browser.py')],env={**os.environ,'CUSTOMER_TEST_URL':base,'CUSTOMER_TEST_OFFLINE':'1'},cwd=ROOT,check=True)
  print('PASS real project-subdirectory deployment and offline booking workflow')
 finally:
