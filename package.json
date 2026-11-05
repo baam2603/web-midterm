@@ -9,7 +9,8 @@
     "test:customer": "python3 tests/customer_integration.py && python3 tests/customer_browser.py",
     "test:admin": "python3 tests/admin_integration.py && python3 tests/admin_browser.py && python3 tests/admin_media.py",
     "test": "npm run test:unit && npm run test:auth && npm run test:customer && npm run test:admin",
-    "test:auth": "python3 tests/session_integration.py && python3 tests/setup_diagnostics.py && python3 tests/auth_browser.py && python3 tests/subdirectory_browser.py"
+    "test:auth": "python3 tests/session_integration.py && python3 tests/setup_diagnostics.py && python3 tests/auth_browser.py && python3 tests/subdirectory_browser.py",
+    "test:mail": "docker exec web-midterm-admin-web php /app/tests/mail_transport_units.php && python3 tests/mail_smtp.py"
   },
   "repository": {
     "type": "git",

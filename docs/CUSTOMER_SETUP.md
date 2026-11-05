@@ -75,7 +75,7 @@ và dùng Idempotency-Key của Resend để tránh gửi trùng khi mạng lỗ
 Kiểm tra status/attempts/last_error trong mail_outbox; nội dung email được xóa sau khi gửi thành công.
 Không bật worker trên DB kiểm thử chứa email giả.
 
-Khôi phục mật khẩu gửi liên kết qua email, hiệu lực 30 phút, dùng một lần; bảng password_resets chỉ lưu hash token.
+Khôi phục mật khẩu gửi liên kết qua email, hiệu lực 5 phút, dùng một lần; bảng password_resets chỉ lưu hash token.
 Liên kết nằm tạm trong hàng đợi email để worker gửi; nội dung hàng đợi được xóa sau khi gửi thành công.
 Tối đa 3 yêu cầu trong 15 phút/tài khoản; phản hồi không tiết lộ email có tồn tại.
 Thay mật khẩu làm mất hiệu lực các phiên cũ; liên kết khôi phục không trả token qua API công khai.
@@ -188,3 +188,89 @@ không đổi qua lại `localhost`/`127.0.0.1` khi đang đăng nhập.
 Không cần migration SQL mới. Kiểm thử: `npm run test:auth`, bao gồm HTTP API thực,
 cấu hình PHP cho HTTPS và luồng chạy dưới thư mục con. Kiểm tra HTTPS end-to-end
 trên hosting vẫn cần thực hiện sau khi bật SSL.
+## Gmail SMTP thay cho Resend (demo)
+
+Code hỗ trợ hai transport, chọn rõ bằng `MAIL_TRANSPORT=resend` hoặc `smtp`.
+Nếu không đặt biến này, Resend vẫn là mặc định để tương thích cấu hình cũ.
+SMTP dùng PHPMailer được khóa phiên bản trong composer.lock; không cần sửa SQL.
+
+### Cài dependency và cập nhật alwaysdata
+
+Tạm vô hiệu hóa cron gửi mail trong panel trước khi chuyển cấu hình.
+Qua SSH, kiểm tra working tree sạch rồi chạy:
+
+```sh
+cd /home/threekbooking/www/web-midterm
+git status --short
+git pull --ff-only origin main
+composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+```
+
+Nếu máy chủ không có Composer hoặc install báo lỗi, dừng chuyển cấu hình và xử lý
+lỗi đó trước. Không upload khóa, tắt xác minh TLS hoặc sửa code vendor.
+`vendor/` không nằm trong Git: cần chạy composer install sau pull lần đầu và khi
+composer.lock thay đổi. Không chạy composer update trên hosting.
+
+Kiểm tra kết nối từ SSH của hosting (không dùng mật khẩu):
+
+```sh
+timeout 15 openssl s_client -brief -starttls smtp -connect smtp.gmail.com:587 -servername smtp.gmail.com -verify_return_error </dev/null
+```
+
+Cần kết nối TLS và xác minh chứng chỉ thành công. Nếu timeout/connection refused,
+kiểm tra quyền truy cập SMTP với hosting; không tắt TLS để vượt lỗi.
+Kết quả này chưa xác nhận Gmail chấp nhận tài khoản/mật khẩu ứng dụng.
+
+### Cấu hình Gmail
+
+Dùng Gmail riêng cho demo, bật xác minh 2 bước và tạo Mật khẩu ứng dụng nếu Google
+cho phép. Không dùng mật khẩu đăng nhập Gmail thường. Đặt cùng cấu hình sau trong
+**cả website và tác vụ cron** của alwaysdata, giữ nguyên DB_* và APP_BASE_URL:
+
+```ini
+MAIL_TRANSPORT=smtp
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_ENCRYPTION=tls
+SMTP_USERNAME=your-project@gmail.com
+SMTP_PASSWORD=YOUR_GOOGLE_APP_PASSWORD
+MAIL_FROM=your-project@gmail.com
+```
+
+Thay Gmail và mật khẩu bằng giá trị thật trong panel; bỏ dấu cách phân nhóm của
+mật khẩu ứng dụng Google. Không gửi giá trị vào chat, Git, ảnh hoặc dòng lệnh SSH.
+MAIL_FROM phải dùng cùng Gmail đã xác thực. RESEND_API_KEY có thể giữ để quay lại
+Resend, nhưng không được sử dụng khi MAIL_TRANSPORT=smtp. `tls` bắt buộc STARTTLS;
+`smtps` hỗ trợ TLS trực tiếp nếu nhà cung cấp khác yêu cầu. Không hỗ trợ SMTP rõ.
+
+Worker và lịch mỗi phút giữ nguyên:
+
+```sh
+php /home/threekbooking/www/web-midterm/scripts/mail-worker.php
+```
+
+Sau khi cả hai nơi đã cấu hình, mở /api/health-config.php và kiểm tra email=true.
+Điều này kiểm tra cấu hình và dependency, không xác nhận gửi được email.
+Bật lại đúng một tác vụ cron gửi mail. Dùng tài khoản thử với email người nhận
+khác đã được bạn cho phép để thử quên mật khẩu. Kiểm tra hộp thư/spam và link
+HTTPS về đúng website. Không gửi nhiều yêu cầu liên tiếp khi đang chờ cron.
+Kiểm tra mail_outbox qua phpMyAdmin: status=sent chỉ cho biết Gmail SMTP nhận thư,
+không đảm bảo vào inbox. Worker không lưu mật khẩu hay phản hồi SMTP thô vào lỗi.
+Thư failed dưới 5 lần sẽ tự thử lại; thư đủ 5 lần cần xem nguyên nhân trước khi
+thử lại. Xin link mới nếu link cũ hết hạn; không tái sử dụng token từ log/DB.
+
+Gmail có hạn mức và cơ chế chống spam; tài khoản mới có thể bị hạn chế. SMTP có
+thể gửi trùng khi mất kết nối sau lúc nhà cung cấp nhận thư; Message-ID ổn định
+không phải cam kết chống trùng. Token đặt lại mật khẩu vẫn chỉ dùng một lần.
+Đây là phương án demo, không cam kết gửi hàng loạt hoặc đến inbox.
+
+Quay lại Resend: tạm dừng cron, đặt MAIL_TRANSPORT=resend và khôi phục MAIL_FROM
+đã dùng với Resend ở cả website và cron, rồi bật lại. Đừng chạy hai worker với hai
+transport song song trên cùng hàng đợi.
+
+### Kiểm thử SMTP cục bộ
+
+Cài Composer dependencies trước. Sau `sh scripts/start-test-environment.sh`, chạy
+`npm run test:mail`. Fixture SMTP chỉ dùng địa chỉ example.invalid và mật khẩu giả;
+kiểm tra TLS/xác thực/MIME thành công và từ chối chứng chỉ sai, sai mật khẩu,
+không có STARTTLS. Không gọi Gmail hay gửi email thật trong bộ kiểm thử.

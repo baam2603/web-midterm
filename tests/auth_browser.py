@@ -16,7 +16,8 @@ try:
  with sync_playwright() as p:
   browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
   def context(routeHandler=None):
-   c=browser.new_context();c.route('**/*',routeHandler or (lambda r:r.continue_() if r.request.url.startswith(URL) else r.abort()));return c
+   # Respect the site's reduced-motion mode so header entrance animation does not race clicks.
+   c=browser.new_context(reduced_motion="reduce");c.route('**/*',routeHandler or (lambda r:r.continue_() if r.request.url.startswith(URL) else r.abort()));return c
   # The real guest journey used to be missing from the end-to-end test.
   c=context();page=c.new_page();page.set_default_timeout(10000);page.goto(URL+hotelPath,wait_until='domcontentloaded');page.locator('[data-room=standard]').first.click();page.wait_for_url('**/auth/login.html?next=*');page.locator('#email').fill(email);page.locator('#password').fill(password);page.locator('[type=submit]').click();page.wait_for_url('**/hotel/Booking.html?*');page.locator('#booking-form').wait_for();assert page.locator('[name=email]').input_value()==email;print('PASS guest room selection → login → exact selected room retained');c.close()
   # Session cookie, empty browser cache, slow profile: clicking must wait instead of redirecting.
@@ -59,6 +60,41 @@ try:
     result=r.fetch(url=URL+parsed.path[len(prefix):]+('?' + parsed.query if parsed.query else ''));r.fulfill(response=result);return
    r.continue_()
   c=context(subfolder);page=c.new_page();page.goto(URL+prefix+hotelPath,wait_until='domcontentloaded');page.locator('[data-room=standard]').first.click();page.wait_for_url('**/course-project/auth/login.html?next=*');page.locator('#email').fill(email);page.locator('#password').fill(password);page.locator('[type=submit]').click();page.wait_for_url('**/course-project/hotel/Booking.html?*');page.locator('#booking-form').wait_for();print('PASS login return URL works under an Apache/XAMPP-style project subfolder');c.close()
+  # Submit the redesigned registration form, then log out through the header.
+  registrationEmail=f'registration-{run}@example.invalid'
+  c=context();page=c.new_page();page.set_default_timeout(10000)
+  try:
+   page.goto(URL+'/auth/register.html',wait_until='domcontentloaded')
+   for selector,value in [('#text_ho','Auth'),('#text_ten','Registration'),('#email',registrationEmail),('#text','0900000000'),('#password',password),('#confirm_password',password)]:page.locator(selector).fill(value)
+   for selector,value in [('#day-select','1'),('#month-select','1'),('#year-select','2000'),('#gender-select','male')]:page.locator(selector).select_option(value)
+   page.locator('[type=submit]').click();page.wait_for_url('**/index1.html')
+   assert sql(f"SELECT COUNT(*) FROM users WHERE email='{registrationEmail}'")=='1'
+   page.locator('#avatarBtn').click();page.locator('#logoutBtn').click()
+   page.locator('#guest-actions').wait_for(state='visible')
+   assert c.request.get(URL+'/api/account/profile.php').status==401
+   print('PASS redesigned registration saves SQL account and header logout invalidates session')
+  finally:
+   c.close();sql(f"DELETE FROM users WHERE email='{registrationEmail}'")
+  # The redesigned login must preserve role routing and its password toggle.
+  c=context();page=c.new_page();page.set_default_timeout(10000)
+  page.goto(URL+'/auth/login.html',wait_until='domcontentloaded')
+  page.locator('#password').fill(password);page.locator('.password-eye-button').click()
+  assert page.locator('#password').get_attribute('type')=='text'
+  assert page.locator('.password-eye-button').get_attribute('aria-pressed')=='true'
+  page.locator('.password-eye-button').click();assert page.locator('#password').get_attribute('type')=='password'
+  sql(f"UPDATE users SET role='admin' WHERE id={uid}")
+  try:
+   page.locator('#email').fill(email);page.locator('[type=submit]').click()
+   page.wait_for_url('**/admin/index.html');page.locator('#tk-admin-app').wait_for(state='visible')
+   print('PASS redesigned login keeps password toggle and verified admin dashboard routing')
+  finally:sql(f"UPDATE users SET role='customer' WHERE id={uid}")
+  c.close()
+  # Customers cannot use the return URL to enter the admin area.
+  c=context();page=c.new_page();page.set_default_timeout(10000)
+  page.goto(URL+'/auth/login.html?next=/admin/index.html',wait_until='domcontentloaded')
+  page.locator('#email').fill(email);page.locator('#password').fill(password);page.locator('[type=submit]').click()
+  page.locator('#login-status').filter(has_text='không có quyền quản trị').wait_for()
+  assert '/auth/login.html' in page.url;print('PASS customer admin return URL shows an explicit permission error');c.close()
   browser.close()
 finally:
  if uid:

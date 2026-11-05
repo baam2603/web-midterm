@@ -82,9 +82,19 @@ try:
  recovery=request(anon,'/api/auth/recovery.php',{'email':emails[0]});assert 'token' not in json.dumps(recovery).lower()
  html=sql(f"SELECT html_body FROM mail_outbox WHERE recipient='{emails[0]}' AND subject LIKE '%THREEK%' ORDER BY id DESC LIMIT 1")
  token=re.search(r'token=([a-f0-9]{64})',html).group(1);assert token!=sql(f'SELECT token_hash FROM password_resets WHERE user_id={users[0]} ORDER BY id DESC LIMIT 1')
+ assert 'hiệu lực 5 phút' in html
+ assert sql(f"SET time_zone='+07:00';SELECT TIMESTAMPDIFF(SECOND,created_at,expires_at) FROM password_resets WHERE user_id={users[0]} ORDER BY id DESC LIMIT 1")=='300';passed('recovery token expires five minutes after creation and email states the same limit')
  request(anon,'/api/auth/recovery.php',{'token':token,'password':newPassword});request(anon,'/api/auth/recovery.php',{'token':token,'password':newPassword},422)
  request(a,'/api/account/profile.php',status=401);request(a,'/api/auth/login.php',{'email':emails[0],'password':password},401);request(a,'/api/auth/login.php',{'email':emails[0],'password':newPassword});passed('hashed one-time recovery token and revocation of old sessions')
  assert request(b,'/api/account/profile.php')['data']['user']['email']==emails[1];passed('password reset does not affect another account')
+ # Only mutate the isolated fixture: expired tokens must not change the password/session.
+ request(anon,'/api/auth/recovery.php',{'email':emails[0]})
+ html=sql(f"SELECT html_body FROM mail_outbox WHERE recipient='{emails[0]}' AND subject LIKE '%THREEK%' ORDER BY id DESC LIMIT 1")
+ expiredToken=re.search(r'token=([a-f0-9]{64})',html).group(1)
+ sql(f"SET time_zone='+07:00';UPDATE password_resets SET expires_at=DATE_SUB(NOW(),INTERVAL 1 SECOND) WHERE user_id={users[0]} AND used_at IS NULL")
+ request(anon,'/api/auth/recovery.php',{'token':expiredToken,'password':password},422)
+ request(a,'/api/auth/login.php',{'email':emails[0],'password':newPassword})
+ passed('expired recovery link is rejected without changing the password')
  print(f'{count} customer checks passed; no live provider requests performed')
 finally:
  if users:
