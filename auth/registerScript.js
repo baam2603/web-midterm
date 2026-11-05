@@ -58,13 +58,15 @@
 
   const next = new URLSearchParams(location.search).get("next");
 
-  const dest =
-    next &&
-    next.startsWith("/") &&
-    !next.startsWith("//") &&
-    !next.startsWith("/\\")
-      ? next
-      : "../index1.html";
+  const dest = (() => {
+    const home = new URL("../index1.html", location.href);
+    if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes("\\")) return home.href;
+    const target = new URL(next, location.origin);
+    const root = new URL("../", location.href);
+    const admin = new URL("../admin/", location.href);
+    return target.origin === location.origin && target.pathname.startsWith(root.pathname) && !target.pathname.startsWith(admin.pathname)
+      ? target.href : home.href;
+  })();
 
   const alreadyHaveBtn = document.querySelector(
     ".btn-already-have"
@@ -171,9 +173,11 @@
 
       if (submitBtn) submitBtn.disabled = true;
 
-      await window.registerUser(payload);
-
-      location.href = dest;
+      registrationStarted = true;
+      const result = await window.registerUser(payload);
+      showOtp(result.challenge);
+      $("password").value = "";
+      $("confirm_password").value = "";
     } catch (err) {
       showError(
         err.message || "Đăng ký thất bại. Vui lòng thử lại."
@@ -182,6 +186,75 @@
       if (submitBtn) submitBtn.disabled = false;
     }
   });
+
+  const dialog = $("registration-otp-dialog");
+  const otpForm = $("registration-otp-form"), code = $("registration-otp-code");
+  const feedback = $("registration-otp-feedback"), verify = $("registration-otp-verify");
+  const resend = $("registration-otp-resend"), closeOtp = $("registration-otp-close");
+  let challenge = null, expiresAt = 0, resendAt = 0, otpBusy = false, registrationStarted = false, locked = false;
+
+  function updateOtpClock() {
+    if (!challenge) return;
+    const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+    const cooldown = Math.max(0, Math.ceil((resendAt - Date.now()) / 1000));
+    $("registration-otp-timer").textContent = remaining
+      ? `Mã còn hiệu lực ${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}.`
+      : "Mã đã hết hạn. Vui lòng gửi lại mã.";
+    verify.disabled = otpBusy || locked || !remaining;
+    resend.disabled = otpBusy || locked || cooldown > 0;
+    resend.textContent = cooldown ? `Gửi lại sau ${cooldown}s` : "Gửi lại mã";
+    closeOtp.disabled = otpBusy;
+  }
+  function showOtp(value) {
+    if (!value?.id) throw Error("Không nhận được phiên xác minh. Vui lòng thử lại.");
+    challenge = value;
+    expiresAt = Date.now() + value.expiresIn * 1000;
+    resendAt = Date.now() + value.retryAfter * 1000;
+    locked = false;
+    $("registration-otp-email").textContent = value.email;
+    code.value = ""; feedback.textContent = "";
+    updateOtpClock();
+    if (!dialog.open) dialog.showModal();
+    code.focus();
+  }
+  function otpError(error) {
+    feedback.textContent = error.message || "Không thực hiện được yêu cầu.";
+    if (error.retryAfter) resendAt = Date.now() + error.retryAfter * 1000;
+    if (["otp_locked", "registration_expired", "registration_session"].includes(error.code)) locked = true;
+  }
+  otpForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (otpBusy || locked || !challenge || !otpForm.reportValidity()) return;
+    otpBusy = true; feedback.textContent = "Đang xác minh..."; updateOtpClock();
+    try {
+      await window.verifyRegistration(challenge.id, code.value);
+      location.replace(dest);
+    } catch (error) { otpError(error); }
+    finally { otpBusy = false; updateOtpClock(); }
+  });
+  resend.addEventListener("click", async () => {
+    if (otpBusy || locked || !challenge) return;
+    otpBusy = true; updateOtpClock();
+    try {
+      const result = await window.resendRegistration(challenge.id);
+      showOtp(result.challenge);
+      feedback.textContent = "Mã mới đang được gửi. Chỉ dùng mã mới nhất.";
+    } catch (error) { otpError(error); }
+    finally { otpBusy = false; updateOtpClock(); }
+  });
+  closeOtp.addEventListener("click", () => {
+    if (!otpBusy) {
+      dialog.close();
+      showError("Chưa hoàn tất đăng ký. Hãy nhập lại thông tin nếu muốn đăng ký lại; mã mới chỉ được gửi sau thời gian chờ.");
+      $("email").focus();
+    }
+  });
+  dialog.addEventListener("cancel", (event) => { if (otpBusy) event.preventDefault(); });
+  code.addEventListener("input", () => { code.value = code.value.replace(/[^0-9]/g, "").slice(0, 6); });
+  setInterval(updateOtpClock, 1000);
+  window.getRegistrationStatus().then((result) => {
+    if (!registrationStarted && result.challenge) showOtp(result.challenge);
+  }).catch((error) => { if (!registrationStarted) showError(error.message); });
 
   // Toggle password visibility using the project's original eye PNG assets.
   function setupPasswordEye(inputId, imageId) {

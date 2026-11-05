@@ -1,5 +1,7 @@
 # Bản tích hợp Admin và Customer
 
+Đăng ký mới xác minh email bằng OTP 6 số. Xem [cài đặt và kiểm thử OTP](docs/REGISTRATION_OTP_SETUP.md); cần import migration bổ sung trước khi chạy nhánh này.
+
 Xem [hướng dẫn customer, VNPay, Resend và Gmail SMTP](docs/CUSTOMER_SETUP.md).
 DB hiện có: sao lưu, giữ dữ liệu và import thêm `database/customer_migration.sql` sau migration admin.
 Thanh toán VNPay/email thật cần tài khoản nhà cung cấp và HTTPS; chưa được bật bằng khóa thử nghiệm.

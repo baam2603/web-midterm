@@ -87,3 +87,7 @@ Python browser test cần Playwright và Chromium ở `/usr/bin/chromium`.
 Integration test tạo tài khoản/dữ liệu riêng rồi dọn trong `finally`.
 Các test JS cũ `smoke.js`, `flows.js`, `render_check.py` mô phỏng admin/auth bằng localStorage;
 chúng chưa được chuyển sang mô hình API mới và không phải bộ nghiệm thu admin hiện tại.
+
+## Migration đăng ký OTP
+
+Nhánh đăng ký OTP cần thêm `database/registration_otp_migration.sql` sau các migration ở trên. File bổ sung, chạy lặp lại được; không nhập lại schema/seed lên DB đã có dữ liệu. Xem [hướng dẫn OTP](REGISTRATION_OTP_SETUP.md).

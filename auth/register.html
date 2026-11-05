@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="styleRegister.css" />
+    <link rel="stylesheet" href="registration-otp.css?v=20261105" />
 </head>
 <body>
     <div class="register-container">
@@ -109,6 +110,21 @@
         </div>
     </div>
 
+    <dialog id="registration-otp-dialog" aria-labelledby="registration-otp-title" aria-describedby="registration-otp-description">
+        <h2 id="registration-otp-title">Xác minh email</h2>
+        <p id="registration-otp-description">Nhập mã gồm 6 chữ số được gửi tới <strong id="registration-otp-email"></strong>.</p>
+        <p class="otp-note">Email có thể mất khoảng 1–2 phút để đến. Kiểm tra cả thư rác.</p>
+        <form id="registration-otp-form">
+            <label for="registration-otp-code">Mã OTP</label>
+            <input id="registration-otp-code" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="000000" aria-describedby="registration-otp-timer registration-otp-feedback" />
+            <p id="registration-otp-timer" class="otp-note"></p>
+            <p id="registration-otp-feedback" role="status" aria-live="polite"></p>
+            <button id="registration-otp-verify" class="btn-submit" type="submit">Xác nhận đăng ký</button>
+            <button id="registration-otp-resend" class="btn-already-have" type="button">Gửi lại mã</button>
+            <button id="registration-otp-close" type="button">Để sau / sửa thông tin</button>
+        </form>
+    </dialog>
+
     <!-- Thư viện JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
@@ -116,6 +132,6 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- Giữ nguyên script kết nối Backend và xử lý form -->
-    <script src="../common/auth-service.js"></script>
-    <script src="registerScript.js"></script>
+    <script src="../common/auth-service.js?v=20261105-otp"></script>
+    <script src="registerScript.js?v=20261105-otp"></script>
 </body>

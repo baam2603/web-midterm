@@ -274,3 +274,7 @@ Cài Composer dependencies trước. Sau `sh scripts/start-test-environment.sh`,
 `npm run test:mail`. Fixture SMTP chỉ dùng địa chỉ example.invalid và mật khẩu giả;
 kiểm tra TLS/xác thực/MIME thành công và từ chối chứng chỉ sai, sai mật khẩu,
 không có STARTTLS. Không gọi Gmail hay gửi email thật trong bộ kiểm thử.
+
+## Đăng ký xác minh email
+
+Đăng ký mới yêu cầu OTP 6 số trước khi tạo tài khoản. Xem [REGISTRATION_OTP_SETUP.md](REGISTRATION_OTP_SETUP.md) cho migration bổ sung, giới hạn và cách cài trên alwaysdata. Tài khoản hiện có không bị thay đổi.

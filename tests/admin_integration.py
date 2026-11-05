@@ -1,3 +1,4 @@
+from registration_helpers import register_test_user, read_registration_otp
 """Run only against an isolated test DB/container. Creates and removes its own fixtures.
 ADMIN_TEST_URL=http://127.0.0.1:8001 ADMIN_TEST_DB_CONTAINER=web-midterm-admin-db python3 tests/admin_integration.py
 """
@@ -26,7 +27,7 @@ def passed(name):
     global count;count+=1;print('PASS',name)
 try:
     for c,email in [(admin,emails[0]),(customer,emails[1])]:
-        request(c,'/api/auth/register.php',{'fullName':'Integration Test','email':email,'password':password},expected=201)
+        register_test_user({'fullName':'Integration Test','email':email,'password':password},URL,c)
         uid=int(sql(f"SELECT id FROM users WHERE email='{email}';"));uids.append(uid)
     sql(f"UPDATE users SET role='admin' WHERE id={uids[0]};")
     for c,email in [(admin,emails[0]),(customer,emails[1])]:request(c,'/api/auth/login.php',{'email':email,'password':password})

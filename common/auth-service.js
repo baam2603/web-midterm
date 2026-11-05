@@ -68,6 +68,7 @@
       const error = Error(json.message || "Yêu cầu thất bại.");
       error.status = response.status;
       error.code = json.code;
+      error.retryAfter = Number(json.data?.retryAfter || 0);
       throw error;
     }
     return json.data || {};
@@ -112,7 +113,7 @@
     return verified;
   }
   const registerUser = (input) =>
-    authenticate("auth/register.php", {
+    request("auth/register.php", "POST", {
       fullName: String(input?.fullName || input?.name || "").trim(),
       email: String(input?.email || "")
         .trim()
@@ -121,6 +122,11 @@
       phone: String(input?.phone || "").trim(),
       birthday: String(input?.birthday || ""),
     });
+  const verifyRegistration = (challengeId, otp) =>
+    authenticate("auth/register-verify.php", { challengeId, otp });
+  const resendRegistration = (challengeId) =>
+    request("auth/register-resend.php", "POST", { challengeId });
+  const getRegistrationStatus = () => request("auth/register-status.php");
   const loginUser = (email, password) =>
     authenticate("auth/login.php", {
       email: String(email || "")
@@ -157,6 +163,9 @@
     getCurrentUser,
     setSession,
     registerUser,
+    verifyRegistration,
+    resendRegistration,
+    getRegistrationStatus,
     loginUser,
     loadProfile,
     updateProfile,

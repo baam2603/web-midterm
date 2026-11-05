@@ -1,205 +1,58 @@
 <?php
-header("Content-Type: application/json; charset=utf-8");
-header("Cache-Control: no-store, private");
-
-require_once __DIR__ . "/../config/database.php";
-require_once __DIR__ . "/../shared/errors.php";
-
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    http_response_code(405);
-    echo json_encode(
-        [
-            "status" => "error",
-            "message" => "Method not allowed",
-        ],
-        JSON_UNESCAPED_UNICODE,
-    );
-    exit();
+require_once __DIR__ . '/../shared/registration.php';
+requireMethod('POST');
+guardCustomerWrite();
+$v = input();
+$fullName = trim((string) ($v['fullName'] ?? $v['full_name'] ?? $v['name'] ?? ''));
+$email = strtolower(trim((string) ($v['email'] ?? '')));
+$password = (string) ($v['password'] ?? '');
+$phone = trim((string) ($v['phone'] ?? ''));
+$birthday = trim((string) ($v['birthday'] ?? ''));
+if (mb_strlen($fullName) < 2 || mb_strlen($fullName) > 120) {
+    reply(400, ['status' => 'error', 'message' => 'Họ và tên phải từ 2 đến 120 ký tự.']);
 }
-
+if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 150) {
+    reply(400, ['status' => 'error', 'message' => 'Email không hợp lệ.']);
+}
+if (strlen($password) < 8 || strlen($password) > 72 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
+    reply(400, ['status' => 'error', 'message' => 'Mật khẩu phải có 8–72 ký tự, bao gồm chữ và số.']);
+}
+if ($phone !== '' && !preg_match('/^[0-9+\-\s]{8,20}$/', $phone)) {
+    reply(400, ['status' => 'error', 'message' => 'Số điện thoại không hợp lệ.']);
+}
+if ($birthday !== '') {
+    $date = DateTimeImmutable::createFromFormat('!Y-m-d', $birthday);
+    if (!$date || $date->format('Y-m-d') !== $birthday || $date > new DateTimeImmutable('today')) {
+        reply(400, ['status' => 'error', 'message' => 'Ngày sinh không hợp lệ.']);
+    }
+}
+if (!mailConfigured()) reply(503, ['status' => 'error', 'message' => 'Email xác minh chưa được cấu hình. Vui lòng liên hệ quản trị viên.']);
+$db = connectDB();
 try {
-    $rawBody = file_get_contents("php://input");
-    $input = json_decode($rawBody, true);
-
-    if (!is_array($input)) {
-        $input = $_POST;
-    }
-
-    $fullName = trim(
-        (string) ($input["fullName"] ??
-            ($input["full_name"] ?? ($input["name"] ?? ""))),
-    );
-    $email = strtolower(trim((string) ($input["email"] ?? "")));
-    $password = (string) ($input["password"] ?? "");
-    $phone = trim((string) ($input["phone"] ?? ""));
-    $birthday = trim((string) ($input["birthday"] ?? ""));
-
-    // 1. Validate dữ liệu đầu vào
-    if (mb_strlen($fullName) < 2 || mb_strlen($fullName) > 120) {
-        http_response_code(400);
-        echo json_encode(
-            [
-                "status" => "error",
-                "message" => "Họ và tên phải từ 2 đến 120 ký tự.",
-            ],
-            JSON_UNESCAPED_UNICODE,
-        );
-        exit();
-    }
-
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 150) {
-        http_response_code(400);
-        echo json_encode(
-            [
-                "status" => "error",
-                "message" => "Email không hợp lệ.",
-            ],
-            JSON_UNESCAPED_UNICODE,
-        );
-        exit();
-    }
-
-    if (
-        strlen($password) < 8 ||
-        strlen($password) > 72 ||
-        !preg_match("/[A-Za-z]/", $password) ||
-        !preg_match("/\d/", $password)
-    ) {
-        http_response_code(400);
-        echo json_encode(
-            [
-                "status" => "error",
-                "message" =>
-                    "Mật khẩu phải có ít nhất 8 ký tự, bao gồmทั้ง chữ và số.",
-            ],
-            JSON_UNESCAPED_UNICODE,
-        );
-        exit();
-    }
-
-    if ($phone !== "" && !preg_match('/^[0-9+\-\s]{8,20}$/', $phone)) {
-        http_response_code(400);
-        echo json_encode(
-            [
-                "status" => "error",
-                "message" => "Số điện thoại không hợp lệ.",
-            ],
-            JSON_UNESCAPED_UNICODE,
-        );
-        exit();
-    }
-
-    $pdo = connectDB();
-
-    // 2. Kiểm tra trùng lặp email
-    $checkStmt = $pdo->prepare(
-        "SELECT id FROM users WHERE email = :email LIMIT 1",
-    );
-    $checkStmt->execute(["email" => $email]);
-    if ($checkStmt->fetch()) {
-        http_response_code(409);
-        echo json_encode(
-            [
-                "status" => "error",
-                "message" => "Email này đã được đăng ký.",
-            ],
-            JSON_UNESCAPED_UNICODE,
-        );
-        exit();
-    }
-
-    if ($birthday !== "") {
-        $date = DateTimeImmutable::createFromFormat("!Y-m-d", $birthday);
-
-        if (
-            !$date ||
-            $date->format("Y-m-d") !== $birthday ||
-            $date > new DateTimeImmutable("today")
-        ) {
-            http_response_code(400);
-            echo json_encode(
-                [
-                    "status" => "error",
-                    "message" => "Ngày sinh không hợp lệ.",
-                ],
-                JSON_UNESCAPED_UNICODE,
-            );
-            exit();
-        }
-    }
-
-    // 3. Hash mật khẩu chuẩn bảo mật server (Bcrypt)
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
-    // 4. Lưu vào MySQL
-
-    // 4. Lưu tài khoản mới vào MySQL
-    $insertSql = "
-        INSERT INTO users (
-            email,
-            password_hash,
-            full_name,
-            display_name,
-            phone,
-            birthday,
-            role
-        )
-        VALUES (
-            :email,
-            :password_hash,
-            :full_name,
-            :display_name,
-            :phone,
-            :birthday,
-            'customer'
-        )
-    ";
-
-    $insertStmt = $pdo->prepare($insertSql);
-
-    $insertStmt->execute([
-        "email" => $email,
-        "password_hash" => $passwordHash,
-        "full_name" => $fullName,
-        "display_name" => $fullName,
-        "phone" => $phone !== "" ? $phone : null,
-        "birthday" => $birthday !== "" ? $birthday : null,
+    $db->beginTransaction();
+    $q = $db->prepare('SELECT id FROM users WHERE email=?');$q->execute([$email]);
+    if ($q->fetchColumn()) registrationError($db, 409, 'email_registered', 'Email này đã được đăng ký.');
+    // Create the email lock before reading counters to serialize concurrent requests.
+    $db->prepare('INSERT IGNORE INTO registration_challenges(email,challenge_id,expires_at,last_sent_at,window_started_at) VALUES(?,?,NOW(),DATE_SUB(NOW(),INTERVAL 1 DAY),NOW())')->execute([$email, bin2hex(random_bytes(32))]);
+    $q = $db->prepare('SELECT * FROM registration_challenges WHERE email=? FOR UPDATE');$q->execute([$email]);$row=$q->fetch();
+    $newWindow = strtotime($row['window_started_at']) + 900 <= time();
+    if (!$newWindow) registrationLimits($db, $row);
+    registrationRate($db);
+    registrationRetireMail($db, $row);
+    $id = bin2hex(random_bytes(32));$otp = registrationCode($row['otp_hash']);
+    $passwordHash = password_hash($password,PASSWORD_DEFAULT);
+    $otpHash = password_hash($otp,PASSWORD_DEFAULT);
+    $now = time();
+    $issuedAt = date('Y-m-d H:i:s', $now);
+    $expires = date('Y-m-d H:i:s', $now + 300);
+    $mailId = registrationQueue($db, $email, $otp, $expires);
+    $db->prepare('UPDATE registration_challenges SET challenge_id=?,full_name=?,password_hash=?,phone=?,birthday=?,otp_hash=?,expires_at=?,last_sent_at=?,window_started_at=?,send_count=?,failed_attempts=?,mail_id=?,consumed_at=NULL WHERE email=?')->execute([
+        $id,$fullName,$passwordHash,$phone ?: null,$birthday ?: null,$otpHash,$expires,$issuedAt,
+        $newWindow ? $issuedAt : $row['window_started_at'], $newWindow ? 1 : (int)$row['send_count']+1,
+        $newWindow ? 0 : (int)$row['failed_attempts'],$mailId,$email,
     ]);
-
-    $userId = (int) $pdo->lastInsertId();
-
-    $userPayload = [
-        "id" => $userId,
-        "email" => $email,
-        "name" => $fullName,
-        "fullName" => $fullName,
-        "displayName" => $fullName,
-        "phone" => $phone,
-        "birthday" => $birthday,
-        "role" => "customer",
-        "createdAt" => date("c"),
-    ];
-
-    // Khởi tạo PHP session để dùng cho các API cần xác thực sau này
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    $_SESSION = [];
-    session_regenerate_id(true);
-    $_SESSION["user"] = $userPayload;
-    $_SESSION["version"] = 1;
-
-    http_response_code(201);
-    echo json_encode(
-        [
-            "status" => "success",
-            "message" => "Đăng ký tài khoản thành công.",
-            "data" => [
-                "user" => $userPayload,
-            ],
-        ],
-        JSON_UNESCAPED_UNICODE,
-    );
-} catch (Throwable $e) {
-    outputApiFailure($e);
-}
+    $db->commit();
+    $_SESSION['registration_id']=$id;
+    reply(202, ['status'=>'success','message'=>'Mã xác minh đang được gửi đến email của bạn.',
+        'data'=>['verificationRequired'=>true,'challenge'=>['id'=>$id,'email'=>$email,'expiresIn'=>300,'retryAfter'=>60]]]);
+} catch (Throwable $error) { registrationFailure($db,$error); }

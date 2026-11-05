@@ -26,6 +26,9 @@ $required = [
     "notifications" => ["user_id", "read_at"],
     "support_tickets" => ["user_id", "reply"],
     "audit_logs" => ["actor_id"],
+    "registration_challenges" => ["challenge_id", "otp_hash", "expires_at", "failed_attempts", "mail_id", "consumed_at"],
+    "registration_rate_limits" => ["ip_hash", "window_started_at", "send_count"],
+    "mail_outbox" => ["expires_at"],
 ];
 $result = [
     "phpSupported" => version_compare(PHP_VERSION, "8.1", ">="),
@@ -63,7 +66,7 @@ $result["ready"] =
     !$result["missing"];
 if ($result["missing"]) {
     $result["message"] =
-        "Sao lưu database rồi import database/admin_migration.sql và database/customer_migration.sql. Không import schema.sql đè lên dữ liệu hiện có.";
+        "Sao lưu database rồi import database/admin_migration.sql và database/customer_migration.sql rồi database/registration_otp_migration.sql. Không import schema.sql đè lên dữ liệu hiện có.";
 }
 if (!$result["mbstring"]) {
     $result["message"] =

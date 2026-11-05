@@ -1,3 +1,4 @@
+from registration_helpers import register_test_user, read_registration_otp
 """Cookie/session lifecycle against the disposable PHP/MariaDB test environment."""
 import http.cookiejar,json,os,secrets,subprocess,urllib.request,urllib.error,urllib.parse
 URL=os.environ.get('SESSION_TEST_URL','http://127.0.0.1:8001')
@@ -39,7 +40,7 @@ try:
  assert next(k.path for k in jar if k.name=='THREEKSESSID')==expected_path
  assert not next(k.domain_specified for k in jar if k.name=='THREEKSESSID')
  print('PASS host-only session cookie has HttpOnly, SameSite=Lax and project-scoped path')
- _,headers=request(c,'/api/auth/register.php',{'fullName':'Session Test','email':email,'password':pw,'phone':'0900000000'},201)
+ _,headers=register_test_user({'fullName':'Session Test','email':email,'password':pw,'phone':'0900000000'},URL,c)
  uid=int(sql(f"SELECT id FROM users WHERE email='{email}'"));registered=sid(jar)
  assert registered!=anonymous and 'no-store' in headers.get('Cache-Control','')
  replay(anonymous);print('PASS registration rotates anonymous session; old cookie cannot authenticate')

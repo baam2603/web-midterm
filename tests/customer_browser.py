@@ -1,3 +1,4 @@
+from registration_helpers import register_test_user, read_registration_otp
 """Real UI customer booking on SQL-only hotel/room codes. No live payment/email."""
 import json,secrets,subprocess,urllib.request,os
 from playwright.sync_api import sync_playwright
@@ -8,7 +9,7 @@ def api(path,body):
  with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(req) as r:return json.load(r)
 run=secrets.token_hex(6);email=f'customer-browser-{run}@example.invalid';pw=secrets.token_urlsafe(20)+'A1';hotel=uid=None
 try:
- api('/api/auth/register.php',{'fullName':'Browser Customer','email':email,'password':pw,'phone':'0900000000'});uid=int(sql(f"SELECT id FROM users WHERE email='{email}'"))
+ register_test_user({'fullName':'Browser Customer','email':email,'password':pw,'phone':'0900000000'},URL);uid=int(sql(f"SELECT id FROM users WHERE email='{email}'"))
  sql(f"INSERT INTO hotels(slug,name,city,type,stars,address,price_per_night,is_active) VALUES('customer-browser-{run}','SQL Browser Hotel {run}','dalat','hotel',4,'Browser Street',900000,1)")
  hotel=int(sql(f"SELECT id FROM hotels WHERE slug='customer-browser-{run}'"));sql(f"INSERT INTO room_types(hotel_id,code,name,capacity,total_rooms,price_per_night,free_cancellation,is_active) VALUES({hotel},'sql-only-room','SQL-only Room',2,5,900000,1,1)")
  with sync_playwright() as p:

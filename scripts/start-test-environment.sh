@@ -23,6 +23,7 @@ if [ "$(docker exec web-midterm-admin-db mariadb -uroot -N -e "SELECT COUNT(*) F
 fi
 docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/admin_migration.sql"
 docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/customer_migration.sql"
+docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/registration_otp_migration.sql"
 # Recreate only the dedicated test web container so proxy/CA and fixture settings stay current.
 if docker container inspect web-midterm-admin-web >/dev/null 2>&1; then docker rm -f web-midterm-admin-web >/dev/null; fi
 mkdir -p "$repo_dir/uploads"

@@ -10,11 +10,11 @@ function mailConfigured(): bool
     }
     return mailTransport() === 'resend' && (bool) getenv('RESEND_API_KEY');
 }
-function queueMail(PDO $db, string $email, string $subject, string $html): void
+function queueMail(PDO $db, string $email, string $subject, string $html, ?string $expiresAt = null): void
 {
     $db->prepare(
-        "INSERT INTO mail_outbox(recipient,subject,html_body) VALUES(?,?,?)",
-    )->execute([$email, $subject, $html]);
+        "INSERT INTO mail_outbox(recipient,subject,html_body,expires_at) VALUES(?,?,?,?)",
+    )->execute([$email, $subject, $html, $expiresAt]);
 }
 function sendMail(array $message): void
 {

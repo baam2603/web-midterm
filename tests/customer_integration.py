@@ -1,3 +1,4 @@
+from registration_helpers import register_test_user, read_registration_otp
 """Customer and signed VNPay protocol tests. Isolated test DB only; no real payments or mail."""
 import os,json,subprocess,urllib.request,urllib.error,http.cookiejar,secrets,hashlib,hmac,urllib.parse,re
 URL=os.environ.get('ADMIN_TEST_URL','http://127.0.0.1:8001');DB='web-midterm-admin-db'
@@ -20,7 +21,7 @@ def signed(p):
  p={k:str(v) for k,v in p.items()};query=urllib.parse.urlencode(sorted(p.items()));p['vnp_SecureHash']=hmac.new(SECRET.encode(),query.encode(),hashlib.sha512).hexdigest();return urllib.parse.urlencode(p)
 try:
  for c,email in [(a,emails[0]),(b,emails[1])]:
-  request(c,'/api/auth/register.php',{'fullName':'Customer Test','email':email,'password':password,'phone':'0900000000'},201);users.append(int(sql(f"SELECT id FROM users WHERE email='{email}'")))
+  register_test_user({'fullName':'Customer Test','email':email,'password':password,'phone':'0900000000'},URL,c);users.append(int(sql(f"SELECT id FROM users WHERE email='{email}'")))
  sql(f"INSERT INTO hotels(slug,name,city,type,stars,address,price_per_night,is_active) VALUES('customer-{run}','Customer SQL Hotel','dalat','hotel',4,'Test address',900000,1)");hotel=int(sql(f"SELECT id FROM hotels WHERE slug='customer-{run}'"))
  sql(f"INSERT INTO room_types(hotel_id,code,name,capacity,total_rooms,price_per_night,free_cancellation,is_active) VALUES({hotel},'unique-room','SQL New Room',2,5,900000,1,1)");room=int(sql(f'SELECT id FROM room_types WHERE hotel_id={hotel}'))
  body={'city':'dalat','hotelId':f'customer-{run}','roomId':'unique-room','checkin':'2099-02-01','checkout':'2099-02-03','rooms':1,'guests':2,'guestName':'Actual Guest','email':emails[0],'phone':'0912345678','note':'Guest note','requestKey':secrets.token_hex(16),'payMethod':'hotel','coupon':'THREEK10'}

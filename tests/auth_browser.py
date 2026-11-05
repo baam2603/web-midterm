@@ -1,11 +1,11 @@
+from registration_helpers import register_test_user, read_registration_otp
 """Regression: room-selection/login continuity, stale responses and unavailable browser storage."""
 import json,secrets,subprocess,urllib.request,urllib.parse
 from playwright.sync_api import sync_playwright
 URL='http://127.0.0.1:8001';DB='web-midterm-admin-db';WEB='web-midterm-admin-web'
 def sql(q):return subprocess.check_output(['docker','exec','-i',DB,'mariadb','-uroot','-N','threek_booking'],input=q.encode()).decode().strip()
 def register(email,pw):
- req=urllib.request.Request(URL+'/api/auth/register.php',data=json.dumps({'fullName':'Auth Regression','email':email,'password':pw,'phone':'0900000000'}).encode(),headers={'Content-Type':'application/json'})
- with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(req) as r:assert r.status==201
+ register_test_user({'fullName':'Auth Regression','email':email,'password':pw,'phone':'0900000000'},URL)
 run=secrets.token_hex(6);email=f'auth-{run}@example.invalid';password=secrets.token_urlsafe(18)+'A1';uid=hotel=None
 try:
  register(email,password);uid=int(sql(f"SELECT id FROM users WHERE email='{email}'"));slug='auth-'+run
@@ -67,7 +67,7 @@ try:
    page.goto(URL+'/auth/register.html',wait_until='domcontentloaded')
    for selector,value in [('#text_ho','Auth'),('#text_ten','Registration'),('#email',registrationEmail),('#text','0900000000'),('#password',password),('#confirm_password',password)]:page.locator(selector).fill(value)
    for selector,value in [('#day-select','1'),('#month-select','1'),('#year-select','2000'),('#gender-select','male')]:page.locator(selector).select_option(value)
-   page.locator('[type=submit]').click();page.wait_for_url('**/index1.html')
+   page.locator('form.needs-validation [type=submit]').click();page.locator('#registration-otp-dialog').wait_for(state='visible');page.locator('#registration-otp-code').fill(read_registration_otp(registrationEmail));page.locator('#registration-otp-verify').click();page.wait_for_url('**/index1.html')
    assert sql(f"SELECT COUNT(*) FROM users WHERE email='{registrationEmail}'")=='1'
    page.locator('#avatarBtn').click();page.locator('#logoutBtn').click()
    page.locator('#guest-actions').wait_for(state='visible')

@@ -11,7 +11,7 @@ state=subprocess.check_output(['docker','inspect','--format','{{.State.Running}}
 if state!='true':raise RuntimeError('Start the dedicated test environment first')
 try:
  docker('stop',WEB)
- docker('run','-d','--name',name,'--network','container:web-midterm-admin-db','-v',str(ROOT)+':/app/3kbooking_midterm:ro','-v',str(ROOT/'uploads')+':/app/3kbooking_midterm/uploads','-e','ONLINE_PAYMENTS_ENABLED=false','web-midterm-php','php','-d','display_errors=Off','-S','0.0.0.0:8000','-t','/app')
+ docker('run','-d','--name',name,'--network','container:web-midterm-admin-db','-v',str(ROOT)+':/app/3kbooking_midterm:ro','-v',str(ROOT/'uploads')+':/app/3kbooking_midterm/uploads','-e','ONLINE_PAYMENTS_ENABLED=false','-e','RESEND_API_KEY=test-only-not-a-real-key','-e','MAIL_FROM=test@example.invalid','web-midterm-php','php','-d','display_errors=Off','-S','0.0.0.0:8000','-t','/app')
  ready=False;http=urllib.request.build_opener(urllib.request.ProxyHandler({}))
  for _ in range(50):
   try:
