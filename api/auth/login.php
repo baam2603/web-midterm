@@ -4,6 +4,7 @@ header("Cache-Control: no-store, private");
 
 require_once __DIR__ . "/../config/database.php";
 require_once __DIR__ . "/../shared/errors.php";
+require_once __DIR__ . "/../shared/rate-limit.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     http_response_code(405);
@@ -18,13 +19,18 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 }
 
 try {
-    $rawBody = file_get_contents("php://input");
-    $input = json_decode($rawBody, true) ?: $_POST;
+    securityGuardJson();
+    $input = securityJsonBody();
 
     $email = strtolower(trim((string) ($input["email"] ?? "")));
     $password = (string) ($input["password"] ?? "");
 
-    if (!$email || !$password) {
+    if (
+        !$email ||
+        !$password ||
+        strlen($email) > 150 ||
+        strlen($password) > 72
+    ) {
         http_response_code(400);
         echo json_encode(
             [
@@ -37,6 +43,14 @@ try {
     }
 
     $pdo = connectDB();
+    securityRateLimit(
+        $pdo,
+        "login-ip",
+        $_SERVER["REMOTE_ADDR"] ?? "unknown",
+        100,
+        900,
+    );
+    $accountBucket = securityRateLimit($pdo, "login-account", $email, 10, 900);
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
     $stmt->execute(["email" => $email]);
     $user = $stmt->fetch();
@@ -53,6 +67,9 @@ try {
         exit();
     }
 
+    $pdo->prepare("DELETE FROM security_rate_limits WHERE bucket=?")->execute([
+        $accountBucket,
+    ]);
     $userPayload = [
         "id" => $user["id"],
         "email" => $user["email"],

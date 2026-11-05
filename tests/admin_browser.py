@@ -1,11 +1,14 @@
+from security_client import protected_headers
 """Real Chromium UI checks against the isolated admin test database."""
 import json,subprocess,urllib.request,urllib.error,http.cookiejar,secrets,os
 from playwright.sync_api import sync_playwright
 URL=os.environ.get('ADMIN_TEST_URL','http://127.0.0.1:8001');DB='web-midterm-admin-db';WEB='web-midterm-admin-web'
 def sql(q):return subprocess.check_output(['docker','exec','-i',DB,'mariadb','-uroot','-N','threek_booking'],input=q.encode()).decode().strip()
 def api(path,body):
- r=urllib.request.Request(URL+path,data=json.dumps(body).encode(),headers={'Content-Type':'application/json'})
- with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(r) as r:return json.load(r)
+ c=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+ req=urllib.request.Request(URL+path,data=json.dumps(body).encode(),headers=protected_headers(c,URL))
+ with c.open(req) as response:return json.load(response)
+
 run=secrets.token_hex(6);email=f'browser-{run}@example.invalid';password=secrets.token_urlsafe(18)+'A1';uid=None;hotel=None
 try:
  api('/api/auth/register.php',{'fullName':'Browser Test','email':email,'password':password})

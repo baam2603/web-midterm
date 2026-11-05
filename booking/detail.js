@@ -50,7 +50,7 @@
         const btn = e.currentTarget;
         btn.disabled = true;
         try {
-          const response = await fetch("../api/bookings/cancel.php", {
+          const response = await window.apiFetch("../api/bookings/cancel.php", {
             method: "POST",
             credentials: "same-origin",
             headers: { "Content-Type": "application/json" },
@@ -70,7 +70,7 @@
   async function loadDetail() {
     root.innerHTML = '<div class="empty">Đang tải chi tiết từ MySQL...</div>';
     try {
-      const response = await fetch(
+      const response = await window.apiFetch(
         "../api/bookings/detail.php?code=" + encodeURIComponent(code || ""),
         { credentials: "same-origin", cache: "no-store" },
       );

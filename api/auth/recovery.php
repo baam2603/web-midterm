@@ -1,12 +1,20 @@
 <?php
 require_once __DIR__ . "/../shared/customer.php";
 require_once __DIR__ . "/../shared/email.php";
+require_once __DIR__ . "/../shared/rate-limit.php";
 requireMethod("POST");
 guardCustomerWrite();
 $v = input();
 $token = $v["token"] ?? "";
 try {
     $db = connectDB();
+    securityRateLimit(
+        $db,
+        "recovery-ip",
+        $_SERVER["REMOTE_ADDR"] ?? "unknown",
+        30,
+        900,
+    );
     if (is_string($token) && $token !== "") {
         $password = $v["password"] ?? "";
         if (

@@ -12,7 +12,7 @@ async function loadFavorites() {
     syncFavButtons();
     return [];
   }
-  const response = await fetch(getApiUrl("account/favorites.php"), {
+  const response = await window.apiFetch(getApiUrl("account/favorites.php"), {
     credentials: "same-origin",
     cache: "no-store",
   });
@@ -27,7 +27,7 @@ async function loadFavorites() {
 async function saveFavorite(item, saved) {
   await window.authReady;
   if (!getCurrentUser()) throw Error("Vui lòng đăng nhập để lưu khách sạn.");
-  const response = await fetch(getApiUrl("account/favorites.php"), {
+  const response = await window.apiFetch(getApiUrl("account/favorites.php"), {
     method: "POST",
     credentials: "same-origin",
     headers: { "Content-Type": "application/json" },

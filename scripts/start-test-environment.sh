@@ -23,6 +23,7 @@ if [ "$(docker exec web-midterm-admin-db mariadb -uroot -N -e "SELECT COUNT(*) F
 fi
 docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/admin_migration.sql"
 docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/customer_migration.sql"
+docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/security_migration.sql"
 # Recreate only the dedicated test web container so proxy/CA and fixture settings stay current.
 if docker container inspect web-midterm-admin-web >/dev/null 2>&1; then docker rm -f web-midterm-admin-web >/dev/null; fi
 mkdir -p "$repo_dir/uploads"
@@ -34,7 +35,7 @@ docker run -d --name web-midterm-admin-web --network container:web-midterm-admin
  -e MAIL_FROM=test@example.invalid web-midterm-php php -d display_errors=Off \
  -d upload_max_filesize=5M -d post_max_size=6M -S 0.0.0.0:8000 -t /app
 attempt=0
-until curl -fsS http://127.0.0.1:8001/api/db-check.php | python3 -c 'import json,sys; assert json.load(sys.stdin)["status"]=="success"'; do
+until curl -fsS http://127.0.0.1:8001/api/setup-status.php | python3 -c 'import json,sys; assert json.load(sys.stdin)["data"]["ready"]'; do
  attempt=$((attempt+1)); [ "$attempt" -lt 30 ] || exit 1
  sleep 1
 done

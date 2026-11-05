@@ -1,0 +1,24 @@
+# Apache 2.4 deployment baseline. Keep this file when uploading the website.
+Options -Indexes
+<IfModule !mod_rewrite.c>
+# Fail closed instead of exposing private directories when rewrite is unavailable.
+Require all denied
+</IfModule>
+DirectoryIndex index.html index1.html
+<IfModule mod_rewrite.c>
+RewriteEngine On
+# Never serve project internals, regardless of directory-index settings.
+RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L,NC]
+RewriteRule ^(?:database|tests|scripts|docs|node_modules|api/config|api/shared)(?:/|$) - [F,L,NC]
+</IfModule>
+<FilesMatch "(?i)(\.(sql|log|bak|zip|ini|env|conf|md|lock)|package\.json|composer\.json)$">
+Require all denied
+</FilesMatch>
+<IfModule mod_headers.c>
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "DENY"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://ajax.googleapis.com https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://api.open-meteo.com https://nominatim.openstreetmap.org https://overpass-api.de https://tile.openstreetmap.org; frame-src https://www.google.com https://maps.google.com"
+Header always set Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on'"
+</IfModule>

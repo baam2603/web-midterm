@@ -1,3 +1,4 @@
+from security_client import protected_headers
 """Upload/cover/delete integration test, isolated admin test server only."""
 import json,secrets,subprocess,urllib.request,http.cookiejar,base64
 URL='http://127.0.0.1:8001';DB='web-midterm-admin-db'
@@ -5,6 +6,7 @@ def sql(q):return subprocess.check_output(['docker','exec','-i',DB,'mariadb','-u
 c=urllib.request.build_opener(urllib.request.ProxyHandler({}),urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 def call(path,body=None,token=None):
  h={'Content-Type':'application/json'}
+ if body is not None:h=protected_headers(c,URL,h)
  if token:h['X-CSRF-Token']=token
  with c.open(urllib.request.Request(URL+path,data=None if body is None else json.dumps(body).encode(),headers=h)) as r:return json.load(r)
 run=secrets.token_hex(6);email=f'media-{run}@example.invalid';pw=secrets.token_urlsafe(18)+'A1';uid=None;hotel=None

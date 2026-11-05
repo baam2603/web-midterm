@@ -4,6 +4,7 @@ header("Cache-Control: no-store, private");
 
 require_once __DIR__ . "/../config/database.php";
 require_once __DIR__ . "/../shared/errors.php";
+require_once __DIR__ . "/../shared/rate-limit.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     http_response_code(405);
@@ -18,12 +19,8 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 }
 
 try {
-    $rawBody = file_get_contents("php://input");
-    $input = json_decode($rawBody, true);
-
-    if (!is_array($input)) {
-        $input = $_POST;
-    }
+    securityGuardJson();
+    $input = securityJsonBody();
 
     $fullName = trim(
         (string) ($input["fullName"] ??
@@ -90,6 +87,13 @@ try {
     }
 
     $pdo = connectDB();
+    securityRateLimit(
+        $pdo,
+        "register-ip",
+        $_SERVER["REMOTE_ADDR"] ?? "unknown",
+        30,
+        900,
+    );
 
     // 2. Kiểm tra trùng lặp email
     $checkStmt = $pdo->prepare(

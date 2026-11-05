@@ -1,3 +1,4 @@
+from security_client import protected_headers
 """Cookie/session lifecycle against the disposable PHP/MariaDB test environment."""
 import http.cookiejar,json,os,secrets,subprocess,urllib.request,urllib.error,urllib.parse
 URL=os.environ.get('SESSION_TEST_URL','http://127.0.0.1:8001')
@@ -11,6 +12,7 @@ def client():
  return urllib.request.build_opener(urllib.request.ProxyHandler({}),urllib.request.HTTPCookieProcessor(jar)),jar
 def request(c,path,body=None,status=200,cookie=None):
  headers={'Content-Type':'application/json'}
+ if body is not None:headers=protected_headers(c,URL,headers)
  if cookie:headers['Cookie']='THREEKSESSID='+cookie
  req=urllib.request.Request(URL+path,data=None if body is None else json.dumps(body).encode(),headers=headers)
  try:response=c.open(req,timeout=15)

@@ -16,6 +16,7 @@ Sao lưu DB trước khi cập nhật. Với DB từ SQL_3K.sql đã có của n
 ```sh
 mariadb -u root -p threek_booking < database/admin_migration.sql
 mariadb -u root -p threek_booking < database/customer_migration.sql
+mariadb -u root -p threek_booking < database/security_migration.sql
 ```
 
 Migration chỉ bổ sung cột, bảng và index; không xóa đơn hoặc tài khoản; chạy lặp lại được trên MariaDB.
@@ -28,6 +29,7 @@ mariadb -u root -p threek_booking < database/schema.sql
 mariadb -u root -p threek_booking < database/seed.sql
 mariadb -u root -p threek_booking < database/admin_migration.sql
 mariadb -u root -p threek_booking < database/customer_migration.sql
+mariadb -u root -p threek_booking < database/security_migration.sql
 ```
 
 `schema.sql` chỉ chứa cấu trúc, không chứa thông tin tài khoản từ SQL người dùng.

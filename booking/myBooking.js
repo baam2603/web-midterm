@@ -126,7 +126,7 @@
       return;
     b.disabled = true;
     try {
-      const response = await fetch("../api/bookings/cancel.php", {
+      const response = await window.apiFetch("../api/bookings/cancel.php", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
@@ -147,7 +147,7 @@
   async function loadBookings() {
     listEl.innerHTML = '<div class="empty">Đang tải dữ liệu từ MySQL...</div>';
     try {
-      const response = await fetch("../api/bookings/list.php", {
+      const response = await window.apiFetch("../api/bookings/list.php", {
         credentials: "same-origin",
         cache: "no-store",
       });

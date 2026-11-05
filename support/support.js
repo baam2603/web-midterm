@@ -21,7 +21,7 @@
         })[c],
     );
   async function request(body) {
-    const r = await fetch("../api/support/tickets.php", {
+    const r = await window.apiFetch("../api/support/tickets.php", {
       credentials: "same-origin",
       cache: "no-store",
       ...(body

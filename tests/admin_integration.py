@@ -1,3 +1,4 @@
+from security_client import protected_headers
 """Run only against an isolated test DB/container. Creates and removes its own fixtures.
 ADMIN_TEST_URL=http://127.0.0.1:8001 ADMIN_TEST_DB_CONTAINER=web-midterm-admin-db python3 tests/admin_integration.py
 """
@@ -10,6 +11,7 @@ def sql(query):
 def client():return urllib.request.build_opener(urllib.request.ProxyHandler({}),urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 def request(c,path,body=None,token=None,expected=200):
     headers={'Content-Type':'application/json'}
+    if body is not None and not path.startswith('/api/admin/') and expected!=403:headers=protected_headers(c,URL,headers)
     if token:headers['X-CSRF-Token']=token
     req=urllib.request.Request(URL+path,data=None if body is None else json.dumps(body).encode(),headers=headers)
     try:

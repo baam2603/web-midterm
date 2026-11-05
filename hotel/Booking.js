@@ -654,7 +654,7 @@
   }
   async function updateQuote() {
     const version = ++quoteVersion;
-    const response = await fetch("../api/bookings/quote.php", {
+    const response = await window.apiFetch("../api/bookings/quote.php", {
       method: "POST",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },

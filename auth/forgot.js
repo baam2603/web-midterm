@@ -35,7 +35,7 @@
     button.disabled = true;
     out.textContent = "Đang xử lý...";
     try {
-      const r = await fetch("../api/auth/recovery.php", {
+      const r = await window.apiFetch("../api/auth/recovery.php", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },

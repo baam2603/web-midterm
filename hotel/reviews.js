@@ -20,7 +20,7 @@
         })[c],
     );
   async function request(path, body) {
-    const r = await fetch(path, {
+    const r = await window.apiFetch(path, {
       credentials: "same-origin",
       cache: "no-store",
       ...(body

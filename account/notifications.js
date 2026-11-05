@@ -14,7 +14,7 @@
         })[c],
     );
   async function load(body) {
-    const r = await fetch("../api/account/notifications.php", {
+    const r = await window.apiFetch("../api/account/notifications.php", {
       credentials: "same-origin",
       cache: "no-store",
       ...(body

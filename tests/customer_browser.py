@@ -1,11 +1,14 @@
+from security_client import protected_headers
 """Real UI customer booking on SQL-only hotel/room codes. No live payment/email."""
 import json,secrets,subprocess,urllib.request,os
 from playwright.sync_api import sync_playwright
 URL=os.environ.get('CUSTOMER_TEST_URL','http://127.0.0.1:8001');DB='web-midterm-admin-db'
 def sql(q):return subprocess.check_output(['docker','exec','-i',DB,'mariadb','-uroot','-N','threek_booking'],input=q.encode()).decode().strip()
 def api(path,body):
- req=urllib.request.Request(URL+path,data=json.dumps(body).encode(),headers={'Content-Type':'application/json'})
- with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(req) as r:return json.load(r)
+ c=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+ req=urllib.request.Request(URL+path,data=json.dumps(body).encode(),headers=protected_headers(c,URL))
+ with c.open(req) as response:return json.load(response)
+
 run=secrets.token_hex(6);email=f'customer-browser-{run}@example.invalid';pw=secrets.token_urlsafe(20)+'A1';hotel=uid=None
 try:
  api('/api/auth/register.php',{'fullName':'Browser Customer','email':email,'password':pw,'phone':'0900000000'});uid=int(sql(f"SELECT id FROM users WHERE email='{email}'"))

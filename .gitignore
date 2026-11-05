@@ -26,3 +26,7 @@ api/config/database.php
 # Database backup files
 database/*backup*.sql
 database/*dump*.sql
+
+# Python test bytecode
+__pycache__/
+*.pyc

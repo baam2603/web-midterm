@@ -3,11 +3,11 @@
 ## Nâng cấp database đang có
 
 Sao lưu DB trong phpMyAdmin trước. Giữ database từ SQL_3K.sql của nhóm;
-import theo thứ tự `database/admin_migration.sql`, rồi `database/customer_migration.sql`.
-Nếu đã chạy migration admin, chỉ cần import migration customer. Các migration chạy lặp lại được trên MariaDB 10.4+.
+import theo thứ tự `database/admin_migration.sql`, `database/customer_migration.sql`, rồi
+`database/security_migration.sql`. Nếu đã chạy admin/customer, chỉ cần thêm migration security. Các migration chạy lặp lại được trên MariaDB 10.4+.
 Không import schema.sql hoặc seed.sql đè lên DB đang dùng.
 
-DB mới: tạo database utf8mb4, import schema.sql → seed.sql → admin_migration.sql → customer_migration.sql.
+DB mới: tạo database utf8mb4, import schema.sql → seed.sql → admin_migration.sql → customer_migration.sql → security_migration.sql.
 PHP 8.1+ (khuyến nghị 8.3), PDO MySQL, mbstring, cURL; cấu hình DB trong biến môi trường như docs/ADMIN_SETUP.md.
 Không mở HTML bằng file:// và không dùng server tĩnh Python.
 
@@ -185,6 +185,15 @@ nhận đúng HTTPS từ proxy đáng tin cậy. Ứng dụng không tự tin c�
 mà người dùng Internet có thể tự gửi. Giữ tất cả trang và API cùng origin;
 không đổi qua lại `localhost`/`127.0.0.1` khi đang đăng nhập.
 
-Không cần migration SQL mới. Kiểm thử: `npm run test:auth`, bao gồm HTTP API thực,
+Bản sửa cookie/session trước đây không cần migration; bản bảo mật hiện tại cần
+`database/security_migration.sql`. Kiểm thử: `npm run test:auth`, bao gồm HTTP API thực,
 cấu hình PHP cho HTTPS và luồng chạy dưới thư mục con. Kiểm tra HTTPS end-to-end
 trên hosting vẫn cần thực hiện sau khi bật SSL.
+
+
+## Nhánh bảo mật bổ sung
+
+Với bản `feat/security-hardening`, cần import thêm `database/security_migration.sql`
+(chỉ bổ sung bảng bộ đếm; không xóa dữ liệu). Xem [SECURITY.md](SECURITY.md) để cấu hình
+Apache, CSRF, giới hạn đăng nhập và chạy kiểm thử. Các ghi chú "không cần migration mới"
+ở các phần UI/session phía trên chỉ áp dụng cho những bản sửa đó.

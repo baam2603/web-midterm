@@ -2,26 +2,7 @@
 require_once __DIR__ . "/bootstrap.php";
 function guardCustomerWrite(): void
 {
-    if (
-        strtolower(trim(explode(";", $_SERVER["CONTENT_TYPE"] ?? "")[0])) !==
-        "application/json"
-    ) {
-        reply(415, ["status" => "error", "message" => "Yêu cầu JSON."]);
-    }
-    $origin = $_SERVER["HTTP_ORIGIN"] ?? "";
-    if ($origin !== "") {
-        $scheme =
-            !empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off"
-                ? "https"
-                : "http";
-        $expected = $scheme . "://" . ($_SERVER["HTTP_HOST"] ?? "");
-        if (strtolower(rtrim($origin, "/")) !== strtolower($expected)) {
-            reply(403, [
-                "status" => "error",
-                "message" => "Nguồn yêu cầu không hợp lệ.",
-            ]);
-        }
-    }
+    securityGuardJson();
 }
 function notifyUser(
     PDO $db,

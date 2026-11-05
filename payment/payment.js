@@ -421,7 +421,7 @@
     return (state.method === "wallet" ? state.wallet : state.method) + "_demo";
   }
   async function saveBooking() {
-    const response = await fetch("../api/bookings/create.php", {
+    const response = await window.apiFetch("../api/bookings/create.php", {
       method: "POST",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
@@ -570,7 +570,7 @@
       button.textContent = "Đang cập nhật giá...";
     }
     try {
-      const response = await fetch("../api/bookings/quote.php", {
+      const response = await window.apiFetch("../api/bookings/quote.php", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },

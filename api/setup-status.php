@@ -4,6 +4,7 @@ header("Content-Type: application/json; charset=utf-8");
 header("Cache-Control: no-store");
 require_once __DIR__ . "/config/database.php";
 $required = [
+    "security_rate_limits" => ["bucket", "attempts", "reset_at"],
     "users" => ["id", "email", "password_hash", "role", "session_version"],
     "hotels" => ["latitude", "longitude", "is_active"],
     "room_types" => ["is_active", "area_m2", "bed_type", "features_json"],
@@ -63,7 +64,7 @@ $result["ready"] =
     !$result["missing"];
 if ($result["missing"]) {
     $result["message"] =
-        "Sao lưu database rồi import database/admin_migration.sql và database/customer_migration.sql. Không import schema.sql đè lên dữ liệu hiện có.";
+        "Sao lưu database rồi import database/admin_migration.sql và database/customer_migration.sql rồi database/security_migration.sql. Không import schema.sql đè lên dữ liệu hiện có.";
 }
 if (!$result["mbstring"]) {
     $result["message"] =

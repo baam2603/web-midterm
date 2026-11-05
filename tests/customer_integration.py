@@ -1,3 +1,4 @@
+from security_client import protected_headers
 """Customer and signed VNPay protocol tests. Isolated test DB only; no real payments or mail."""
 import os,json,subprocess,urllib.request,urllib.error,http.cookiejar,secrets,hashlib,hmac,urllib.parse,re
 URL=os.environ.get('ADMIN_TEST_URL','http://127.0.0.1:8001');DB='web-midterm-admin-db'
@@ -5,6 +6,7 @@ SECRET='integration-test-key-not-for-production'
 def sql(q):return subprocess.check_output(['docker','exec','-i',DB,'mariadb','-uroot','-N','threek_booking'],input=q.encode()).decode().strip()
 def client():return urllib.request.build_opener(urllib.request.ProxyHandler({}),urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 def request(c,path,body=None,status=200,headers=None):
+ if body is not None:headers=protected_headers(c,URL,headers)
  r=urllib.request.Request(URL+path,data=None if body is None else json.dumps(body).encode(),headers={'Content-Type':'application/json',**(headers or {})})
  try:
   with c.open(r,timeout=15) as res:code=res.status;raw=res.read()

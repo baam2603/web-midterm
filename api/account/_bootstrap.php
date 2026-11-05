@@ -46,34 +46,13 @@ function authId(): int
 }
 function body(): array
 {
-    $v = json_decode(file_get_contents("php://input"), true);
-    if (!is_array($v)) {
-        respond(400, "Dữ liệu JSON không hợp lệ.");
-    }
-    return $v;
+    return securityJsonBody();
 }
 function guardWrite(): void
 {
-    $origin = $_SERVER["HTTP_ORIGIN"] ?? "";
-    if ($origin) {
-        $host = parse_url($origin, PHP_URL_HOST);
-        $port = parse_url($origin, PHP_URL_PORT);
-        $server = explode(":", $_SERVER["HTTP_HOST"] ?? "");
-        if (
-            strtolower((string) $host) !== strtolower($server[0]) ||
-            ($port !== null &&
-                (string) $port !==
-                    ($server[1] ??
-                        (($_SERVER["HTTPS"] ?? "") === "on" ? "443" : "80")))
-        ) {
-            respond(403, "Origin không hợp lệ.");
-        }
-    }
-    $type = strtolower(trim(explode(";", $_SERVER["CONTENT_TYPE"] ?? "")[0]));
-    if ($type !== "application/json") {
-        respond(415, "Yêu cầu application/json.");
-    }
+    securityGuardJson();
 }
+
 function userData(array $u): array
 {
     return [

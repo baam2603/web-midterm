@@ -8,6 +8,15 @@ set_exception_handler("outputApiFailure");
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+if (
+    !in_array(
+        $_SERVER["REQUEST_METHOD"] ?? "GET",
+        ["GET", "HEAD", "OPTIONS"],
+        true,
+    )
+) {
+    securityGuardSource();
+}
 function reply(int $code, array $body): never
 {
     http_response_code($code);
@@ -16,8 +25,7 @@ function reply(int $code, array $body): never
 }
 function input(): array
 {
-    $v = json_decode(file_get_contents("php://input"), true);
-    return is_array($v) ? $v : [];
+    return securityJsonBody();
 }
 function requireMethod(string $method): void
 {
@@ -68,6 +76,7 @@ function failServer(Throwable $e): never
 
 function requireCsrf(): void
 {
+    securityGuardSource();
     $expected = $_SESSION["admin_csrf"] ?? "";
     $sent = $_SERVER["HTTP_X_CSRF_TOKEN"] ?? "";
     if (

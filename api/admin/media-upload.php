@@ -39,10 +39,22 @@ if (
     ]);
 }
 $tmp = $file["tmp_name"];
+$actualSize = filesize($tmp);
+$detected = (new finfo(FILEINFO_MIME_TYPE))->file($tmp);
 $info = @getimagesize($tmp);
 $mime = $info["mime"] ?? "";
 $types = ["image/jpeg" => "jpg", "image/png" => "png", "image/webp" => "webp"];
-if (!isset($types[$mime]) || ($info[0] ?? 0) > 8000 || ($info[1] ?? 0) > 8000) {
+if (
+    !isset($types[$mime]) ||
+    $detected !== $mime ||
+    !$actualSize ||
+    $actualSize > 5 * 1024 * 1024 ||
+    ($info[0] ?? 0) < 1 ||
+    ($info[1] ?? 0) < 1 ||
+    ($info[0] ?? 0) > 8000 ||
+    ($info[1] ?? 0) > 8000 ||
+    ($info[0] ?? 0) * ($info[1] ?? 0) > 40000000
+) {
     reply(422, [
         "status" => "error",
         "message" => "Định dạng hoặc kích thước ảnh không hợp lệ.",
@@ -87,10 +99,22 @@ try {
     // Ngăn PHP thực thi trong thư mục ảnh trên Apache. Khuyến nghị bật cấu hình này ở web server.
     $htaccess = dirname($destDir, 2) . "/.htaccess";
     if (!file_exists($htaccess)) {
-        @file_put_contents(
-            $htaccess,
-            "Options -Indexes\n<FilesMatch \"\\.(php|phtml|phar)$\">\nRequire all denied\n</FilesMatch>\n",
-        );
+        $policy = <<<'APACHE'
+        Options -Indexes
+        <FilesMatch "(?i)\.(php[0-9]?|phtml|phar|cgi|pl|sh|html?|svg|js)$">
+        Require all denied
+        </FilesMatch>
+        <IfModule mod_headers.c>
+        Header always set X-Content-Type-Options "nosniff"
+        Header always set Content-Security-Policy "default-src 'none'; sandbox"
+        </IfModule>
+        APACHE;
+        if (file_put_contents($htaccess, $policy) === false) {
+            throw new RuntimeException(
+                "Không thể cấu hình bảo vệ thư mục ảnh.",
+            );
+        }
+        chmod($htaccess, 0644);
     }
     $name = bin2hex(random_bytes(16)) . "." . $types[$mime];
     $destination = $destDir . "/" . $name;

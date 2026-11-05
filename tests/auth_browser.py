@@ -1,11 +1,14 @@
+from security_client import protected_headers
 """Regression: room-selection/login continuity, stale responses and unavailable browser storage."""
 import json,secrets,subprocess,urllib.request,urllib.parse
 from playwright.sync_api import sync_playwright
 URL='http://127.0.0.1:8001';DB='web-midterm-admin-db';WEB='web-midterm-admin-web'
 def sql(q):return subprocess.check_output(['docker','exec','-i',DB,'mariadb','-uroot','-N','threek_booking'],input=q.encode()).decode().strip()
 def register(email,pw):
- req=urllib.request.Request(URL+'/api/auth/register.php',data=json.dumps({'fullName':'Auth Regression','email':email,'password':pw,'phone':'0900000000'}).encode(),headers={'Content-Type':'application/json'})
- with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(req) as r:assert r.status==201
+ c=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+ req=urllib.request.Request(URL+'/api/auth/register.php',data=json.dumps({'fullName':'Auth Regression','email':email,'password':pw,'phone':'0900000000'}).encode(),headers=protected_headers(c,URL))
+ with c.open(req) as response:assert response.status==201
+
 run=secrets.token_hex(6);email=f'auth-{run}@example.invalid';password=secrets.token_urlsafe(18)+'A1';uid=hotel=None
 try:
  register(email,password);uid=int(sql(f"SELECT id FROM users WHERE email='{email}'"));slug='auth-'+run
@@ -25,7 +28,7 @@ try:
    if not r.request.url.startswith(URL):r.abort();return
    if '/api/account/profile.php' in r.request.url and counter[0]==0:counter[0]+=1;held.append(r);return
    r.continue_()
-  c=context(delayProfile);assert c.request.post(URL+'/api/auth/login.php',data={'email':email,'password':password}).ok
+  c=context(delayProfile);assert c.request.post(URL+'/api/auth/login.php',headers={'X-CSRF-Token':c.request.get(URL+'/api/auth/csrf.php').json()['data']['csrfToken']},data={'email':email,'password':password}).ok
   page=c.new_page();page.set_default_timeout(10000);page.goto(URL+hotelPath,wait_until='domcontentloaded');page.locator('[data-room=standard]').first.click();assert '/hotel/hotel.html' in page.url;assert held;held[0].continue_();page.wait_for_url('**/hotel/Booking.html?*');page.locator('#booking-form').wait_for();print('PASS valid cookie + empty cache + delayed profile does not redirect to login');c.close()
   # A profile requested before login may answer 401 after the new login succeeds.
   held=[];counter=[0]
@@ -58,7 +61,7 @@ try:
    if parsed.path.startswith(prefix+'/'):
     result=r.fetch(url=URL+parsed.path[len(prefix):]+('?' + parsed.query if parsed.query else ''));r.fulfill(response=result);return
    r.continue_()
-  c=context(subfolder);page=c.new_page();page.goto(URL+prefix+hotelPath,wait_until='domcontentloaded');page.locator('[data-room=standard]').first.click();page.wait_for_url('**/course-project/auth/login.html?next=*');page.locator('#email').fill(email);page.locator('#password').fill(password);page.locator('[type=submit]').click();page.wait_for_url('**/course-project/hotel/Booking.html?*');page.locator('#booking-form').wait_for();print('PASS login return URL works under an Apache/XAMPP-style project subfolder');c.close()
+  c=context(subfolder);page=c.new_page();page.goto(URL+prefix+hotelPath,wait_until='domcontentloaded');page.locator('[data-room=standard]').first.click();page.wait_for_url('**/course-project/auth/login.html?next=*');page.locator('#email').fill(email);page.locator('#password').fill(password);page.locator('[type=submit]').click();page.wait_for_url('**/course-project/hotel/Booking.html?*');page.locator('#booking-form').wait_for();print('PASS login return URL works under an Apache/XAMPP-style project subfolder');c.unroute_all(behavior='wait');c.close()
   browser.close()
 finally:
  if uid:
