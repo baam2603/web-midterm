@@ -37,11 +37,17 @@ try {
     }
 
     $pdo = connectDB();
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
+    $stmt = $pdo->prepare(
+        "SELECT id,email,password_hash,full_name,display_name,phone,birthday,role,session_version,deleted_at FROM users WHERE email = :email LIMIT 1",
+    );
     $stmt->execute(["email" => $email]);
     $user = $stmt->fetch();
 
-    if (!$user || !password_verify($password, $user["password_hash"])) {
+    if (
+        !$user ||
+        $user["deleted_at"] !== null ||
+        !password_verify($password, $user["password_hash"])
+    ) {
         http_response_code(401);
         echo json_encode(
             [

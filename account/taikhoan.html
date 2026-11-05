@@ -157,15 +157,15 @@
           <!-- 4. Xóa tài khoản -->
           <div class="profile-danger">
             <div>
-              <h3>Xóa tài khoản</h3>
+              <h3>Đóng tài khoản</h3>
               <p>
-                Hành động này không thể hoàn tác. Tài khoản có đơn đặt phòng
-                liên quan chưa thể tự xóa. Vui lòng liên hệ hỗ trợ nếu cần xử lý
-                dữ liệu đã phát sinh.
+                Tài khoản sẽ bị đóng vĩnh viễn và thông tin cá nhân được ẩn danh.
+                Lịch sử đơn được giữ để đối soát. Bạn cần xử lý xong các đơn đang
+                hoạt động và khoản thanh toán/hoàn tiền trước khi đóng.
               </p>
             </div>
             <button type="button" class="auth-logout" id="delete-account-btn">
-              Xóa tài khoản
+              Đóng tài khoản
             </button>
           </div>
         </div>
@@ -176,14 +176,14 @@
 
     <!-- QUAN TRỌNG: auth-service.js phải nạp TRƯỚC header.js -->
 
-    <script src="../common/auth-service.js?v=20261104-session2"></script>
+    <script src="../common/auth-service.js?v=20261106-closure"></script>
     <script src="../common/header.js"></script>
     <script>
       mountHeader("site-header", {
         logoHref: "index1.html",
       });
     </script>
-    <script src="taikhoan.js"></script>
+    <script src="taikhoan.js?v=20261106-closure"></script>
     <script src="doimatkhau.js"></script>
   </body>
 </html>

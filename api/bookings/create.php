@@ -122,7 +122,9 @@ $hash = hash(
 try {
     $db = connectDB();
     $db->beginTransaction();
-    $q = $db->prepare("SELECT id FROM users WHERE id=? FOR UPDATE");
+    $q = $db->prepare(
+        "SELECT id FROM users WHERE id=? AND deleted_at IS NULL FOR UPDATE",
+    );
     $q->execute([$uid]);
     if (!$q->fetchColumn()) {
         $db->rollBack();

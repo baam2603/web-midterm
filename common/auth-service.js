@@ -29,6 +29,7 @@
     publish(null);
     try {
       sessionStorage.removeItem("threek_guest_access_v2");
+      sessionStorage.removeItem("threek_checkout");
     } catch {}
   }
   async function request(endpoint, method = "GET", data) {

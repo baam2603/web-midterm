@@ -91,3 +91,10 @@ chúng chưa được chuyển sang mô hình API mới và không phải bộ n
 ## Migration đăng ký OTP
 
 Nhánh đăng ký OTP cần thêm `database/registration_otp_migration.sql` sau các migration ở trên. File bổ sung, chạy lặp lại được; không nhập lại schema/seed lên DB đã có dữ liệu. Xem [hướng dẫn OTP](REGISTRATION_OTP_SETUP.md).
+
+
+## Đóng tài khoản có lịch sử đặt phòng
+
+Bản sửa `fix/account-closure-policy` cần import thêm `database/account_closure_migration.sql`
+(sau các migration hiện tại trên main), không xóa/import lại database.
+Xem [ACCOUNT_CLOSURE.md](ACCOUNT_CLOSURE.md) để biết quy tắc đơn/tiền, ẩn danh và kiểm thử.

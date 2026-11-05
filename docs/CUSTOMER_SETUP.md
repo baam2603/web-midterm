@@ -278,3 +278,10 @@ không có STARTTLS. Không gọi Gmail hay gửi email thật trong bộ kiểm
 ## Đăng ký xác minh email
 
 Đăng ký mới yêu cầu OTP 6 số trước khi tạo tài khoản. Xem [REGISTRATION_OTP_SETUP.md](REGISTRATION_OTP_SETUP.md) cho migration bổ sung, giới hạn và cách cài trên alwaysdata. Tài khoản hiện có không bị thay đổi.
+
+
+## Đóng tài khoản có lịch sử đặt phòng
+
+Bản sửa `fix/account-closure-policy` cần import thêm `database/account_closure_migration.sql`
+(sau các migration hiện tại trên main), không xóa/import lại database.
+Xem [ACCOUNT_CLOSURE.md](ACCOUNT_CLOSURE.md) để biết quy tắc đơn/tiền, ẩn danh và kiểm thử.

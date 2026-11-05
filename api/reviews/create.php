@@ -22,6 +22,7 @@ if (
 }
 try {
     $db = connectDB();
+    beginAccountWrite($db, $uid);
     $q = $db->prepare(
         "SELECT id,hotel_id,status,checkout FROM bookings WHERE code=? AND user_id=? LIMIT 1",
     );
@@ -53,11 +54,16 @@ try {
         }
         throw $e;
     }
+    $id = $db->lastInsertId();
+    $db->commit();
     reply(201, [
         "status" => "success",
         "message" => "Đã gửi đánh giá, đang chờ duyệt.",
-        "data" => ["id" => $db->lastInsertId()],
+        "data" => ["id" => $id],
     ]);
 } catch (Throwable $e) {
+    if (isset($db) && $db->inTransaction()) {
+        $db->rollBack();
+    }
     failServer($e);
 }

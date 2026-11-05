@@ -31,7 +31,9 @@ function requireUser(): int
     if (!$id) {
         reply(401, ["status" => "error", "message" => "Vui lòng đăng nhập."]);
     }
-    $q = connectDB()->prepare("SELECT session_version FROM users WHERE id=?");
+    $q = connectDB()->prepare(
+        "SELECT session_version FROM users WHERE id=? AND deleted_at IS NULL",
+    );
     $q->execute([$id]);
     $version = $q->fetchColumn();
     if (

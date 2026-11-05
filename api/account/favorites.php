@@ -21,6 +21,7 @@ try {
                 "message" => "Khách sạn không hợp lệ.",
             ]);
         }
+        beginAccountWrite($db, $uid);
         $q = $db->prepare("SELECT id FROM hotels WHERE slug=? AND city=?");
         $q->execute([$slug, $city]);
         $id = $q->fetchColumn();
@@ -46,7 +47,14 @@ try {
         "SELECT h.slug id,h.name,h.city,h.is_active,UNIX_TIMESTAMP(f.created_at)*1000 savedAt FROM favorites f JOIN hotels h ON h.id=f.hotel_id WHERE f.user_id=? ORDER BY f.created_at DESC,h.id DESC",
     );
     $q->execute([$uid]);
-    reply(200, ["status" => "success", "data" => $q->fetchAll()]);
+    $items = $q->fetchAll();
+    if ($db->inTransaction()) {
+        $db->commit();
+    }
+    reply(200, ["status" => "success", "data" => $items]);
 } catch (Throwable $e) {
+    if (isset($db) && $db->inTransaction()) {
+        $db->rollBack();
+    }
     failServer($e);
 }

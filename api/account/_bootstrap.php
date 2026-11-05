@@ -32,7 +32,9 @@ function authId(): int
     if ($id <= 0) {
         respond(401, "Vui lòng đăng nhập lại.");
     }
-    $q = connectDB()->prepare("SELECT session_version FROM users WHERE id=?");
+    $q = connectDB()->prepare(
+        "SELECT session_version FROM users WHERE id=? AND deleted_at IS NULL",
+    );
     $q->execute([$id]);
     $version = $q->fetchColumn();
     if (

@@ -71,3 +71,25 @@ function expireCustomerBookings(PDO $db, int $uid): void
     );
     $q->execute([$uid]);
 }
+
+/** Serialize personal-data writes with account closure, including requests authenticated earlier. */
+function beginAccountWrite(PDO $db, int $uid): void
+{
+    $db->beginTransaction();
+    $q = $db->prepare(
+        "SELECT session_version FROM users WHERE id=? AND deleted_at IS NULL FOR UPDATE",
+    );
+    $q->execute([$uid]);
+    $version = $q->fetchColumn();
+    if (
+        $version === false ||
+        (int) $version !== (int) ($_SESSION["version"] ?? 1)
+    ) {
+        $db->rollBack();
+        endUserSession();
+        reply(401, [
+            "status" => "error",
+            "message" => "Phiên đăng nhập không còn hợp lệ.",
+        ]);
+    }
+}

@@ -76,7 +76,7 @@ try:
  request(c,'/api/auth/login.php',{'email':email,'password':newPw});current=sid(jar)
  request(c,'/api/account/delete-account.php',{'password':newPw})
  assert not list(jar);replay(current)
- assert sql(f'SELECT COUNT(*) FROM users WHERE id={uid}')=='0'
- print('PASS account deletion removes user, server session and browser cookie')
+ assert sql(f'SELECT COUNT(*) FROM users WHERE id={uid} AND deleted_at IS NOT NULL')=='1'
+ print('PASS account closure anonymizes user and removes server session/browser cookie')
 finally:
- if uid:sql(f'DELETE FROM users WHERE id={uid}')
+ if uid:sql(f'DELETE FROM audit_logs WHERE actor_id={uid};DELETE FROM users WHERE id={uid}')

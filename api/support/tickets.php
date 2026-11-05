@@ -29,6 +29,7 @@ try {
                     "Chọn chủ đề và nhập nội dung từ 10 đến 3000 ký tự.",
             ]);
         }
+        beginAccountWrite($db, $uid);
         if ($code !== "") {
             $q = $db->prepare(
                 "SELECT id FROM bookings WHERE code=? AND user_id=?",
@@ -44,9 +45,11 @@ try {
         $db->prepare(
             "INSERT INTO support_tickets(user_id,topic,message,booking_code) VALUES(?,?,?,?)",
         )->execute([$uid, $topic, $message, $code ?: null]);
+        $id = (int) $db->lastInsertId();
+        $db->commit();
         reply(201, [
             "status" => "success",
-            "data" => ["id" => (int) $db->lastInsertId()],
+            "data" => ["id" => $id],
         ]);
     }
     requireMethod("GET");
@@ -56,5 +59,8 @@ try {
     $q->execute([$uid]);
     reply(200, ["status" => "success", "data" => $q->fetchAll()]);
 } catch (Throwable $e) {
+    if (isset($db) && $db->inTransaction()) {
+        $db->rollBack();
+    }
     failServer($e);
 }

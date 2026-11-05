@@ -37,11 +37,22 @@ try {
             ]);
         }
         $db->prepare(
-            "UPDATE users SET password_hash=?,session_version=session_version+1 WHERE id=?",
+            "UPDATE users SET password_hash=?,session_version=session_version+1 WHERE id=? AND deleted_at IS NULL",
         )->execute([
             password_hash($password, PASSWORD_DEFAULT),
             $reset["user_id"],
         ]);
+        $q = $db->prepare(
+            "SELECT id FROM users WHERE id=? AND deleted_at IS NULL",
+        );
+        $q->execute([$reset["user_id"]]);
+        if (!$q->fetchColumn()) {
+            $db->rollBack();
+            reply(422, [
+                "status" => "error",
+                "message" => "Liên kết khôi phục không còn hợp lệ.",
+            ]);
+        }
         $db->prepare(
             "UPDATE password_resets SET used_at=NOW() WHERE user_id=? AND used_at IS NULL",
         )->execute([$reset["user_id"]]);
@@ -66,7 +77,9 @@ try {
         ]);
     }
     $db->beginTransaction();
-    $q = $db->prepare("SELECT id FROM users WHERE email=? FOR UPDATE");
+    $q = $db->prepare(
+        "SELECT id FROM users WHERE email=? AND deleted_at IS NULL FOR UPDATE",
+    );
     $q->execute([$email]);
     $uid = $q->fetchColumn();
     if ($uid) {
