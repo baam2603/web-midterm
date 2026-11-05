@@ -1,8 +1,14 @@
 <?php
+require_once __DIR__ . "/mail-transport.php";
 function mailConfigured(): bool
 {
-    return (bool) (getenv("RESEND_API_KEY") &&
-        filter_var(getenv("MAIL_FROM"), FILTER_VALIDATE_EMAIL));
+    if (!filter_var(getenv("MAIL_FROM"), FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+    if (mailTransport() === 'smtp') {
+        return smtpConfig() !== null && is_file(__DIR__ . '/../../vendor/autoload.php');
+    }
+    return mailTransport() === 'resend' && (bool) getenv('RESEND_API_KEY');
 }
 function queueMail(PDO $db, string $email, string $subject, string $html): void
 {
@@ -10,6 +16,18 @@ function queueMail(PDO $db, string $email, string $subject, string $html): void
         "INSERT INTO mail_outbox(recipient,subject,html_body) VALUES(?,?,?)",
     )->execute([$email, $subject, $html]);
 }
+function sendMail(array $message): void
+{
+    if (!mailConfigured()) {
+        throw new RuntimeException('Email chưa được cấu hình đầy đủ.');
+    }
+    if (mailTransport() === 'smtp') {
+        smtpMail($message);
+        return;
+    }
+    resendMail($message);
+}
+
 function resendMail(array $message): void
 {
     if (!mailConfigured()) {

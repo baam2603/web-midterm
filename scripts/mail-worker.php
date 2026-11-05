@@ -9,7 +9,7 @@ require_once __DIR__ . "/../api/shared/email.php";
 if (!mailConfigured()) {
     fwrite(
         STDERR,
-        "Configure RESEND_API_KEY and a verified MAIL_FROM before starting the mail worker.\n",
+        "Configure MAIL_TRANSPORT (resend or smtp), its credentials and MAIL_FROM before starting the mail worker.\n",
     );
     exit(1);
 }
@@ -26,7 +26,7 @@ for ($i = 0; $i < 20; $i++) {
         break;
     }
     try {
-        resendMail($m);
+        sendMail($m);
         $db->prepare(
             "UPDATE mail_outbox SET status='sent',sent_at=NOW(),last_attempt_at=NOW(),attempts=attempts+1,last_error=NULL,html_body='' WHERE id=?",
         )->execute([$m["id"]]);
