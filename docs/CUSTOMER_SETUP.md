@@ -285,3 +285,10 @@ không có STARTTLS. Không gọi Gmail hay gửi email thật trong bộ kiểm
 Bản sửa `fix/account-closure-policy` cần import thêm `database/account_closure_migration.sql`
 (sau các migration hiện tại trên main), không xóa/import lại database.
 Xem [ACCOUNT_CLOSURE.md](ACCOUNT_CLOSURE.md) để biết quy tắc đơn/tiền, ẩn danh và kiểm thử.
+
+
+## Cải tiến OSM không cần Google billing
+
+Nhánh `feat/osm-manual-location` hỗ trợ khách sạn chưa có trên OSM bằng vị trí thủ công,
+giữ dữ liệu và kiểm tra nguồn rõ ràng. Cần import thêm `database/osm_location_migration.sql`.
+Xem [OSM_MANUAL_LOCATION.md](OSM_MANUAL_LOCATION.md) để cài đặt và sử dụng.

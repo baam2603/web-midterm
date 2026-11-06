@@ -130,6 +130,14 @@
       name: String(h.name || ""),
       stars: Number(h.stars || 0),
       address: String(h.address || ""),
+      lat:
+        h.maps_provider === "google" || h.latitude == null
+          ? null
+          : Number(h.latitude),
+      lng:
+        h.maps_provider === "google" || h.longitude == null
+          ? null
+          : Number(h.longitude),
       intro: String(h.description || ""),
       images,
       amenities: dbAmenities,

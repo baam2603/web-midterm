@@ -12,7 +12,13 @@ $required = [
         "session_version",
         "deleted_at",
     ],
-    "hotels" => ["latitude", "longitude", "is_active"],
+    "hotels" => [
+        "latitude",
+        "longitude",
+        "is_active",
+        "maps_provider",
+        "maps_verified_at",
+    ],
     "room_types" => ["is_active", "area_m2", "bed_type", "features_json"],
     "bookings" => [
         "guest_name",
@@ -84,7 +90,7 @@ $result["ready"] =
     !$result["missing"];
 if ($result["missing"]) {
     $result["message"] =
-        "Sao lưu database rồi import database/admin_migration.sql và database/customer_migration.sql rồi database/registration_otp_migration.sql và database/account_closure_migration.sql. Không import schema.sql đè lên dữ liệu hiện có.";
+        "Sao lưu database rồi import database/admin_migration.sql và database/customer_migration.sql rồi database/registration_otp_migration.sql và database/account_closure_migration.sql và database/osm_location_migration.sql. Không import schema.sql đè lên dữ liệu hiện có.";
 }
 if (!$result["mbstring"]) {
     $result["message"] =
