@@ -1,11 +1,10 @@
-/* 3K Booking Admin: tìm cơ sở lưu trú quanh vị trí đã chọn trên Leaflet. */
+/* 3K Booking Admin: tìm cơ sở lưu trú quanh vị trí đã chọn trên Google Maps. */
 (function () {
   "use strict";
   const CITY = {
     dalat: { lat: 11.9404, lng: 108.4583, zoom: 13 },
     vungtau: { lat: 10.346, lng: 107.0843, zoom: 13 },
   };
-  let leafletPromise = null;
   let current = null;
   const byId = (id, el = document) => el.querySelector("#" + id);
   const slugify = (value) =>
@@ -19,29 +18,6 @@
       .replace(/^-+|-+$/g, "")
       .slice(0, 80)
       .replace(/-+$/g, "");
-
-  function loadLeaflet() {
-    if (window.L) return Promise.resolve(window.L);
-    if (leafletPromise) return leafletPromise;
-    leafletPromise = new Promise((resolve, reject) => {
-      if (!document.querySelector("link[data-admin-leaflet]")) {
-        const css = document.createElement("link");
-        css.rel = "stylesheet";
-        css.href = "vendor/leaflet/leaflet.css";
-        css.dataset.adminLeaflet = "1";
-        document.head.appendChild(css);
-      }
-      const script = document.createElement("script");
-      script.src = "vendor/leaflet/leaflet.js";
-      script.onload = () => resolve(window.L);
-      script.onerror = () => {
-        leafletPromise = null;
-        reject(Error("Không tải được thư viện Leaflet."));
-      };
-      document.head.appendChild(script);
-    });
-    return leafletPromise;
-  }
 
   function ui(form) {
     const mount = byId("tk-maps-results", form);
@@ -68,7 +44,10 @@
 
   function disposeStale() {
     if (current && !current.form.isConnected) {
-      current.map.remove();
+      current.controller?.abort();
+      current.markers.forEach((m) => (m.map = null));
+      current.centerPin.map = null;
+      google.maps.event.clearInstanceListeners(current.map);
       current = null;
     }
   }
@@ -90,8 +69,10 @@
       mapLink.hidden = true;
       mapLink.removeAttribute("href");
     }
+    delete ctx.form.dataset.googleSelection;
     ctx.places = [];
-    ctx.markers.clearLayers();
+    ctx.markers.forEach((m) => (m.map = null));
+    ctx.markers = [];
     byId("tk-map-nearby-list", ctx.shell).replaceChildren();
     byId("tk-map-local-filter", ctx.shell).value = "";
   }
@@ -103,15 +84,18 @@
     );
     const list = byId("tk-map-nearby-list", ctx.shell);
     list.replaceChildren();
-    ctx.markers.clearLayers();
+    ctx.markers.forEach((m) => (m.map = null));
+    ctx.markers = [];
     const bounds = [];
     filtered.forEach((place) => {
-      const marker = ctx.L.marker([place.lat, place.lng]).addTo(ctx.markers);
-      const tooltip = document.createElement("span");
-      tooltip.textContent = place.name;
-      marker.bindTooltip(tooltip);
-      marker.on("click", () => selectPlace(ctx, place));
-      bounds.push([place.lat, place.lng]);
+      const marker = ThreeKMaps.marker(
+        ctx,
+        { lat: place.lat, lng: place.lng },
+        place.name,
+        () => selectPlace(ctx, place),
+      );
+      ctx.markers.push(marker);
+      bounds.push({ lat: place.lat, lng: place.lng });
       const button = document.createElement("button");
       button.type = "button";
       button.className = "tk-hotel-map-choice";
@@ -123,9 +107,12 @@
       button.addEventListener("click", () => selectPlace(ctx, place));
       list.append(button);
     });
+    ThreeKMaps.credits(
+      list,
+      filtered.flatMap((p) => p.attributions || []),
+    );
     if (filtered.length > 0) {
-      const cluster = ctx.L.latLngBounds(bounds);
-      ctx.map.fitBounds(cluster, { padding: [35, 35], maxZoom: 15 });
+      ThreeKMaps.fit(ctx, bounds);
       showStatus(
         ctx,
         `Có ${filtered.length} khách sạn phù hợp. Nhấn ghim hoặc tên để chọn.`,
@@ -188,9 +175,15 @@
         mapLink.href = p.mapsUrl;
         mapLink.hidden = false;
       }
-      ctx.map.setView([p.lat, p.lng], 16);
-      showStatus(ctx, `Đã chọn “${name}”. Địa chỉ đã được xác minh từ OSM.`);
-      // Không chỉnh giá, số sao, tiện nghi vì OSM không xác minh các thuộc tính thương mại này.
+      ctx.map.setCenter({ lat: p.lat, lng: p.lng });
+      ctx.map.setZoom(16);
+      ctx.searchCenter = { lat: p.lat, lng: p.lng };
+      ctx.centerPin.position = ctx.searchCenter;
+      showStatus(
+        ctx,
+        `Đã chọn “${name}”. Địa chỉ đã được xác minh từ Google Places.`,
+      );
+      // Không chỉnh giá, số sao, tiện nghi vì Google Places không xác minh các thuộc tính thương mại này.
     } catch (error) {
       if (error.name === "AbortError") return;
       showStatus(ctx, error.message || "Không thể xác minh địa chỉ.");
@@ -241,7 +234,7 @@
       if (!ctx.places.length)
         showStatus(
           ctx,
-          "Không thấy khách sạn nào có dữ liệu OSM quanh vị trí này. Hãy thử vị trí khác.",
+          "Không thấy khách sạn nào có dữ liệu Google Places quanh vị trí này. Hãy thử vị trí khác.",
         );
     } catch (error) {
       if (error.name === "AbortError") return;
@@ -259,51 +252,67 @@
     const panel = document.getElementById("tk-create-hotel-panel");
     if (!form || !panel || panel.hidden || (current && current.form === form)) {
       if (current?.map && current.form === form && !panel?.hidden) {
-        current.map.invalidateSize();
+        google.maps.event.trigger(current.map, "resize");
       }
       return;
     }
     const shell = ui(form);
     if (!shell || !form.elements.namedItem("google_place_id")) return;
     try {
-      const L = await loadLeaflet();
-      if (!form.isConnected || panel.hidden || current?.form === form) return;
       const city = form.elements.namedItem("city").value;
       const location = CITY[city] || CITY.dalat;
-      const map = L.map(byId("tk-admin-hotel-map", shell), {
-        scrollWheelZoom: false,
-      });
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
-      }).addTo(map);
-      map.setView([location.lat, location.lng], location.zoom);
-      const centerPin = L.marker([location.lat, location.lng], {
-        draggable: true,
-      }).addTo(map);
-      const markers = L.layerGroup().addTo(map);
+      const sdkContext = await ThreeKMaps.create(
+        byId("tk-admin-hotel-map", shell),
+        { lat: location.lat, lng: location.lng },
+        location.zoom,
+      );
+      if (!form.isConnected || panel.hidden || current?.form === form) return;
+      const { map, sdk } = sdkContext;
+      const centerPin = ThreeKMaps.marker(
+        sdkContext,
+        { lat: location.lat, lng: location.lng },
+        "Tâm tìm kiếm",
+        null,
+        { gmpDraggable: true },
+      );
       const ctx = {
         form,
         shell,
-        L,
         map,
+        sdk,
         centerPin,
-        markers,
+        markers: [],
         searchCenter: { lat: location.lat, lng: location.lng },
         places: [],
         busy: false,
         queryId: 0,
       };
       current = ctx;
-      map.on("click", (event) => {
-        ctx.searchCenter = event.latlng;
-        centerPin.setLatLng(event.latlng);
+      const syncTextSelection = (p) => {
+        if (!Number.isFinite(p?.lat) || !Number.isFinite(p?.lng)) return;
+        ctx.searchCenter = { lat: p.lat, lng: p.lng };
+        centerPin.position = ctx.searchCenter;
+        map.setCenter(ctx.searchCenter);
+        map.setZoom(16);
+        showStatus(ctx, "Đã chọn vị trí “" + p.name + "” trên Google Maps.");
+      };
+      form.addEventListener("admin:google-place-selected", (event) =>
+        syncTextSelection(event.detail),
+      );
+      try {
+        syncTextSelection(JSON.parse(form.dataset.googleSelection || "null"));
+      } catch (_) {}
+
+      map.addListener("click", (event) => {
+        if (!event.latLng) return;
+        ctx.searchCenter = event.latLng.toJSON();
+        centerPin.position = ctx.searchCenter;
         clearResults(ctx);
         showStatus(ctx, "Đã chọn vị trí. Nhấn “Tìm khách sạn quanh vị trí”.");
       });
-      centerPin.on("dragend", () => {
-        ctx.searchCenter = centerPin.getLatLng();
+      centerPin.addListener("dragend", (event) => {
+        if (!event.latLng) return;
+        ctx.searchCenter = event.latLng.toJSON();
         clearResults(ctx);
         showStatus(
           ctx,
@@ -318,13 +327,14 @@
       );
       form.elements.namedItem("city").addEventListener("change", () => {
         const pos = CITY[form.elements.namedItem("city").value] || CITY.dalat;
-        map.setView([pos.lat, pos.lng], pos.zoom);
+        map.setCenter({ lat: pos.lat, lng: pos.lng });
+        map.setZoom(pos.zoom);
         ctx.searchCenter = { lat: pos.lat, lng: pos.lng };
-        centerPin.setLatLng(ctx.searchCenter);
+        centerPin.position = ctx.searchCenter;
         clearResults(ctx);
         showStatus(ctx, "Đã đổi thành phố. Hãy tìm lại khách sạn.");
       });
-      setTimeout(() => map.invalidateSize(), 30);
+      setTimeout(() => google.maps.event.trigger(map, "resize"), 30);
     } catch (error) {
       const message = byId("tk-map-hotel-status", shell);
       if (message) message.textContent = error.message;

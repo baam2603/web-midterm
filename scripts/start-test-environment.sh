@@ -25,16 +25,23 @@ docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/d
 docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/customer_migration.sql"
 docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/registration_otp_migration.sql"
 docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/account_closure_migration.sql"
+docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/google_maps_migration.sql"
 # Recreate only the dedicated test web container so proxy/CA and fixture settings stay current.
 if docker container inspect web-midterm-admin-web >/dev/null 2>&1; then docker rm -f web-midterm-admin-web >/dev/null; fi
 mkdir -p "$repo_dir/uploads"
 docker run -d --name web-midterm-admin-web --network container:web-midterm-admin-db \
  -v "$repo_dir:/app:ro" -v "$repo_dir/uploads:/app/uploads" \
+ -e APP_ENV=test -e GOOGLE_PLACES_API_KEY=test-only-places-key \
+ -e GOOGLE_MAPS_BROWSER_KEY=test-only-browser-key -e GOOGLE_PLACES_TEST_ENDPOINT=http://127.0.0.1:8004/v1 \
  -e ONLINE_PAYMENTS_ENABLED=true -e VNPAY_TMN_CODE=TESTONLY \
  -e VNPAY_HASH_SECRET=integration-test-key-not-for-production \
  -e APP_BASE_URL=https://example.invalid -e RESEND_API_KEY=test-only-not-a-real-key \
  -e MAIL_FROM=test@example.invalid web-midterm-php php -d display_errors=Off \
  -d upload_max_filesize=5M -d post_max_size=6M -S 0.0.0.0:8000 -t /app
+# Separate fixture process survives the subdirectory suite stopping/restarting the test web.
+if docker container inspect web-midterm-admin-google-fixture >/dev/null 2>&1; then docker rm -f web-midterm-admin-google-fixture >/dev/null; fi
+docker run -d --name web-midterm-admin-google-fixture --network container:web-midterm-admin-db \
+ -v "$repo_dir:/app:ro" web-midterm-php php -S 127.0.0.1:8004 /app/tests/fixtures/google-places-router.php
 attempt=0
 until curl -fsS http://127.0.0.1:8001/api/db-check.php | python3 -c 'import json,sys; assert json.load(sys.stdin)["status"]=="success"'; do
  attempt=$((attempt+1)); [ "$attempt" -lt 30 ] || exit 1

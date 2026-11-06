@@ -24,11 +24,16 @@ try {
     reply(200, [
         "status" => "success",
         "data" => [
-            "places" => osmNearbyPlaces((float) $lat, (float) $lon, $city),
+            "places" => googleNearbyPlaces((float) $lat, (float) $lon, $city),
         ],
     ]);
 } catch (InvalidArgumentException $e) {
     reply(422, ["status" => "error", "message" => $e->getMessage()]);
+} catch (GooglePlacesUnavailable $e) {
+    reply($e->getCode() === 503 ? 503 : 502, [
+        "status" => "error",
+        "message" => $e->getMessage(),
+    ]);
 } catch (Throwable $e) {
     error_log("[3K nearby] " . $e->getMessage());
     reply(502, [

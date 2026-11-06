@@ -220,7 +220,8 @@ a {
 .map-card__btn {
   position: absolute;
   left: 50%;
-  bottom: 10px;
+  top: 8px;
+  bottom: auto;
   transform: translateX(-50%);
   display: flex;
   align-items: center;

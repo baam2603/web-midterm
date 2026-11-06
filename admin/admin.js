@@ -665,7 +665,7 @@
 
     <p class="tk-muted">
       Khách sạn cần có địa điểm được xác minh
-      trên OpenStreetMap trước khi lưu.
+      trên Google Maps trước khi lưu.
     </p>
 
     <form id="tk-create-hotel-db" class="tk-form">
@@ -707,7 +707,7 @@
             id="tk-maps-search"
             type="search"
             minlength="3"
-            maxlength="100"
+            maxlength="255"
             autocomplete="off"
             placeholder="Nhập tên khách sạn hoặc địa chỉ..."
           >
@@ -719,7 +719,7 @@
             id="tk-maps-search-button"
             class="tk-outline"
           >
-            Tìm trên OpenStreetMap
+            Tìm trên Google Maps
           </button>
         </div>
 
@@ -733,7 +733,7 @@
         <input
           type="hidden"
           name="google_place_id"
-          id="tk-osm-place-id"
+          id="tk-google-place-id"
         >
 
         <label>
@@ -755,17 +755,17 @@
           rel="noopener noreferrer"
           hidden
         >
-          Xem vị trí trên OpenStreetMap
+          Xem vị trí trên Google Maps
         </a>
 
         <p class="tk-muted">
           Dữ liệu bản đồ:
           <a
-            href="https://www.openstreetmap.org/copyright"
+            href="https://maps.google.com"
             target="_blank"
             rel="noopener noreferrer"
           >
-            © OpenStreetMap contributors
+            Google Maps
           </a>
         </p>
       </div>
@@ -1262,14 +1262,15 @@
     if (event.persisted) show();
   });
 
-  // OPENSTREETMAP — QUẢN LÝ ĐỊA ĐIỂM
-  let osmSearchVersion = 0;
-  let osmSearchController = null;
+  // GOOGLE MAPS — QUẢN LÝ ĐỊA ĐIỂM
+  let placeSearchVersion = 0;
+  let placeSearchController = null;
 
-  function clearOsmSelection(form) {
+  function clearPlaceSelection(form) {
     form.elements.namedItem("google_place_id").value = "";
     form.elements.namedItem("address").value = "";
-    delete form.dataset.selectedOsmKind;
+    delete form.dataset.selectedPlaceKind;
+    delete form.dataset.googleSelection;
     const mapLink = form.querySelector("#tk-selected-maps");
     const results = form.querySelector("#tk-maps-results");
 
@@ -1301,9 +1302,9 @@
     }
 
     if (e.target.id === "tk-maps-search") {
-      osmSearchVersion++;
-      osmSearchController?.abort();
-      clearOsmSelection(form);
+      placeSearchVersion++;
+      placeSearchController?.abort();
+      clearPlaceSelection(form);
     }
   });
 
@@ -1312,16 +1313,16 @@
     const form = e.target.closest("#tk-create-hotel-db");
     if (!form) return;
     if (e.target.id === "tk-maps-mode") {
-      osmSearchVersion++;
-      osmSearchController?.abort();
-      clearOsmSelection(form);
+      placeSearchVersion++;
+      placeSearchController?.abort();
+      clearPlaceSelection(form);
       return;
     }
     if (e.target.name !== "city") return;
 
-    osmSearchVersion++;
-    osmSearchController?.abort();
-    clearOsmSelection(form);
+    placeSearchVersion++;
+    placeSearchController?.abort();
+    clearPlaceSelection(form);
 
     const searchInput = form.querySelector("#tk-maps-search");
     if (searchInput) searchInput.value = "";
@@ -1337,7 +1338,7 @@
       ?.click();
   });
 
-  // TÌM KHÁCH SẠN TRÊN OPENSTREETMAP
+  // TÌM KHÁCH SẠN TRÊN GOOGLE MAPS
   content.addEventListener("click", async (e) => {
     const searchButton = e.target.closest("#tk-maps-search-button");
 
@@ -1355,15 +1356,15 @@
       return;
     }
 
-    osmSearchController?.abort();
-    osmSearchController = new AbortController();
-    const version = ++osmSearchVersion;
-    clearOsmSelection(form);
+    placeSearchController?.abort();
+    placeSearchController = new AbortController();
+    const version = ++placeSearchVersion;
+    clearPlaceSelection(form);
 
     searchButton.disabled = true;
     searchButton.textContent = "Đang tìm...";
 
-    results.textContent = "Đang tìm khách sạn trên OpenStreetMap...";
+    results.textContent = "Đang tìm khách sạn trên Google Maps...";
 
     try {
       const url = new URL("../api/admin/places-search.php", location.href);
@@ -1378,13 +1379,13 @@
         method: "GET",
         credentials: "same-origin",
         cache: "no-store",
-        signal: osmSearchController.signal,
+        signal: placeSearchController.signal,
       });
 
       const data = await response.json().catch(() => null);
 
       // Bỏ qua kết quả cũ nếu Admin đã đổi từ khóa
-      if (version !== osmSearchVersion || !form.isConnected) {
+      if (version !== placeSearchVersion || !form.isConnected) {
         return;
       }
 
@@ -1409,7 +1410,7 @@
 
       for (const place of places) {
         if (
-          !/^osm-[NWR][0-9]{1,15}$/.test(place.placeId || "") ||
+          !/^[A-Za-z0-9_-]{10,255}$/.test(place.placeId || "") ||
           !place.name ||
           !place.address
         ) {
@@ -1428,19 +1429,9 @@
 
         const kind = place.kind || "location";
         const prefix =
-          place.matchSource === "exact_address"
-            ? "⌖ Đúng số nhà và đường trên OSM"
-            : place.matchSource === "nearby"
-              ? "↗ Cơ sở lưu trú LÂN CẬN (" +
-                (Number.isFinite(Number(place.distanceMeters))
-                  ? Math.round(Number(place.distanceMeters)) + " m"
-                  : "gần địa chỉ") +
-                ")"
-              : kind === "lodging"
-                ? "✓ Cơ sở lưu trú / Căn hộ"
-                : kind === "address"
-                  ? "🏢 Tòa nhà / Địa điểm trên bản đồ"
-                  : "○ Khu vực / Đường phố (không thể chọn)";
+          kind === "lodging"
+            ? "✓ Cơ sở lưu trú"
+            : "○ Địa chỉ/khu vực — không thể chọn";
         button.textContent =
           prefix + " — " + place.name + " — " + place.address;
         button.disabled = kind === "location" || place.canSelect === false;
@@ -1449,7 +1440,7 @@
             "Đây là đường phố/khu vực chung, vui lòng chọn tòa nhà hoặc địa chỉ cụ thể";
 
         button.addEventListener("click", () => {
-          if (version !== osmSearchVersion || !form.isConnected) {
+          if (version !== placeSearchVersion || !form.isConnected) {
             return;
           }
 
@@ -1459,11 +1450,11 @@
             return;
           }
 
-          // Lưu OSM ID & Địa chỉ
+          // Lưu Google Place ID & Địa chỉ
           form.elements.namedItem("google_place_id").value = place.placeId;
 
           const selectedKind = place.kind || "lodging";
-          form.dataset.selectedOsmKind = selectedKind;
+          form.dataset.selectedPlaceKind = selectedKind;
           form.elements.namedItem("address").value = place.address;
 
           const nameInput = form.elements.namedItem("name");
@@ -1491,46 +1482,46 @@
             }
           }
 
-          // Tạo đường dẫn OpenStreetMap an toàn
-          const mapTypes = {
-            N: "node",
-            W: "way",
-            R: "relation",
-          };
-
-          const mapType = mapTypes[place.placeId[4]];
-          const osmId = place.placeId.slice(5);
-
           const mapLink = form.querySelector("#tk-selected-maps");
-
           mapLink.href =
-            "https://www.openstreetmap.org/" + mapType + "/" + osmId;
-
+            "https://www.google.com/maps/search/?api=1&query=" +
+            encodeURIComponent(place.name) +
+            "&query_place_id=" +
+            encodeURIComponent(place.placeId);
           mapLink.hidden = false;
+          form.dataset.googleSelection = JSON.stringify(place);
+          form.dispatchEvent(
+            new CustomEvent("admin:google-place-selected", { detail: place }),
+          );
 
           results.replaceChildren();
           results.textContent =
             "Đã chọn địa điểm: " +
             place.name +
             " (Bạn có thể giữ nguyên hoặc chỉnh sửa lại Tên khách sạn bên dưới)";
+          ThreeKMaps.credits(results, place.attributions || []);
         });
 
         results.appendChild(button);
       }
 
+      ThreeKMaps.credits(
+        results,
+        places.flatMap((p) => p.attributions || []),
+      );
       if (count === 0) {
         results.textContent = "Không có địa điểm hợp lệ trong kết quả.";
       }
     } catch (error) {
-      if (version === osmSearchVersion && error.name !== "AbortError") {
-        console.error("OSM Search Error:", error);
+      if (version === placeSearchVersion && error.name !== "AbortError") {
+        console.error("Google Places Search Error:", error);
 
         results.textContent = error.message || "Lỗi tìm kiếm bản đồ.";
       }
     } finally {
       if (searchButton.isConnected) {
         searchButton.disabled = false;
-        searchButton.textContent = "Tìm trên OpenStreetMap";
+        searchButton.textContent = "Tìm trên Google Maps";
       }
     }
   });
@@ -1556,7 +1547,7 @@
       stars: Number(values.stars),
       address: values.address.trim(),
 
-      // Trường này chứa mã địa điểm OSM
+      // Trường này chứa Google Place ID
       google_place_id: values.google_place_id,
 
       price_per_night: Number(values.price_per_night),
@@ -1565,11 +1556,11 @@
 
     // Bắt buộc chọn địa điểm trên bản đồ
     if (
-      !/^osm-[NWR][0-9]{1,15}$/.test(payload.google_place_id || "") ||
+      !/^[A-Za-z0-9_-]{10,255}$/.test(payload.google_place_id || "") ||
       !payload.address
     ) {
       feedback(
-        "Vui lòng tìm và chọn khách sạn trên " + "OpenStreetMap trước khi lưu.",
+        "Vui lòng tìm và chọn khách sạn trên " + "Google Maps trước khi lưu.",
         true,
       );
       return;

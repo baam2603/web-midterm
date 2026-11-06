@@ -82,7 +82,68 @@
             );
             if (!h) return;
             editor.hidden = false;
-            editor.innerHTML = `<p><button type="button" class="tk-outline" data-editor-back>← Về danh sách khách sạn</button></p><h2>Chỉnh sửa ${esc(h.name)}</h2><form class="tk-form" id="admin-hotel-edit-form"><input type="hidden" name="id" value="${Number(h.id)}"><label>Tên khách sạn<input name="name" minlength="3" maxlength="150" required value="${esc(h.name)}"></label><label>Loại hình<select name="type">${["hotel", "resort", "homestay", "villa"].map((v) => `<option ${v === h.type ? "selected" : ""}>${v}</option>`).join("")}</select></label><label>Số sao<input name="stars" type="number" min="1" max="5" required value="${Number(h.stars)}"></label><label>Giá tham khảo/đêm<input name="price_per_night" type="number" min="100000" max="100000000" step="1" required value="${Number(h.price_per_night)}"></label><label>Mô tả<textarea name="description" maxlength="3000">${esc(h.description)}</textarea></label><p>Địa chỉ: ${esc(h.address)}. Mã khách sạn và liên kết đơn được giữ nguyên.</p><p role="status"></p><div class="tk-actions"><button type="submit" class="tk-primary">Lưu khách sạn</button><button type="button" data-cancel class="tk-outline">Hủy</button></div></form>`;
+            editor.innerHTML = `<p><button type="button" class="tk-outline" data-editor-back>← Về danh sách khách sạn</button></p><h2>Chỉnh sửa ${esc(h.name)}</h2><form class="tk-form" id="admin-hotel-edit-form"><input type="hidden" name="id" value="${Number(h.id)}"><label>Tên khách sạn<input name="name" minlength="3" maxlength="150" required value="${esc(h.name)}"></label><label>Loại hình<select name="type">${["hotel", "resort", "homestay", "villa"].map((v) => `<option ${v === h.type ? "selected" : ""}>${v}</option>`).join("")}</select></label><label>Số sao<input name="stars" type="number" min="1" max="5" required value="${Number(h.stars)}"></label><label>Giá tham khảo/đêm<input name="price_per_night" type="number" min="100000" max="100000000" step="1" required value="${Number(h.price_per_night)}"></label><label>Mô tả<textarea name="description" maxlength="3000">${esc(h.description)}</textarea></label><p>Địa chỉ: ${esc(h.address)}. Mã khách sạn và liên kết đơn được giữ nguyên.</p><fieldset><legend>Cập nhật vị trí bằng Google Maps (không bắt buộc)</legend><input type="search" data-location-query placeholder="Tên khách sạn hoặc địa chỉ"><button type="button" class="tk-outline" data-location-search>Tìm trên Google Maps</button><input type="hidden" name="new_place_id"><div data-location-results role="status"></div><p data-location-selected></p><small>Chọn đúng khách sạn để thay địa chỉ và tọa độ cũ khi bấm Lưu.</small></fieldset><p role="status"></p><div class="tk-actions"><button type="submit" class="tk-primary">Lưu khách sạn</button><button type="button" data-cancel class="tk-outline">Hủy</button></div></form>`;
+            const searchButton = editor.querySelector("[data-location-search]");
+            let searchSerial = 0;
+            searchButton.onclick = async () => {
+              const serial = ++searchSerial,
+                results = editor.querySelector("[data-location-results]");
+              const query = editor
+                .querySelector("[data-location-query]")
+                .value.trim();
+              if (query.length < 3) {
+                results.textContent = "Nhập ít nhất 3 ký tự.";
+                return;
+              }
+              searchButton.disabled = true;
+              results.textContent = "Đang tìm...";
+              editor.querySelector("[name=new_place_id]").value = "";
+              try {
+                const url = new URL(
+                  "../api/admin/places-search.php",
+                  location.href,
+                );
+                url.search = new URLSearchParams({
+                  q: query,
+                  city: h.city,
+                  mode: "auto",
+                });
+                const r = await fetch(url, {
+                    credentials: "same-origin",
+                    cache: "no-store",
+                  }),
+                  j = await r.json();
+                if (!r.ok) throw Error(j.message);
+                if (serial !== searchSerial || !results.isConnected) return;
+                results.replaceChildren();
+                for (const p of j.data.places) {
+                  const option = document.createElement("button");
+                  option.type = "button";
+                  option.className = "tk-outline";
+                  option.textContent = p.name + " — " + p.address;
+                  option.disabled = !p.canSelect;
+                  option.onclick = () => {
+                    editor.querySelector("[name=new_place_id]").value =
+                      p.placeId;
+                    editor.querySelector(
+                      "[data-location-selected]",
+                    ).textContent =
+                      "Sẽ cập nhật vị trí: " + p.name + " — " + p.address;
+                  };
+                  results.append(option);
+                }
+                ThreeKMaps.credits(
+                  results,
+                  j.data.places.flatMap((p) => p.attributions || []),
+                );
+                if (!j.data.places.length)
+                  results.textContent = "Không tìm thấy cơ sở lưu trú phù hợp.";
+              } catch (e) {
+                if (results.isConnected) results.textContent = e.message;
+              } finally {
+                if (searchButton.isConnected) searchButton.disabled = false;
+              }
+            };
             const closeEditor = () => {
               const form = editor.querySelector("form");
               if (

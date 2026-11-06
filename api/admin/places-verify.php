@@ -18,13 +18,19 @@ try {
             "name" => $p["name"],
             "address" => $p["formattedAddress"],
             "kind" => $p["kind"],
-            "mapsUrl" => osmPlaceUrl($p["id"]),
+            "attributions" => $p["attributions"],
+            "mapsUrl" => placeMapsUrl($p["id"]),
             "lat" => $p["location"]["latitude"],
             "lng" => $p["location"]["longitude"],
         ],
     ]);
 } catch (InvalidArgumentException $e) {
     reply(422, ["status" => "error", "message" => $e->getMessage()]);
+} catch (GooglePlacesUnavailable $e) {
+    reply($e->getCode() === 503 ? 503 : 502, [
+        "status" => "error",
+        "message" => $e->getMessage(),
+    ]);
 } catch (Throwable $e) {
     error_log("[3K verify] " . $e->getMessage());
     reply(502, [

@@ -6,7 +6,7 @@ require_once __DIR__ . "/../shared/bootstrap.php";
 require_once __DIR__ . "/places-service.php";
 
 requireMethod("GET");
-set_time_limit(45); // tìm kiếm có thể gọi Nominatim + Overpass nhiều lần (mỗi lần cách nhau >= 1 giây)
+set_time_limit(25);
 requireAdmin();
 session_write_close();
 header("Cache-Control: no-store, private");
@@ -21,62 +21,37 @@ if (
     !isset($cityNames[$city]) ||
     $length === false ||
     $length < 3 ||
-    $length > 100 ||
+    $length > 255 ||
     !in_array($mode, ["auto", "name", "address"], true)
 ) {
     reply(422, [
         "status" => "error",
         "message" =>
-            "Nhập tên/địa chỉ từ 3 đến 100 ký tự và chọn thành phố hợp lệ.",
+            "Nhập tên/địa chỉ từ 3 đến 255 ký tự và chọn thành phố hợp lệ.",
     ]);
 }
 
 try {
-    $GLOBALS["osm_deadline"] = microtime(true) + 20.0;
-    $key = hash("sha256", $city . "|" . $mode . "|" . osmFold($query));
-    $items = osmLimitedCachedRequest(
-        "ranked-search-" . $key,
-        $key,
-        900,
-        0.0,
-        static fn() => searchLodgingPlaces(
-            $query,
-            $city,
-            $cityNames[$city],
-            $mode,
-        ),
-    );
-    $places = [];
-    foreach ($items as $p) {
-        $id = osmPlaceId($p);
-        if ($id === null) {
-            continue;
-        }
-        $kind = $p["_kind"] ?? osmResultKind($p);
-        $places[] = [
-            "placeId" => $id,
-            "name" => osmHotelName($p) ?: (string) $p["display_name"],
-            "address" => (string) $p["display_name"],
-            "mapsUrl" => osmPlaceUrl($id),
-            "kind" => $kind,
-            "canSelect" => $kind !== "location",
-            "distanceMeters" => $p["_distanceMeters"] ?? null,
-        ];
-    }
+    $places = googleSearchPlaces($query, $city, $mode);
     reply(200, [
         "status" => "success",
         "data" => [
             "places" => $places,
             "mode" => $mode,
             "note" =>
-                "Địa chỉ có số nhà chỉ xác minh vị trí; không xác nhận cơ sở kinh doanh khách sạn.",
+                "Chọn đúng cơ sở lưu trú. Kết quả đường phố chỉ dùng tham khảo, không thể lưu thành khách sạn.",
         ],
+    ]);
+} catch (GooglePlacesUnavailable $e) {
+    reply($e->getCode() === 503 ? 503 : 502, [
+        "status" => "error",
+        "message" => $e->getMessage(),
     ]);
 } catch (Throwable $e) {
     error_log("[3K places-search] " . $e->getMessage());
     reply(502, [
         "status" => "error",
         "message" =>
-            "Dịch vụ bản đồ đang bận hoặc mất kết nối. Hãy thử lại sau; bạn cũng có thể dán đường dẫn địa điểm OSM.",
+            "Google Places chưa sẵn sàng. Kiểm tra cấu hình Places API (New), billing và key phía máy chủ.",
     ]);
 }

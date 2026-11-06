@@ -46,37 +46,20 @@ check(
     ) === 3,
     "overlapping stays",
 );
-check(osmFold("ĐÀ LẠT") === "da lat", "Vietnamese folding");
+check(googlePlaceId("ChIJFixtureHotelDalat123"), "Google Place ID");
+check(!googlePlaceId("osm-W12345"), "legacy OSM cannot be mistaken for Google");
 check(
-    osmParseReference("https://www.openstreetmap.org/way/12345") === "W12345",
-    "OSM reference",
-);
-check(
-    osmParseReference("https://evil.invalid/way/12345") === null,
+    googlePlaceReference(
+        "https://evil.invalid/?query_place_id=ChIJFixtureHotelDalat123",
+    ) === null,
     "foreign URL rejected",
 );
-check(osmLooksLikeAddress("12 đường Trần Phú"), "address detection");
 check(!isNearSelectedCity(0, 0, "dalat"), "out-of-city coordinates");
 check(
-    osmResultKind([
-        "class" => "highway",
-        "type" => "residential",
-        "name" => "Street",
-    ]) === "location",
-    "street is not selectable",
+    !googleLodging(["types" => ["route"]]),
+    "street is not a lodging business",
 );
-$hotel = [
-    "name" => "Khách sạn Đồi Thông",
-    "display_name" => "Đà Lạt",
-    "_kind" => "lodging",
-];
-$other = [
-    "name" => "Sea Resort",
-    "display_name" => "Đà Lạt",
-    "_kind" => "lodging",
-];
 check(
-    osmScore($hotel, "Doi Thong", "name") >
-        osmScore($other, "Doi Thong", "name"),
-    "accent insensitive ranking",
+    googleLodging(["types" => ["hotel", "lodging"]]),
+    "lodging type recognized",
 );

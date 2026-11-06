@@ -72,17 +72,29 @@ if (
 
 try {
     $pdo = connectDB();
-    $stmt = $pdo->prepare("SELECT id FROM hotels WHERE id = :id LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id,city FROM hotels WHERE id = :id LIMIT 1");
     $stmt->execute(["id" => $id]);
-    if (!$stmt->fetchColumn()) {
+    $existing = $stmt->fetch();
+    if (!$existing) {
         reply(404, [
             "status" => "error",
             "message" => "Không tìm thấy khách sạn.",
         ]);
     }
-    // Không nhận address, city, slug, google_place_id, is_active từ payload.
-    // Thay đổi vị trí cần dùng lại quy trình xác minh OSM;
-    // thay đổi hiển thị cần dùng hotels-visibility.php.
+    $place = null;
+    $placeId = $data["new_place_id"] ?? "";
+    if (!is_string($placeId)) {
+        throw new InvalidArgumentException("Google Place ID không hợp lệ.");
+    }
+    if ($placeId !== "") {
+        require_once __DIR__ . "/places-service.php";
+        $place = getVerifiedHotelPlace($placeId, $existing["city"]);
+        if (mb_strlen($place["formattedAddress"]) > 255) {
+            throw new InvalidArgumentException(
+                "Địa chỉ Google Maps quá dài để lưu.",
+            );
+        }
+    }
     $pdo->beginTransaction();
     $update = $pdo->prepare(
         'UPDATE hotels
@@ -99,6 +111,17 @@ try {
         "description" => $description === "" ? null : $description,
     ]);
 
+    if ($place) {
+        $pdo->prepare(
+            "UPDATE hotels SET address=?,google_place_id=?,latitude=?,longitude=?,maps_provider='google',maps_verified_at=NOW() WHERE id=?",
+        )->execute([
+            $place["formattedAddress"],
+            $place["id"],
+            $place["location"]["latitude"],
+            $place["location"]["longitude"],
+            $id,
+        ]);
+    }
     auditLog($pdo, "hotel.update", "hotel", $id);
     $pdo->commit();
     reply(200, [
@@ -106,6 +129,28 @@ try {
         "message" => "Đã cập nhật thông tin khách sạn.",
         "data" => ["id" => (int) $id],
     ]);
+} catch (InvalidArgumentException $e) {
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    reply(422, ["status" => "error", "message" => $e->getMessage()]);
+} catch (GooglePlacesUnavailable $e) {
+    reply($e->getCode() === 503 ? 503 : 502, [
+        "status" => "error",
+        "message" => $e->getMessage(),
+    ]);
+} catch (PDOException $e) {
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    if ((int) ($e->errorInfo[1] ?? 0) === 1062) {
+        reply(409, [
+            "status" => "error",
+            "message" =>
+                "Địa điểm Google Maps này đã được liên kết với khách sạn khác.",
+        ]);
+    }
+    failServer($e);
 } catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();

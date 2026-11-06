@@ -6,7 +6,7 @@
    - Thanh tìm kiếm: gợi ý đường phố, lịch chọn ngày, chọn khách & phòng
    - Bộ lọc render tự động theo cấu hình từng thành phố, lọc khách sạn trực tiếp
    - Thời tiết: Open-Meteo (miễn phí, không cần API key)
-   - Bản đồ: Leaflet + OpenStreetMap (miễn phí, không cần API key)
+   - Bản đồ: Google Maps JavaScript API (key giới hạn theo tên miền)
    ===================================================================== */
 (function () {
   "use strict";
@@ -121,25 +121,6 @@
     if (e.key === "Escape") Popup.close();
   });
   window.addEventListener("resize", () => Popup.place());
-
-  /* ------------------------- Nạp Leaflet khi cần ------------------------- */
-  let leafletPromise = null;
-  function loadLeaflet() {
-    if (window.L) return Promise.resolve(window.L);
-    if (leafletPromise) return leafletPromise;
-    leafletPromise = new Promise((resolve, reject) => {
-      const css = document.createElement("link");
-      css.rel = "stylesheet";
-      css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-      document.head.appendChild(css);
-      const js = document.createElement("script");
-      js.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-      js.onload = () => resolve(window.L);
-      js.onerror = reject;
-      document.head.appendChild(js);
-    });
-    return leafletPromise;
-  }
 
   /* ===================================================================
      initCityPage: chỉ khởi tạo một lần sau khi dữ liệu đã sẵn sàng.
@@ -571,87 +552,69 @@
       const box = $(".map-canvas");
       if (!box) return;
       try {
-        const L = await loadLeaflet();
-        box.innerHTML = "";
+        box.replaceChildren();
         box.classList.add("tk-map");
         if (box.clientHeight < 180) box.style.height = "220px";
-        map = L.map(box, { scrollWheelZoom: false, zoomControl: true }).setView(
-          [city.lat, city.lng],
+        map = await ThreeKMaps.create(
+          box,
+          { lat: city.lat, lng: city.lng },
           city.zoom,
         );
-        L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
-          maxZoom: 19,
-          attribution: "&copy; Google Maps",
-        }).addTo(map);
-
-        city.hotels
-          .filter((h) => Number.isFinite(h.lat) && Number.isFinite(h.lng))
-          .forEach((h) => {
-            const m = L.marker([h.lat, h.lng], {
-              icon: L.divIcon({
-                className: "",
-                html: `<span class="tk-pin">${icon("location_on")}</span>`,
-                iconSize: [34, 34],
-                iconAnchor: [17, 32],
-                popupAnchor: [0, -28],
-              }),
-            });
-            m.bindPopup(
-              `<div class="tk-map-pop"><strong>${esc(h.name)}</strong><span>${fmtMoney(h.price)} / đêm</span></div>`,
-            );
-            m.on("click", () => highlight(h.id, true));
-            markers[h.id] = m;
-          });
-        setTimeout(() => map.invalidateSize(), 200);
         updateMap();
-      } catch (err) {
-        console.warn("[city-page] Không tải được bản đồ.", err);
+      } catch (error) {
+        box.textContent = error.message;
       }
     }
-
     function updateMap() {
-      if (!map || !window.L) return;
-      const L = window.L;
+      if (!map) return;
       const mapped = visible.filter(
         (h) => Number.isFinite(h.lat) && Number.isFinite(h.lng),
       );
-      const ids = new Set(mapped.map((h) => h.id));
-      Object.keys(markers).forEach((id) => {
-        const m = markers[id];
-        if (ids.has(id)) {
-          if (!map.hasLayer(m)) m.addTo(map);
-        } else if (map.hasLayer(m)) map.removeLayer(m);
+      Object.values(markers).forEach((m) => {
+        m.map = null;
       });
-      if (mapped.length === 1) map.setView([mapped[0].lat, mapped[0].lng], 15);
-      else if (mapped.length > 1)
-        map.fitBounds(L.latLngBounds(mapped.map((h) => [h.lat, h.lng])), {
-          padding: [24, 24],
-          maxZoom: 15,
-        });
-      else map.setView([city.lat, city.lng], city.zoom);
+      markers = {};
+      mapped.forEach((h) => {
+        const content = document.createElement("span");
+        content.className = "tk-pin";
+        content.textContent = "●";
+        content.title = h.name;
+        const m = ThreeKMaps.marker(
+          map,
+          { lat: h.lat, lng: h.lng },
+          h.name,
+          () => highlight(h.id, true),
+          { content },
+        );
+        markers[h.id] = m;
+      });
+      if (mapped.length)
+        ThreeKMaps.fit(
+          map,
+          mapped.map((h) => ({ lat: h.lat, lng: h.lng })),
+        );
+      else {
+        map.map.setCenter({ lat: city.lat, lng: city.lng });
+        map.map.setZoom(city.zoom);
+      }
     }
-
     function highlight(id, scroll) {
       document
         .querySelectorAll(".hotel-card--active")
         .forEach((c) => c.classList.remove("hotel-card--active"));
-      Object.values(markers).forEach(
-        (m) =>
-          m._icon &&
-          m._icon.firstChild &&
-          m._icon.firstChild.classList.remove("is-active"),
+      Object.values(markers).forEach((m) =>
+        m.content?.classList.remove("is-active"),
       );
       if (!id) return;
-      const card =
-        listEl && listEl.querySelector(`.hotel-card[data-id="${id}"]`);
+      const card = listEl?.querySelector(
+        `.hotel-card[data-id="${CSS.escape(id)}"]`,
+      );
       if (card) {
         card.classList.add("hotel-card--active");
         if (scroll)
           card.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-      const m = markers[id];
-      if (m && m._icon && m._icon.firstChild)
-        m._icon.firstChild.classList.add("is-active");
+      markers[id]?.content?.classList.add("is-active");
     }
 
     /* ======================= THANH TÌM KIẾM ======================= */

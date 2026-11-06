@@ -5,6 +5,7 @@
   "main": "header.js",
   "scripts": {
     "test:prepare": "sh scripts/start-test-environment.sh",
+    "test:maps": "python3 tests/google_places_integration.py && python3 tests/google_maps_browser.py",
     "test:unit": "docker exec web-midterm-admin-web php /app/tests/admin_units.php",
     "test:customer": "python3 tests/customer_integration.py && python3 tests/customer_browser.py",
     "test:admin": "python3 tests/admin_integration.py && python3 tests/admin_browser.py && python3 tests/admin_media.py",

@@ -1,3 +1,4 @@
+from google_maps_fixture import route_with_google
 from registration_helpers import register_test_user, read_registration_otp
 """Real Chromium UI checks against the isolated admin test database."""
 import json,subprocess,urllib.request,urllib.error,http.cookiejar,secrets,os
@@ -11,31 +12,22 @@ run=secrets.token_hex(6);email=f'browser-{run}@example.invalid';password=secrets
 try:
  register_test_user({'fullName':'Browser Test','email':email,'password':password},URL)
  uid=int(sql(f"SELECT id FROM users WHERE email='{email}';"));sql(f"UPDATE users SET role='admin' WHERE id={uid};")
- # Provider fixture exercises our real search/verification/create endpoints without depending on OSM availability.
- fixture='''<?php require '/app/api/admin/places-service.php';
- $params=['osm_ids'=>'N999999999999','format'=>'jsonv2','addressdetails'=>1,'namedetails'=>1,'accept-language'=>'vi'];
- $url=NOMINATIM_URL.'lookup?'.http_build_query($params,'','&',PHP_QUERY_RFC3986);
- $p=['osm_type'=>'node','osm_id'=>999999999999,'lat'=>'11.9404','lon'=>'108.4583','class'=>'tourism','type'=>'hotel','name'=>'Browser OSM Hotel','display_name'=>'12 Test Street, Dalat, Vietnam','address'=>['country_code'=>'vn']];
- osmCacheWrite(osmCacheDir().'/'.sha1('nominatim:'.$url).'.json',[$p]);
- $ql='[out:json][timeout:12];('.osmLodgingQl('["name"]','(around:1800,11.940400,108.458300)').');out center tags 60;';
- osmCacheWrite(osmCacheDir().'/'.sha1('overpass:'.$ql).'.json',['elements'=>[['type'=>'node','id'=>999999999999,'lat'=>11.9404,'lon'=>108.4583,'tags'=>['name'=>'Browser OSM Hotel','tourism'=>'hotel']]]]);
- '''
- subprocess.run(['docker','exec','-i',WEB,'php'],input=fixture.encode(),check=True)
  with sync_playwright() as p:
   browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
   context=browser.new_context()
-  context.route('**/*',lambda route:route.continue_() if route.request.url.startswith(URL) else route.abort())
+  context.route('**/*',route_with_google(URL))
   page=context.new_page();page.set_default_timeout(10000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   page.goto(URL+'/auth/login.html',wait_until='domcontentloaded');page.locator('#email').fill(email);page.locator('#password').fill(password);page.locator('button[type=submit],input[type=submit]').first.click()
   page.wait_for_url('**/admin/index.html');page.locator('#tk-admin-app').wait_for(state='visible');page.locator('[data-tab=hotels]').click();page.locator('#tk-open-create-hotel').click()
   page.locator('#tk-map-find-nearby').wait_for();page.locator('#tk-map-find-nearby').click();page.locator('#tk-map-nearby-list button').first.click()
-  page.wait_for_function("document.querySelector('[name=google_place_id]').value === 'osm-N999999999999'")
-  print('PASS browser Leaflet map → nearby search → verified selection (provider fixture)')
-  page.locator('#tk-maps-search').fill('osm-N999999999999');page.locator('#tk-maps-search-button').click();page.locator('#tk-maps-results button').first.click();
-  assert page.locator('[name=google_place_id]').input_value()=='osm-N999999999999'
+  page.wait_for_function("document.querySelector('[name=google_place_id]').value === 'ChIJFixtureHotelDalat123'")
+  print('PASS browser Google map → nearby search → verified selection (provider fixture)')
+  page.locator('#tk-maps-search').fill('ChIJFixtureHotelDalat123');page.locator('#tk-maps-search-button').click();page.locator('#tk-maps-results button').first.click();
+  assert page.locator('[name=google_place_id]').input_value()=='ChIJFixtureHotelDalat123'
+  assert page.evaluate('testGoogleMaps[testGoogleMaps.length-1].center.lat')==11.9404
   page.locator('#tk-create-hotel-db [name=slug]').fill('browser-'+run);page.locator('#tk-create-hotel-db [name=price_per_night]').fill('900000');page.locator('#tk-create-hotel-db [type=submit]').click()
   page.locator('#tk-admin-feedback').filter(has_text='thành công').wait_for()
-  hotel=int(sql(f"SELECT id FROM hotels WHERE slug='browser-{run}';"));print('PASS browser OSM search → select → SQL hotel creation (provider fixture)')
+  hotel=int(sql(f"SELECT id FROM hotels WHERE slug='browser-{run}';"));print('PASS browser Google Places search → select → SQL hotel creation (provider fixture)')
   page.locator('[data-tab=rooms]').click();page.locator('#tk-create-room-db').wait_for()
   form=page.locator('#tk-create-room-db')
   form.locator('[name=hotel_id]').select_option(str(hotel));
@@ -58,12 +50,15 @@ try:
   assert sql(f'SELECT price_per_night FROM room_types WHERE id={room};')=='1350000.00'
   assert page.get_by_text('Updated Browser Room',exact=True).count()>=1;print('PASS browser room create/edit → SQL persists after reload')
   page.locator('[data-tab=hotels]').click();page.locator(f'[data-hotel-edit-db="{hotel}"]').click()
-  search=page.get_by_placeholder('Nhập từ khóa để lọc danh sách...');search.fill('Browser OSM Hotel')
-  page.locator('[data-editor-back]').click();assert not page.locator('#admin-hotel-editor').is_visible() and search.input_value()=='Browser OSM Hotel'
+  search=page.get_by_placeholder('Nhập từ khóa để lọc danh sách...');search.fill('Browser Google Hotel')
+  page.locator('[data-editor-back]').click();assert not page.locator('#admin-hotel-editor').is_visible() and search.input_value()=='Browser Google Hotel'
   page.locator(f'[data-hotel-edit-db="{hotel}"]').click()
+  editLocation=page.locator('#admin-hotel-edit-form')
+  editLocation.locator('[data-location-query]').fill('Browser Google Hotel');editLocation.locator('[data-location-search]').click()
+  editLocation.locator('[data-location-results] button').filter(has_text='Browser Google Hotel').click()
   editHotel=page.locator('#admin-hotel-edit-form');editHotel.locator('[name=name]').fill('Edited Browser Hotel');editHotel.locator('[name=type]').select_option('villa');editHotel.locator('[type=submit]').click()
   page.locator('#tk-admin-feedback').filter(has_text='Đã cập nhật khách sạn').wait_for()
-  assert sql(f'SELECT type FROM hotels WHERE id={hotel};')=='villa';print('PASS browser hotel editor saves SQL')
+  assert sql(f'SELECT type FROM hotels WHERE id={hotel};')=='villa';assert sql(f"SELECT CONCAT(maps_provider,':',google_place_id) FROM hotels WHERE id={hotel}")=='google:ChIJFixtureHotelDalat123';print('PASS browser hotel editor saves SQL')
   sql(f"INSERT INTO bookings(code,user_id,hotel_id,room_type_id,checkin,checkout,rooms,guests,total,status) VALUES('browser-{run}',{uid},{hotel},{room},'2020-01-01','2020-01-02',1,1,900000,'checked_in')")
   booking=int(sql(f"SELECT id FROM bookings WHERE code='browser-{run}'"))
   page.locator('[data-tab=bookings]').click();page.locator(f'[data-op-id="{booking}"][data-op-status="completed"]').wait_for()

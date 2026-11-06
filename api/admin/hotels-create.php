@@ -50,7 +50,7 @@ $slug = $getText("slug");
 $city = $getText("city");
 $type = $getText("type");
 $address = $getText("address");
-$placeRef = $getText("google_place_id"); // cột cũ, nay lưu ID OSM dạng osm-W123456
+$placeRef = $getText("google_place_id"); // Google Place ID verified again by the server.
 $description = $getText("description");
 $stars = filter_var($data["stars"] ?? null, FILTER_VALIDATE_INT, [
     "options" => ["min_range" => 1, "max_range" => 5],
@@ -67,7 +67,7 @@ if (
     !in_array($type, ["hotel", "resort", "homestay", "villa"], true) ||
     $stars === false ||
     !$validLength($address, 5, 255) ||
-    !preg_match('/^osm-[NWR][0-9]{1,15}$/D', $placeRef) ||
+    !googlePlaceId($placeRef) ||
     !$validLength($description, 0, 3000) ||
     $price === false
 ) {
@@ -83,7 +83,7 @@ try {
     // Xác minh phía server; không tin vào ID/tên/địa chỉ do JavaScript gửi.
     $place = getVerifiedHotelPlace($placeRef, $city);
 
-    // Only enforce matching hotel name when OSM identifies a lodging object.
+    // Only enforce matching hotel name when Google Places identifies a lodging object.
     // An exact house-number address verifies LOCATION, not that the hotel exists.
     $verifiedKind = (string) ($place["kind"] ?? "");
 
@@ -109,8 +109,8 @@ try {
     $pdo->beginTransaction();
     $stmt = $pdo->prepare(
         'INSERT INTO hotels
-         (slug, name, city, type, stars, address, google_place_id, price_per_night, description, latitude, longitude, is_active)
-         VALUES (:slug, :name, :city, :type, :stars, :address, :google_place_id, :price, :description, :lat, :lon, 0)',
+         (slug, name, city, type, stars, address, google_place_id, price_per_night, description, latitude, longitude, is_active, maps_provider, maps_verified_at)
+         VALUES (:slug, :name, :city, :type, :stars, :address, :google_place_id, :price, :description, :lat, :lon, 0, :maps_provider, NOW())',
     );
     $stmt->execute([
         "slug" => $slug,
@@ -120,6 +120,7 @@ try {
         "stars" => $stars,
         "address" => $address,
         "google_place_id" => $placeRef,
+        "maps_provider" => "google",
         "price" => $price,
         "description" => $description !== "" ? $description : null,
         "lat" => (float) $lat,
@@ -141,6 +142,11 @@ try {
     ]);
 } catch (InvalidArgumentException $e) {
     reply(422, ["status" => "error", "message" => $e->getMessage()]);
+} catch (GooglePlacesUnavailable $e) {
+    reply($e->getCode() === 503 ? 503 : 502, [
+        "status" => "error",
+        "message" => $e->getMessage(),
+    ]);
 } catch (PDOException $e) {
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();
@@ -153,7 +159,7 @@ try {
         reply(409, [
             "status" => "error",
             "message" =>
-                "Slug hoặc địa điểm OpenStreetMap đã tồn tại trong hệ thống.",
+                "Slug hoặc địa điểm Google Maps đã tồn tại trong hệ thống.",
         ]);
     }
     failServer($e);

@@ -60,8 +60,11 @@
   const moreCount = Math.max(total - 6, 0);
 
   const mapQuery = encodeURIComponent(`${hotel.name}, ${hotel.address}`);
-  const mapEmbed = `https://www.google.com/maps?q=${mapQuery}&output=embed`;
-  const mapLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+
+  const hasPosition = Number.isFinite(hotel.lat) && Number.isFinite(hotel.lng);
+  const mapLink = hasPosition
+    ? `https://www.google.com/maps/dir/?api=1&destination=${hotel.lat},${hotel.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
 
   /* ---------- Loại phòng ---------- */
   const rooms = hotel.rooms || [];
@@ -152,7 +155,7 @@
 
       <aside class="aside">
         <div class="card map-card">
-          <iframe src="${mapEmbed}" loading="lazy" title="Bản đồ ${esc(hotel.name)}" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <div id="hotel-google-map" style="width:100%;height:100%" aria-label="Bản đồ ${esc(hotel.name)}"></div>
           <a class="map-card__btn" href="${mapLink}" target="_blank" rel="noopener">${icon("map")} Xem trên bản đồ</a>
         </div>
 
@@ -237,6 +240,25 @@
       </div>
     </section>
   `;
+
+  (async () => {
+    const box = document.getElementById("hotel-google-map");
+    if (!hasPosition) {
+      box.textContent =
+        "Khách sạn chưa có tọa độ được xác minh. Vui lòng xem địa chỉ hoặc mở Google Maps.";
+      return;
+    }
+    try {
+      const ctx = await ThreeKMaps.create(
+        box,
+        { lat: hotel.lat, lng: hotel.lng },
+        16,
+      );
+      ThreeKMaps.marker(ctx, { lat: hotel.lat, lng: hotel.lng }, hotel.name);
+    } catch (error) {
+      box.textContent = error.message;
+    }
+  })();
 
   /* ---------- Chọn phòng ---------- */
 

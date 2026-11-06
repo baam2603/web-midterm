@@ -285,3 +285,10 @@ không có STARTTLS. Không gọi Gmail hay gửi email thật trong bộ kiểm
 Bản sửa `fix/account-closure-policy` cần import thêm `database/account_closure_migration.sql`
 (sau các migration hiện tại trên main), không xóa/import lại database.
 Xem [ACCOUNT_CLOSURE.md](ACCOUNT_CLOSURE.md) để biết quy tắc đơn/tiền, ẩn danh và kiểm thử.
+
+
+## Nhánh Google Maps
+
+Nhánh `feat/google-maps-places` chuyển sang SDK Google và Places API (New), cần hai key
+và `database/google_maps_migration.sql`. Xem [GOOGLE_MAPS_SETUP.md](GOOGLE_MAPS_SETUP.md).
+Các ghi chú OSM trước đây chỉ mô tả phiên bản cũ; dữ liệu cũ vẫn được giữ để xác minh lại.
