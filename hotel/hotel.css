@@ -219,9 +219,12 @@ a {
 }
 .map-card__btn {
   position: absolute;
-  left: 50%;
-  bottom: 10px;
-  transform: translateX(-50%);
+  left: auto;
+  right: 8px;
+  top: 8px;
+  bottom: auto;
+  z-index: 500;
+  transform: none;
   display: flex;
   align-items: center;
   gap: 6px;

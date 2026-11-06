@@ -26,6 +26,7 @@ docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/d
 docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/registration_otp_migration.sql"
 docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/account_closure_migration.sql"
 docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/public_reviews_migration.sql"
+docker exec -i web-midterm-admin-db mariadb -uroot threek_booking < "$repo_dir/database/osm_location_migration.sql"
 # Recreate only the dedicated test web container so proxy/CA and fixture settings stay current.
 if docker container inspect web-midterm-admin-web >/dev/null 2>&1; then docker rm -f web-midterm-admin-web >/dev/null; fi
 mkdir -p "$repo_dir/uploads"

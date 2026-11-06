@@ -12,7 +12,7 @@ function apiFailure(Throwable $error): array
         return [
             503,
             "database_upgrade_required",
-            "Cơ sở dữ liệu chưa được cập nhật. Hãy import database/admin_migration.sql rồi database/customer_migration.sql và database/registration_otp_migration.sql và database/account_closure_migration.sql và database/public_reviews_migration.sql vào database đang dùng. Không xóa dữ liệu hiện có.",
+            "Cơ sở dữ liệu chưa được cập nhật. Hãy import database/admin_migration.sql rồi database/customer_migration.sql và database/registration_otp_migration.sql và database/account_closure_migration.sql và database/public_reviews_migration.sql và database/osm_location_migration.sql vào database đang dùng. Không xóa dữ liệu hiện có.",
         ];
     }
     if (

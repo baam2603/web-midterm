@@ -32,14 +32,16 @@
     const old = new Map(city.hotels.map((h) => [String(h.id), h]));
     const results = json.data.map((h) => {
       const prev = old.get(String(h.slug)) || {};
+      // Never substitute demo coordinates when SQL has no confirmed location.
+      const ownPosition = h.maps_provider !== "google";
       const lat =
-        h.latitude == null || h.latitude === ""
-          ? Number(prev.lat)
-          : Number(h.latitude);
+        ownPosition && h.latitude != null && h.latitude !== ""
+          ? Number(h.latitude)
+          : null;
       const lng =
-        h.longitude == null || h.longitude === ""
-          ? Number(prev.lng)
-          : Number(h.longitude);
+        ownPosition && h.longitude != null && h.longitude !== ""
+          ? Number(h.longitude)
+          : null;
       const knownAmenityCodes = (
         Array.isArray(h.amenities) ? h.amenities : []
       ).filter((x) =>

@@ -102,3 +102,9 @@ Xem [ACCOUNT_CLOSURE.md](ACCOUNT_CLOSURE.md) để biết quy tắc đơn/tiền
 ## Đánh giá công khai không cần đặt phòng
 
 Xem [PUBLIC_REVIEWS.md](PUBLIC_REVIEWS.md) để import migration bổ sung và kiểm thử quyền xóa. Admin không còn duyệt/từ chối đánh giá.
+
+## Cải tiến OSM không cần Google billing
+
+Nhánh `feat/osm-manual-location` hỗ trợ khách sạn chưa có trên OSM bằng vị trí thủ công,
+giữ dữ liệu và kiểm tra nguồn rõ ràng. Cần import thêm `database/osm_location_migration.sql`.
+Xem [OSM_MANUAL_LOCATION.md](OSM_MANUAL_LOCATION.md) để cài đặt và sử dụng.

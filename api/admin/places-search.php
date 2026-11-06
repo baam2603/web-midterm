@@ -59,7 +59,9 @@ try {
             "address" => (string) $p["display_name"],
             "mapsUrl" => osmPlaceUrl($id),
             "kind" => $kind,
-            "canSelect" => $kind !== "location",
+            "canSelect" => $kind === "lodging",
+            "lat" => is_numeric($p["lat"] ?? null) ? (float) $p["lat"] : null,
+            "lng" => is_numeric($p["lon"] ?? null) ? (float) $p["lon"] : null,
             "distanceMeters" => $p["_distanceMeters"] ?? null,
         ];
     }

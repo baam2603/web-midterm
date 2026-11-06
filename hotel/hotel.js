@@ -59,9 +59,10 @@
   const total = hotel.images.length;
   const moreCount = Math.max(total - 6, 0);
 
-  const mapQuery = encodeURIComponent(`${hotel.name}, ${hotel.address}`);
-  const mapEmbed = `https://www.google.com/maps?q=${mapQuery}&output=embed`;
-  const mapLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+  const hasPosition = Number.isFinite(hotel.lat) && Number.isFinite(hotel.lng);
+  const mapLink = hasPosition
+    ? `https://www.openstreetmap.org/?mlat=${hotel.lat}&mlon=${hotel.lng}#map=17/${hotel.lat}/${hotel.lng}`
+    : `https://www.openstreetmap.org/search?query=${encodeURIComponent(hotel.name + ", " + hotel.address)}`;
 
   /* ---------- Loại phòng ---------- */
   const rooms = hotel.rooms || [];
@@ -152,7 +153,7 @@
 
       <aside class="aside">
         <div class="card map-card">
-          <iframe src="${mapEmbed}" loading="lazy" title="Bản đồ ${esc(hotel.name)}" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <div id="hotel-osm-map" style="height:100%;width:100%" aria-label="Vị trí ${esc(hotel.name)}"></div>
           <a class="map-card__btn" href="${mapLink}" target="_blank" rel="noopener">${icon("map")} Xem trên bản đồ</a>
         </div>
 
@@ -237,6 +238,24 @@
       </div>
     </section>
   `;
+
+  (async () => {
+    const box = document.getElementById("hotel-osm-map");
+    if (!hasPosition) {
+      box.textContent =
+        "Khách sạn chưa có tọa độ. Vui lòng xem địa chỉ hoặc liên hệ cơ sở để xác nhận vị trí.";
+      return;
+    }
+    try {
+      const L = await ThreeKOSM.load();
+      const m = ThreeKOSM.map(box, [hotel.lat, hotel.lng], 16, L);
+      L.marker([hotel.lat, hotel.lng])
+        .addTo(m)
+        .bindTooltip(document.createTextNode(hotel.name));
+    } catch (e) {
+      box.textContent = e.message;
+    }
+  })();
 
   /* ---------- Chọn phòng ---------- */
 

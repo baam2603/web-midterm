@@ -58,6 +58,7 @@
     </div>
     <footer id="site-footer"></footer>
     <script src="../common/auth-service.js?v=20261106-closure"></script>
+    <script src="../common/osm-map.js?v=20261107-manual"></script>
     <script src="../common/header.js"></script>
     <script src="../common/footer.js"></script>
     <script>
@@ -67,7 +68,7 @@
     <script src="../common/city-data.js"></script>
     <script src="hotel-data.js"></script>
 
-    <script src="hotel-detail-api.js?v=20261107-reviews"></script>
+    <script src="hotel-detail-api.js?v=20261107-osm-reviews"></script>
 
     <script>
       async function loadScript(src) {
@@ -90,7 +91,7 @@
           return;
         }
 
-        await loadScript("hotel.js?v=20261104-nav");
+        await loadScript("hotel.js?v=20261107-manual");
         await loadScript("reviews.js?v=20261107");
       }
 
