@@ -697,7 +697,7 @@
         <div id="tk-manual-location" hidden>
           <p class="tk-muted">Bạn tự xác nhận tên/địa chỉ cơ sở. Ghim trên bản đồ chỉ xác định vị trí, không chứng minh khách sạn có trong dữ liệu OSM.</p>
           <div class="tk-flexcols"><label>Vĩ độ<input type="number" name="latitude" step="any" min="-90" max="90"></label><label>Kinh độ<input type="number" name="longitude" step="any" min="-180" max="180"></label></div>
-          <label><input type="checkbox" name="location_confirmed" style="width:auto"> Tôi đã kiểm tra đúng địa chỉ và vị trí khách sạn</label>
+          <label class="tk-location-confirm"><input type="checkbox" name="location_confirmed"><span>Tôi đã kiểm tra đúng địa chỉ và vị trí khách sạn</span></label>
         </div>
 
         <label>
