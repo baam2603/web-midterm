@@ -828,3 +828,29 @@ a {
     right: 20px;
   }
 }
+/* Reviews follow Vung Tau's blue palette instead of the shared green controls. */
+body[data-city="vungtau"] #reviews {
+  --tk-green: var(--c-mid);
+  --tk-line: rgba(15, 76, 107, 0.2);
+}
+body[data-city="vungtau"] #reviews .tk-outline {
+  color: var(--c-deep);
+  border-color: #9dbed0;
+  background: #f1f8fc;
+}
+body[data-city="vungtau"] #reviews .tk-form label,
+body[data-city="vungtau"] #reviews .tk-form select,
+body[data-city="vungtau"] #reviews .tk-form textarea {
+  color: var(--c-deep);
+}
+body[data-city="vungtau"] #reviews .tk-form select,
+body[data-city="vungtau"] #reviews .tk-form textarea {
+  border-color: #b9cfdc;
+}
+body[data-city="vungtau"] #reviews .tk-form select:focus,
+body[data-city="vungtau"] #reviews .tk-form textarea:focus {
+  outline-color: var(--c-mid);
+}
+body[data-city="vungtau"] #reviews .tk-surface > p[aria-label] {
+  color: var(--c-mid);
+}
