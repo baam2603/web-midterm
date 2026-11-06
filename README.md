@@ -1,5 +1,7 @@
 # Bản tích hợp Admin và Customer
 
+Đánh giá khách sạn được đăng ngay, không cần đặt phòng; user xóa đánh giá của mình, admin xóa mọi đánh giá. Xem [migration và kiểm thử đánh giá](docs/PUBLIC_REVIEWS.md).
+
 Đăng ký mới xác minh email bằng OTP 6 số. Xem [cài đặt và kiểm thử OTP](docs/REGISTRATION_OTP_SETUP.md); cần import migration bổ sung trước khi chạy nhánh này.
 
 Xem [hướng dẫn customer, VNPay, Resend và Gmail SMTP](docs/CUSTOMER_SETUP.md).

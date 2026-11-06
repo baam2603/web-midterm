@@ -67,7 +67,7 @@
     <script src="../common/city-data.js"></script>
     <script src="hotel-data.js"></script>
 
-    <script src="hotel-detail-api.js"></script>
+    <script src="hotel-detail-api.js?v=20261107-reviews"></script>
 
     <script>
       async function loadScript(src) {
@@ -91,7 +91,7 @@
         }
 
         await loadScript("hotel.js?v=20261104-nav");
-        await loadScript("reviews.js");
+        await loadScript("reviews.js?v=20261107");
       }
 
       startHotelDetail().catch(console.error);

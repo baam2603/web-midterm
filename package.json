@@ -9,10 +9,11 @@
     "test:customer": "python3 tests/customer_integration.py && python3 tests/customer_browser.py",
     "test:admin": "python3 tests/admin_integration.py && python3 tests/admin_browser.py && python3 tests/admin_media.py",
     "test:closure": "python3 tests/account_closure_integration.py && python3 tests/account_closure_races.py && python3 tests/account_closure_browser.py",
-    "test": "npm run test:closure && npm run test:unit && npm run test:auth && npm run test:registration && npm run test:customer && npm run test:admin",
+    "test": "npm run test:closure && npm run test:unit && npm run test:auth && npm run test:registration && npm run test:customer && npm run test:reviews && npm run test:admin",
     "test:auth": "python3 tests/session_integration.py && python3 tests/setup_diagnostics.py && python3 tests/auth_browser.py && python3 tests/subdirectory_browser.py",
     "test:mail": "docker exec web-midterm-admin-web php /app/tests/mail_transport_units.php && python3 tests/mail_smtp.py",
-    "test:registration": "python3 tests/registration_otp_integration.py && python3 tests/registration_otp_browser.py"
+    "test:registration": "python3 tests/registration_otp_integration.py && python3 tests/registration_otp_browser.py",
+    "test:reviews": "python3 tests/reviews_integration.py && python3 tests/reviews_browser.py"
   },
   "repository": {
     "type": "git",

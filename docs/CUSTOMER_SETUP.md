@@ -22,7 +22,7 @@ Không mở HTML bằng file:// và không dùng server tĩnh Python.
 - Thông tin khách nhận phòng, email, điện thoại, ghi chú, giá và điều kiện hủy được lưu theo đơn.
 - Thành công/chi tiết/lịch sử/tra cứu chỉ đọc đơn thuộc phiên đăng nhập, tải lại trang vẫn giữ dữ liệu.
 - Yêu thích, thông báo và trạng thái đã đọc lưu trong DB theo tài khoản.
-- Đánh giá chỉ từ đơn đã hoàn tất, duyệt ở admin; hỗ trợ và phản hồi đồng bộ SQL.
+- Đánh giá không cần đơn đặt phòng và công khai ngay; user/admin có quyền xóa theo sở hữu; hỗ trợ và phản hồi đồng bộ SQL.
 - Thanh toán tại khách sạn hoạt động mà không cần merchant VNPay hoặc dịch vụ email.
 - Website hiện yêu cầu đăng nhập để đặt/tra cứu; không cấp quyền bằng mã đơn + thông tin đoán được.
 
@@ -285,3 +285,7 @@ không có STARTTLS. Không gọi Gmail hay gửi email thật trong bộ kiểm
 Bản sửa `fix/account-closure-policy` cần import thêm `database/account_closure_migration.sql`
 (sau các migration hiện tại trên main), không xóa/import lại database.
 Xem [ACCOUNT_CLOSURE.md](ACCOUNT_CLOSURE.md) để biết quy tắc đơn/tiền, ẩn danh và kiểm thử.
+
+## Đánh giá công khai không cần đặt phòng
+
+Xem [PUBLIC_REVIEWS.md](PUBLIC_REVIEWS.md) để import migration bổ sung và kiểm thử quyền xóa. Admin không còn duyệt/từ chối đánh giá.

@@ -45,7 +45,7 @@ try:
   future=pool.submit(call,c,'/api/account/delete-account.php',{'password':password},409);await_waiter(future);release(holder);holder=None;result=future.result(timeout=15)
   assert result['data']['reason']=='active_bookings' and sql(f'SELECT deleted_at IS NULL FROM users WHERE id={uid}')=='1'
   print('PASS closure waits for concurrent booking and rejects it after the active order commits')
-  personal=[('/api/support/tickets.php',{'topic':'Race support','message':'Private content must not reappear'},'support_tickets'),('/api/account/favorites.php',{'id':'closure-race-'+run,'city':'dalat','saved':True},'favorites'),('/api/reviews/create.php',{'code':'PRIVATE-REVIEW-'+run,'score':5,'comment':'Private review must not reappear'},'reviews')]
+  personal=[('/api/support/tickets.php',{'topic':'Race support','message':'Private content must not reappear'},'support_tickets'),('/api/account/favorites.php',{'id':'closure-race-'+run,'city':'dalat','saved':True},'favorites'),('/api/reviews/create.php',{'city':'dalat','hotelId':'closure-race-'+run,'score':5,'comment':'Private review must not reappear'},'reviews')]
   for index,(endpoint,payload,table) in enumerate(personal):
    uid,c=user('personal'+str(index))
    if table=='reviews':sql(f"INSERT INTO bookings(code,user_id,hotel_id,room_type_id,checkin,checkout,rooms,guests,total,status) VALUES('PRIVATE-REVIEW-{run}',{uid},{hotel},{room},'2020-01-01','2020-01-02',1,2,990000,'completed')")

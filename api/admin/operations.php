@@ -2,7 +2,8 @@
 // One bounded, role-checked API for administrative operations.
 require_once __DIR__ . "/../shared/customer.php";
 require_once __DIR__ . "/../shared/inventory.php";
-requireAdmin();
+require_once __DIR__ . "/../shared/reviews.php";
+$adminUid = requireAdmin();
 header("Cache-Control: no-store, private");
 $method = $_SERVER["REQUEST_METHOD"];
 if (!in_array($method, ["GET", "POST"], true)) {
@@ -29,7 +30,8 @@ try {
         if (!$id) {
             reply(422, ["status" => "error", "message" => "ID không hợp lệ."]);
         }
-        $db->beginTransaction();
+        if ($section === "reviews") beginAccountWrite($db, $adminUid);
+        else $db->beginTransaction();
         if ($section === "bookings") {
             $q = $db->prepare("SELECT * FROM bookings WHERE id=? FOR UPDATE");
             $q->execute([$id]);
@@ -109,45 +111,11 @@ try {
                 "code" => $b["code"],
             ]);
         } elseif ($section === "reviews") {
-            $next = $v["status"] ?? "";
-            if (!in_array($next, ["approved", "rejected"], true)) {
+            if (($v['action'] ?? '') !== 'delete') {
                 $db->rollBack();
-                reply(422, [
-                    "status" => "error",
-                    "message" => "Trạng thái đánh giá không hợp lệ.",
-                ]);
+                reply(422, ['status'=>'error','message'=>'Chỉ hỗ trợ xóa đánh giá; không còn duyệt đánh giá.']);
             }
-            $q = $db->prepare(
-                "SELECT status FROM reviews WHERE id=? FOR UPDATE",
-            );
-            $q->execute([$id]);
-            $old = $q->fetchColumn();
-            if ($old === false) {
-                $db->rollBack();
-                reply(404, [
-                    "status" => "error",
-                    "message" => "Không tìm thấy đánh giá.",
-                ]);
-            }
-            if ($old !== $next) {
-                $owner = $db->prepare("SELECT user_id FROM reviews WHERE id=?");
-                $owner->execute([$id]);
-                notifyUser(
-                    $db,
-                    (int) $owner->fetchColumn(),
-                    "Kết quả đánh giá",
-                    $next === "approved"
-                        ? "Đánh giá của bạn đã được duyệt."
-                        : "Đánh giá của bạn chưa được duyệt.",
-                );
-                $db->prepare(
-                    "UPDATE reviews SET status=?,moderated_at=NOW() WHERE id=?",
-                )->execute([$next, $id]);
-                auditLog($db, "review.moderate", "review", $id, [
-                    "from" => $old,
-                    "to" => $next,
-                ]);
-            }
+            deleteHotelReview($db, $id, $adminUid);
         } elseif ($section === "support") {
             $reply = trim((string) ($v["reply"] ?? ""));
             $next = $v["status"] ?? "answered";
@@ -270,11 +238,11 @@ try {
         $n = 4;
     } elseif ($section === "reviews") {
         $source =
-            "reviews v JOIN hotels h ON h.id=v.hotel_id JOIN users u ON u.id=v.user_id JOIN bookings b ON b.id=v.booking_id";
+            "reviews v JOIN hotels h ON h.id=v.hotel_id JOIN users u ON u.id=v.user_id LEFT JOIN bookings b ON b.id=v.booking_id";
         $fields = "v.*,u.full_name author,h.name hotelName,b.code";
         $order = "v.created_at DESC,v.id DESC";
         $prefix = "v";
-        $statuses = ["pending", "approved", "rejected"];
+        $statuses = [];
         $searchSql =
             "(v.comment LIKE ? OR h.name LIKE ? OR u.full_name LIKE ?)";
         $n = 3;

@@ -59,12 +59,14 @@ try {
     $db = connectDB();
     $result["databaseConnected"] = true;
     $q = $db->query(
-        "SELECT table_name,column_name FROM information_schema.columns WHERE table_schema=DATABASE()",
+        "SELECT table_name,column_name,is_nullable FROM information_schema.columns WHERE table_schema=DATABASE()",
     );
     $actual = [];
     foreach ($q->fetchAll() as $row) {
         $actual[$row["table_name"]][$row["column_name"]] = true;
     }
+    $reviewColumn = $db->query("SELECT is_nullable FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='reviews' AND column_name='booking_id'")->fetchColumn();
+    if ($reviewColumn !== 'YES') $result['missing'][] = 'reviews.booking_id (nullable)';
     foreach ($required as $table => $columns) {
         foreach ($columns as $column) {
             if (empty($actual[$table][$column])) {
@@ -84,7 +86,7 @@ $result["ready"] =
     !$result["missing"];
 if ($result["missing"]) {
     $result["message"] =
-        "Sao lưu database rồi import database/admin_migration.sql và database/customer_migration.sql rồi database/registration_otp_migration.sql và database/account_closure_migration.sql. Không import schema.sql đè lên dữ liệu hiện có.";
+        "Sao lưu database rồi import database/admin_migration.sql và database/customer_migration.sql rồi database/registration_otp_migration.sql và database/account_closure_migration.sql và database/public_reviews_migration.sql. Không import schema.sql đè lên dữ liệu hiện có.";
 }
 if (!$result["mbstring"]) {
     $result["message"] =
