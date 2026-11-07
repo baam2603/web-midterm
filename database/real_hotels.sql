@@ -1522,4 +1522,141 @@ VALUES ('the-imperial-hotel-vung-tau','{
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
+-- 12. Fusion Suites Vũng Tàu: dữ liệu do người dùng cung cấp.
+INSERT INTO threek_hotel_data_drafts (hotel_slug,payload)
+VALUES ('fusion-suites-vung-tau','{
+  "slug": "fusion-suites-vung-tau",
+  "name": "Fusion Suites Vũng Tàu",
+  "city": "vungtau",
+  "type": "hotel",
+  "address": "Số 2 Đường Trương Công Định, Phường 2, Thành phố Vũng Tàu, Tỉnh Bà Rịa - Vũng Tàu",
+  "contact_phone": null,
+  "stars": 5,
+  "latitude": 10.3475,
+  "longitude": 107.0782,
+  "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
+  "checkin_time": "15:00:00",
+  "checkout_time": "12:00:00",
+  "price_per_night": 2400000,
+  "description": "Khách sạn căn hộ nghỉ dưỡng với thiết kế hiện đại tại góc đường Trương Công Định và Hạ Long, gần Bãi Trước theo thông tin người dùng cung cấp.",
+  "nearby_notes": [
+    "Bãi Trước",
+    "Đường Hạ Long"
+  ],
+  "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
+  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "rooms": [
+    {
+      "code": "fusion-suite",
+      "name": "Fusion Suite King / Twin",
+      "source_name_candidates": "Fusion Suite King / Twin",
+      "actual_room_name": "Fusion Suite King / Twin",
+      "description": "Phòng Fusion Suite có lựa chọn giường King hoặc hai giường Twin.",
+      "reported_features": [],
+      "unconfirmed_features": [
+        "Xác nhận King/Twin là lựa chọn giường chung một hạng hay hai hạng có tồn phòng riêng; 20 phòng hiện là tổng người dùng cung cấp, không nhân đôi."
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 2400000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": 6,
+      "total_rooms": 20,
+      "area_m2": null,
+      "bed_type": "1 giường King (1.8m x 2m) hoặc 2 giường Twin",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm bữa sáng linh hoạt theo thông tin người dùng; điều kiện dùng bất cứ lúc nào/ở đâu cần xác nhận theo gói.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 5,
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và 1 trẻ em; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "deluxe-ocean-view-suite",
+      "name": "Deluxe Ocean View Suite",
+      "source_name_candidates": "Deluxe Ocean View Suite",
+      "actual_room_name": "Deluxe Ocean View Suite",
+      "description": "Phòng Deluxe Suite hướng biển, bố trí một giường King lớn.",
+      "reported_features": [],
+      "unconfirmed_features": [],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 3500000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 25,
+      "area_m2": null,
+      "bed_type": "1 giường King lớn hướng biển",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm bữa sáng linh hoạt theo thông tin người dùng; cần xác nhận khung giờ, địa điểm và điều kiện gói giá.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 5,
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và 1 trẻ em; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "premium-suite",
+      "name": "Penthouse / Presidential Suite",
+      "source_name_candidates": "Penthouse / Presidential Suite",
+      "actual_room_name": null,
+      "description": "Nhóm phòng cao cấp có giường King, khu vực phòng khách và bếp nhỏ; tên hạng và cấu hình cụ thể cần xác nhận.",
+      "reported_features": [],
+      "unconfirmed_features": [
+        "Tên hạng chính xác: Penthouse hay Presidential Suite",
+        "Số phòng ngủ và số giường King cho 4 người lớn",
+        "Chọn chính sách không hoàn hủy hoặc gói linh hoạt trước 10 ngày; cần xác nhận điều kiện hoàn tiền và phí hủy muộn",
+        "Nội dung đặc quyền spa và dịch vụ theo gói"
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 7200000,
+      "capacity": 6,
+      "max_adults": 4,
+      "max_children": 2,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 4,
+      "area_m2": null,
+      "bed_type": "Giường King thượng hạng; cần xác nhận số giường và phòng ngủ. Khu vực phòng khách và bếp nhỏ không mặc định là giường phụ",
+      "breakfast_included": true,
+      "breakfast_note": "Theo người dùng, đã bao gồm bữa sáng cùng đặc quyền spa và dịch vụ cao cấp; cần xác nhận nội dung và điều kiện theo gói.",
+      "free_cancellation": null,
+      "cancellation_free_before_days": null,
+      "cancellation_policy": "Chưa chọn: không hoàn hủy (Non-refundable) hoặc linh hoạt trước 10 ngày tùy chính sách gói phòng.",
+      "capacity_note": "Tổng số người theo giới hạn 4 người lớn và 2 trẻ em; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    }
+  ],
+  "missing_for_publication": [
+    "Chọn hạng cao cấp Penthouse hay Presidential Suite; phân bổ giá/tồn phòng nếu là hai hạng khác nhau",
+    "Xác nhận Fusion Suite King/Twin quản lý chung hay tách tồn phòng",
+    "Chọn chính sách hủy cụ thể cho hạng cao cấp theo gói giá",
+    "Số phòng ngủ, số giường và cấu hình phù hợp 4 người lớn của hạng cao cấp",
+    "Điều kiện bữa sáng linh hoạt và đặc quyền spa; không mặc định mọi gói đều gồm spa",
+    "Ảnh: người dùng sẽ bổ sung sau",
+    "Số điện thoại liên hệ nếu cần",
+    "Diện tích phòng nếu cần hiển thị",
+    "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
+    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
+    "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+  ],
+  "star_rating_note": "Hạng 5 sao theo người dùng cung cấp; chưa xác minh độc lập."
+}')
+ON DUPLICATE KEY UPDATE payload=VALUES(payload);
+
 COMMIT;
