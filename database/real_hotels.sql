@@ -2186,4 +2186,137 @@ VALUES ('mercure-vung-tau','{
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
+-- 17. Mermaid Seaside Vũng Tàu: dữ liệu do người dùng cung cấp.
+INSERT INTO threek_hotel_data_drafts (hotel_slug,payload)
+VALUES ('mermaid-seaside-vung-tau','{
+  "slug": "mermaid-seaside-vung-tau",
+  "name": "Mermaid Seaside Vũng Tàu",
+  "city": "vungtau",
+  "type": "hotel",
+  "address": "Số 164 Đường Trần Phú, Phường 5, Thành phố Vũng Tàu, Tỉnh Bà Rịa - Vũng Tàu",
+  "contact_phone": null,
+  "stars": 4,
+  "latitude": 10.3625,
+  "longitude": 107.0512,
+  "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
+  "checkin_time": "14:00:00",
+  "checkout_time": "12:00:00",
+  "price_per_night": 1250000,
+  "description": "Khách sạn nghỉ dưỡng ven biển trên đường Trần Phú, có không gian yên tĩnh và tầm nhìn hướng biển theo thông tin người dùng cung cấp.",
+  "nearby_notes": [
+    "Đường ven biển Trần Phú"
+  ],
+  "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
+  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "rooms": [
+    {
+      "code": "superior-sea-view",
+      "name": "Superior Sea View",
+      "source_name_candidates": "Superior Sea View",
+      "actual_room_name": "Superior Sea View",
+      "description": "Phòng Superior hướng biển, có lựa chọn giường Double hoặc hai giường Twin.",
+      "reported_features": [],
+      "unconfirmed_features": [],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 1250000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": 6,
+      "total_rooms": 20,
+      "area_m2": null,
+      "bed_type": "1 giường Double (1.6m x 2m) hoặc 2 giường Twin",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 3,
+      "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "deluxe-ocean-front",
+      "name": "Deluxe Ocean Front",
+      "source_name_candidates": "Deluxe Ocean Front",
+      "actual_room_name": "Deluxe Ocean Front",
+      "description": "Phòng Deluxe trực diện biển, bố trí một giường King.",
+      "reported_features": [],
+      "unconfirmed_features": [],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 1850000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 30,
+      "area_m2": null,
+      "bed_type": "1 giường King (1.8m x 2m) trực diện biển",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng tiêu chuẩn theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 3,
+      "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "premium-suite",
+      "name": "Mermaid Suite / Penthouse",
+      "source_name_candidates": "Mermaid Suite / Penthouse",
+      "actual_room_name": null,
+      "description": "Nhóm phòng cao cấp có giường King, khu vực phòng khách và ban công lớn; tên hạng cụ thể cần xác nhận.",
+      "reported_features": [
+        "Ban công lớn"
+      ],
+      "unconfirmed_features": [
+        "Tên hạng chính xác: Mermaid Suite hay Penthouse",
+        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm",
+        "Nội dung đặc quyền cao cấp theo gói"
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 3500000,
+      "capacity": 4,
+      "max_adults": 2,
+      "max_children": 2,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 5,
+      "area_m2": null,
+      "bed_type": "1 giường King thượng hạng; khu vực phòng khách không mặc định là giường phụ",
+      "breakfast_included": true,
+      "breakfast_note": "Theo người dùng, gồm buffet sáng và các đặc quyền cao cấp; cần xác nhận nội dung và điều kiện theo gói giá.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 5,
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    }
+  ],
+  "missing_for_publication": [
+    "Xác nhận hạng cao cấp: Mermaid Suite hay Penthouse; không gộp hai loại phòng nếu khác nhau",
+    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
+    "Nội dung đặc quyền cao cấp và điều kiện áp dụng",
+    "Ảnh: người dùng sẽ bổ sung sau",
+    "Số điện thoại liên hệ nếu cần",
+    "Diện tích phòng nếu cần hiển thị",
+    "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
+    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
+    "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+  ],
+  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
+}')
+ON DUPLICATE KEY UPDATE payload=VALUES(payload);
+
 COMMIT;
