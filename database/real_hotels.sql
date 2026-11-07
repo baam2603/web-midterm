@@ -3,6 +3,8 @@
 -- Không bao gồm bộ 20 khách sạn trích từ danh sách iVIVU.
 -- Chưa xác minh độc lập; thông tin thiếu được giữ NULL, không suy đoán.
 -- Mã slug/phòng do ThreeK đặt; không dùng mã iVIVU.
+-- Dữ liệu cố định cho DEMO; chính sách hủy chi tiết chỉ tham khảo, không tự tính phí/thu cọc.
+-- Hủy theo cơ chế web hiện tại (ngày lịch trước check-in, không phải mốc đủ 24 giờ).
 -- CHỈ lưu bản nháp, chưa đưa vào hotels/room_types hoặc mở bán.
 -- Import trong database threek_booking sau khi sao lưu.
 -- Chạy lại cập nhật nội dung bản nháp cùng slug; không sửa tài khoản/đơn/dữ liệu đang bán.
@@ -35,7 +37,7 @@ VALUES ('cicilia-rouge-dalat','{
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
   "external_rating_note": "Người dùng nêu điểm tham khảo khoảng 4.9/5; không nhập vào hạng sao hoặc bảng reviews.",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "standard",
@@ -69,9 +71,10 @@ VALUES ('cicilia-rouge-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "cancellation_free_before_days": 3,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
-      "unconfirmed_features": []
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
+      "unconfirmed_features": [],
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "midrange",
@@ -106,8 +109,9 @@ VALUES ('cicilia-rouge-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "cancellation_free_before_days": 3,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng."
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium",
@@ -141,8 +145,8 @@ VALUES ('cicilia-rouge-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "cancellation_free_before_days": 5,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "cancellation_fee_rules": {
         "scope": "late_cancellation_or_no_show",
         "ordinary_standard": {
@@ -155,24 +159,35 @@ VALUES ('cicilia-rouge-dalat','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
     "Ảnh: người dùng sẽ bổ sung sau",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
   "checkin_time": "14:00:00",
   "checkout_time": "12:00:00",
   "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
   "price_per_night": 1100000,
-  "star_rating_note": "Hạng 4 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 4 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -196,7 +211,7 @@ VALUES ('merperle-dalat-hotel','{
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
   "external_rating_note": "Người dùng nêu điểm tham khảo khoảng 4.9/5; không nhập vào bảng reviews. Hạng 5 sao theo thông tin người dùng cung cấp.",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "deluxe",
@@ -233,8 +248,9 @@ VALUES ('merperle-dalat-hotel','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "cancellation_free_before_days": 5,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng."
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "midrange",
@@ -269,8 +285,9 @@ VALUES ('merperle-dalat-hotel','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "cancellation_free_before_days": 5,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng."
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "suite",
@@ -306,22 +323,33 @@ VALUES ('merperle-dalat-hotel','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "cancellation_free_before_days": 7,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng."
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
     "Ảnh: người dùng sẽ bổ sung sau",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
   "checkin_time": "14:00:00",
   "checkout_time": "12:00:00",
   "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
-  "price_per_night": 1800000
+  "price_per_night": 1800000,
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -349,7 +377,7 @@ VALUES ('best-western-premier-imperial-dalat','{
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
   "external_rating_note": "Người dùng nêu điểm tham khảo khoảng 4.7–4.8/5; không nhập vào bảng reviews.",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "deluxe",
@@ -385,8 +413,9 @@ VALUES ('best-western-premier-imperial-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "cancellation_free_before_days": 3,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng."
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "midrange",
@@ -421,8 +450,9 @@ VALUES ('best-western-premier-imperial-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "cancellation_free_before_days": 5,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng."
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "suite",
@@ -458,31 +488,41 @@ VALUES ('best-western-premier-imperial-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "cancellation_free_before_days": null,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "deposit_required": true,
       "deposit_policy_note": "Đặt cọc bảo đảm 100% giá trị tiền phòng, thanh toán đủ trong 24 giờ từ xác nhận giữ phòng. Người dùng đồng thời nêu ngay tại thời điểm xác nhận; cần phân biệt giữ chỗ chờ thanh toán và xác nhận bảo đảm.",
       "deposit_percent": 100,
       "deposit_basis": "room_total",
       "deposit_payment_deadline_hours": 24,
       "deposit_deadline_anchor": "booking_hold_confirmation",
-      "deposit_ready_for_automatic_collection": false
+      "deposit_ready_for_automatic_collection": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
     "Ảnh: người dùng sẽ bổ sung sau",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Chốt trạng thái giữ chỗ/xác nhận bảo đảm, cách thanh toán và xử lý hết hạn 24 giờ; không tự kích hoạt thu cọc"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
   "checkin_time": "15:00:00",
   "checkout_time": "12:00:00",
   "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
   "price_per_night": 2100000,
-  "star_rating_note": "Hạng 5 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 5 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -506,7 +546,7 @@ VALUES ('hotel-colline-dalat','{
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
   "external_rating_note": "Người dùng nêu điểm tham khảo khoảng 4.5/5; không nhập vào bảng reviews. Hạng 4 sao theo thông tin người dùng cung cấp.",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "superior",
@@ -545,8 +585,9 @@ VALUES ('hotel-colline-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "cancellation_free_before_days": 2,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng."
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "midrange",
@@ -582,8 +623,9 @@ VALUES ('hotel-colline-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "cancellation_free_before_days": 3,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng."
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "suite",
@@ -619,22 +661,33 @@ VALUES ('hotel-colline-dalat','{
       "child_age_limit_exclusive": null,
       "cancellation_free_before_days": 5,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng."
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
     "Ảnh: người dùng sẽ bổ sung sau",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
   "checkin_time": "14:00:00",
   "checkout_time": "12:00:00",
   "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
-  "price_per_night": 1450000
+  "price_per_night": 1450000,
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -659,7 +712,7 @@ VALUES ('swiss-belresort-tuyen-lam-dalat','{
     "Khu du lịch Hồ Tuyền Lâm"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "deluxe-golf-view",
@@ -685,10 +738,11 @@ VALUES ('swiss-belresort-tuyen-lam-dalat','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "grand-deluxe-mountain-view",
@@ -714,10 +768,11 @@ VALUES ('swiss-belresort-tuyen-lam-dalat','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium-suite",
@@ -743,11 +798,12 @@ VALUES ('swiss-belresort-tuyen-lam-dalat','{
       "cancellation_free_before_days": 7,
       "cancellation_policy": "Miễn phí hủy trước 7 ngày; không hoàn tiền nếu hủy muộn.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
-      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp."
+      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp.",
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -755,12 +811,22 @@ VALUES ('swiss-belresort-tuyen-lam-dalat','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
   "star_rating_note": "Hạng 5 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập.",
-  "address_note": "Địa chỉ/phường theo xác nhận bổ sung của người dùng; chưa xác minh độc lập địa giới hành chính hiện hành."
+  "address_note": "Địa chỉ/phường theo xác nhận bổ sung của người dùng; chưa xác minh độc lập địa giới hành chính hiện hành.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -785,7 +851,7 @@ VALUES ('new-life-hotel-dalat','{
     "Đồi Đống Đa"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "superior",
@@ -811,10 +877,11 @@ VALUES ('new-life-hotel-dalat','{
       "cancellation_free_before_days": 2,
       "cancellation_policy": "Miễn phí hủy trước 2 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "deluxe-valley-view",
@@ -840,10 +907,11 @@ VALUES ('new-life-hotel-dalat','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium-suite",
@@ -869,8 +937,8 @@ VALUES ('new-life-hotel-dalat','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp.",
@@ -886,8 +954,10 @@ VALUES ('new-life-hotel-dalat','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -895,12 +965,21 @@ VALUES ('new-life-hotel-dalat','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
-  "star_rating_note": "Hạng 3 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 3 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -927,7 +1006,7 @@ VALUES ('ngoc-phat-dalat','{
     "Quảng trường Lâm Viên"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "superior-view",
@@ -953,11 +1032,12 @@ VALUES ('ngoc-phat-dalat','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
-      "name_confirmation_note": "Người dùng xác nhận giữ hạng cơ bản và giá 1.250.000 VNĐ; phòng trung cấp vẫn là Deluxe Park View giá 1.850.000 VNĐ."
+      "name_confirmation_note": "Người dùng xác nhận giữ hạng cơ bản và giá 1.250.000 VNĐ; phòng trung cấp vẫn là Deluxe Park View giá 1.850.000 VNĐ.",
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "deluxe-park-view",
@@ -983,10 +1063,11 @@ VALUES ('ngoc-phat-dalat','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium-suite",
@@ -1012,8 +1093,8 @@ VALUES ('ngoc-phat-dalat','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp.",
@@ -1029,8 +1110,10 @@ VALUES ('ngoc-phat-dalat','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -1038,12 +1121,21 @@ VALUES ('ngoc-phat-dalat','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
-  "star_rating_note": "Hạng 4 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 4 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -1069,7 +1161,7 @@ VALUES ('golden-sun-dalat','{
     "Quảng trường Lâm Viên"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "standard-double",
@@ -1095,10 +1187,11 @@ VALUES ('golden-sun-dalat','{
       "cancellation_free_before_days": 2,
       "cancellation_policy": "Miễn phí hủy trước 2 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "deluxe-balcony",
@@ -1124,10 +1217,11 @@ VALUES ('golden-sun-dalat','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium-suite",
@@ -1153,8 +1247,8 @@ VALUES ('golden-sun-dalat','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp.",
@@ -1170,8 +1264,10 @@ VALUES ('golden-sun-dalat','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -1179,12 +1275,21 @@ VALUES ('golden-sun-dalat','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
-  "star_rating_note": "Hạng 3 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 3 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -1210,7 +1315,7 @@ VALUES ('lens-dalat','{
     "Chợ đêm Đà Lạt"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "standard",
@@ -1236,10 +1341,11 @@ VALUES ('lens-dalat','{
       "cancellation_free_before_days": 2,
       "cancellation_policy": "Miễn phí hủy trước 2 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "superior-city-view",
@@ -1265,10 +1371,11 @@ VALUES ('lens-dalat','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "executive-suite",
@@ -1294,8 +1401,8 @@ VALUES ('lens-dalat','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "cancellation_fee_rules": {
@@ -1310,8 +1417,10 @@ VALUES ('lens-dalat','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -1319,12 +1428,21 @@ VALUES ('lens-dalat','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
-  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -1350,7 +1468,7 @@ VALUES ('olive-dalat','{
     "Khu vực cửa ngõ thành phố"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "standard-double",
@@ -1376,10 +1494,11 @@ VALUES ('olive-dalat','{
       "cancellation_free_before_days": 2,
       "cancellation_policy": "Miễn phí hủy trước 2 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "deluxe-valley-view",
@@ -1405,10 +1524,11 @@ VALUES ('olive-dalat','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "suite-panorama-view",
@@ -1434,8 +1554,8 @@ VALUES ('olive-dalat','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "cancellation_fee_rules": {
@@ -1450,8 +1570,10 @@ VALUES ('olive-dalat','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -1459,14 +1581,23 @@ VALUES ('olive-dalat','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
     "Đối chiếu địa chỉ/phường chính thức",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
   "star_rating_note": "Hạng 3 sao theo người dùng cung cấp; chưa xác minh độc lập.",
-  "address_note": "Người dùng ghi khu vực Xuân Hương / đèo Prenn; cần đối chiếu phường chính thức trước khi công khai."
+  "address_note": "Người dùng ghi khu vực Xuân Hương / đèo Prenn; cần đối chiếu phường chính thức trước khi công khai.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -1491,7 +1622,7 @@ VALUES ('the-imperial-hotel-vung-tau','{
     "Bãi Sau"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "deluxe",
@@ -1519,10 +1650,11 @@ VALUES ('the-imperial-hotel-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "grand-deluxe-ocean-view",
@@ -1548,10 +1680,11 @@ VALUES ('the-imperial-hotel-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "imperial-suite",
@@ -1579,8 +1712,8 @@ VALUES ('the-imperial-hotel-vung-tau','{
       "cancellation_free_before_days": 10,
       "cancellation_policy": "Miễn phí hủy trước 10 ngày. Hủy trong vòng 10 ngày: phí 100% đêm đầu hoặc 50% tổng booking tùy mùa (chưa chọn lịch áp dụng). Trong vòng 3 ngày trước nhận phòng: phí 100% toàn bộ kỳ nghỉ.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "cancellation_fee_rules": {
@@ -1605,8 +1738,10 @@ VALUES ('the-imperial-hotel-vung-tau','{
         "precedence_note": "Mức trong 3 ngày ưu tiên hơn mức trong 10 ngày. Chính sách riêng này ưu tiên quy tắc 100% chung.",
         "deadline_timezone": null,
         "deadline_boundary_inclusive": null,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -1616,12 +1751,21 @@ VALUES ('the-imperial-hotel-vung-tau','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch áp dụng phí 100% đêm đầu hay 50% tổng booking trong 10 ngày; mốc giờ và cách tính ranh giới 10/3 ngày"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
-  "star_rating_note": "Hạng 5 sao theo người dùng cung cấp; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 5 sao theo người dùng cung cấp; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -1647,7 +1791,7 @@ VALUES ('fusion-suites-vung-tau','{
     "Đường Hạ Long"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "fusion-suite",
@@ -1675,10 +1819,11 @@ VALUES ('fusion-suites-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và 1 trẻ em; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "deluxe-ocean-view-suite",
@@ -1704,10 +1849,11 @@ VALUES ('fusion-suites-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và 1 trẻ em; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium-suite",
@@ -1736,8 +1882,8 @@ VALUES ('fusion-suites-vung-tau','{
       "cancellation_free_before_days": 10,
       "cancellation_policy": "Miễn phí hủy trước 10 ngày. Hủy trong vòng 10 ngày: phí 100% đêm đầu hoặc 50% tổng booking tùy mùa (chưa chọn lịch áp dụng). Trong vòng 3 ngày trước nhận phòng: phí 100% toàn bộ kỳ nghỉ.",
       "capacity_note": "Tổng số người theo giới hạn 4 người lớn và 2 trẻ em; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
@@ -1775,8 +1921,10 @@ VALUES ('fusion-suites-vung-tau','{
         "precedence_note": "Mức trong 3 ngày ưu tiên hơn mức trong 10 ngày. Chính sách riêng này ưu tiên quy tắc 100% chung.",
         "deadline_timezone": null,
         "deadline_boundary_inclusive": null,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -1787,12 +1935,21 @@ VALUES ('fusion-suites-vung-tau','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch áp dụng phí 100% đêm đầu hay 50% tổng booking trong 10 ngày; mốc giờ và cách tính ranh giới 10/3 ngày"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
-  "star_rating_note": "Hạng 5 sao theo người dùng cung cấp; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 5 sao theo người dùng cung cấp; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -1817,7 +1974,7 @@ VALUES ('new-wave-vung-tau','{
     "Bãi Sau"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "superior",
@@ -1843,10 +2000,11 @@ VALUES ('new-wave-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "deluxe-ocean-view",
@@ -1872,10 +2030,11 @@ VALUES ('new-wave-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium-suite",
@@ -1901,8 +2060,8 @@ VALUES ('new-wave-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
@@ -1930,8 +2089,10 @@ VALUES ('new-wave-vung-tau','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -1940,12 +2101,21 @@ VALUES ('new-wave-vung-tau','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
-  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -1970,7 +2140,7 @@ VALUES ('pullman-vung-tau','{
     "Khu vực Bãi Sau"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "superior",
@@ -1998,10 +2168,11 @@ VALUES ('pullman-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "deluxe-ocean-view",
@@ -2027,10 +2198,11 @@ VALUES ('pullman-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "pullman-suite",
@@ -2058,8 +2230,8 @@ VALUES ('pullman-vung-tau','{
       "cancellation_free_before_days": 10,
       "cancellation_policy": "Miễn phí hủy trước 10 ngày. Hủy trong vòng 10 ngày: phí 100% đêm đầu hoặc 50% tổng booking tùy mùa (chưa chọn lịch áp dụng). Trong vòng 3 ngày trước nhận phòng: phí 100% toàn bộ kỳ nghỉ.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "cancellation_fee_rules": {
@@ -2084,8 +2256,10 @@ VALUES ('pullman-vung-tau','{
         "precedence_note": "Mức trong 3 ngày ưu tiên hơn mức trong 10 ngày. Chính sách riêng này ưu tiên quy tắc 100% chung.",
         "deadline_timezone": null,
         "deadline_boundary_inclusive": null,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -2095,13 +2269,22 @@ VALUES ('pullman-vung-tau','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch áp dụng phí 100% đêm đầu hay 50% tổng booking trong 10 ngày; mốc giờ và cách tính ranh giới 10/3 ngày"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
   "star_rating_note": "Hạng 5 sao theo người dùng cung cấp; chưa xác minh độc lập.",
-  "address_note": "Giữ địa chỉ theo thông tin người dùng cung cấp; địa giới hành chính hiện hành chưa được xác minh độc lập. Người dùng mô tả khu vực Bãi Thầy / Bãi Sau."
+  "address_note": "Giữ địa chỉ theo thông tin người dùng cung cấp; địa giới hành chính hiện hành chưa được xác minh độc lập. Người dùng mô tả khu vực Bãi Thầy / Bãi Sau.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -2126,7 +2309,7 @@ VALUES ('oyster-bay-vung-tau','{
     "Đường ven biển Trần Phú"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "deluxe-view",
@@ -2152,8 +2335,8 @@ VALUES ('oyster-bay-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
@@ -2168,7 +2351,8 @@ VALUES ('oyster-bay-vung-tau','{
           "total_rooms": 8,
           "price_per_night": 1500000
         }
-      ]
+      ],
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "executive-ocean-view",
@@ -2194,10 +2378,11 @@ VALUES ('oyster-bay-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium-suite",
@@ -2225,8 +2410,8 @@ VALUES ('oyster-bay-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
@@ -2254,8 +2439,10 @@ VALUES ('oyster-bay-vung-tau','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -2265,13 +2452,22 @@ VALUES ('oyster-bay-vung-tau','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và mô tả khu vực bãi biển trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
   "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập.",
-  "location_note": "Người dùng mô tả hướng biển Bãi Trước; cần đối chiếu vị trí bãi biển và tọa độ trước khi công khai."
+  "location_note": "Người dùng mô tả hướng biển Bãi Trước; cần đối chiếu vị trí bãi biển và tọa độ trước khi công khai.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -2297,7 +2493,7 @@ VALUES ('mercure-vung-tau','{
     "Đường ven biển Hạ Long"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "superior-hill-view",
@@ -2323,10 +2519,11 @@ VALUES ('mercure-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "deluxe-ocean-view",
@@ -2352,10 +2549,11 @@ VALUES ('mercure-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "executive-suite",
@@ -2383,8 +2581,8 @@ VALUES ('mercure-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "cancellation_fee_rules": {
@@ -2399,8 +2597,10 @@ VALUES ('mercure-vung-tau','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -2409,12 +2609,21 @@ VALUES ('mercure-vung-tau','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
-  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -2439,7 +2648,7 @@ VALUES ('mermaid-seaside-vung-tau','{
     "Đường ven biển Trần Phú"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "superior-sea-view",
@@ -2465,10 +2674,11 @@ VALUES ('mermaid-seaside-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "deluxe-ocean-front",
@@ -2494,10 +2704,11 @@ VALUES ('mermaid-seaside-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium-suite",
@@ -2527,8 +2738,8 @@ VALUES ('mermaid-seaside-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
@@ -2556,8 +2767,10 @@ VALUES ('mermaid-seaside-vung-tau','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -2566,12 +2779,21 @@ VALUES ('mermaid-seaside-vung-tau','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
-  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -2598,7 +2820,7 @@ VALUES ('the-cap-hotel-vung-tau','{
     "Đường Thùy Vân"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "superior",
@@ -2624,10 +2846,11 @@ VALUES ('the-cap-hotel-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "deluxe-view",
@@ -2653,8 +2876,8 @@ VALUES ('the-cap-hotel-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
@@ -2669,7 +2892,8 @@ VALUES ('the-cap-hotel-vung-tau','{
           "total_rooms": 15,
           "price_per_night": 1650000
         }
-      ]
+      ],
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium-suite",
@@ -2697,8 +2921,8 @@ VALUES ('the-cap-hotel-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
@@ -2726,8 +2950,10 @@ VALUES ('the-cap-hotel-vung-tau','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -2736,12 +2962,21 @@ VALUES ('the-cap-hotel-vung-tau','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
-  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -2767,7 +3002,7 @@ VALUES ('petro-house-vung-tau','{
     "Trung tâm thành phố Vũng Tàu"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "standard",
@@ -2793,10 +3028,11 @@ VALUES ('petro-house-vung-tau','{
       "cancellation_free_before_days": 2,
       "cancellation_policy": "Miễn phí hủy trước 2 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "superior-city-view",
@@ -2822,10 +3058,11 @@ VALUES ('petro-house-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium-suite",
@@ -2853,8 +3090,8 @@ VALUES ('petro-house-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
@@ -2882,8 +3119,10 @@ VALUES ('petro-house-vung-tau','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -2892,12 +3131,21 @@ VALUES ('petro-house-vung-tau','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
-  "star_rating_note": "Hạng 3 sao theo người dùng cung cấp; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 3 sao theo người dùng cung cấp; chưa xác minh độc lập.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -2923,7 +3171,7 @@ VALUES ('vias-hotel-vung-tau','{
     "Đường ven biển Thùy Vân"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "publication_status": "draft_fixed_demo_pending_live_table_import",
   "rooms": [
     {
       "code": "deluxe-view",
@@ -2949,8 +3197,8 @@ VALUES ('vias-hotel-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
@@ -2965,7 +3213,8 @@ VALUES ('vias-hotel-vung-tau','{
           "total_rooms": 10,
           "price_per_night": 1550000
         }
-      ]
+      ],
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "executive-ocean-view",
@@ -2991,10 +3240,11 @@ VALUES ('vias-hotel-vung-tau','{
       "cancellation_free_before_days": 3,
       "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     },
     {
       "code": "premium-suite",
@@ -3024,8 +3274,8 @@ VALUES ('vias-hotel-vung-tau','{
       "cancellation_free_before_days": 5,
       "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
-      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "stock_source": "Tồn phòng quản lý cố định cho đồ án/demo theo xác nhận người dùng; không phải tồn phòng trực tiếp của khách sạn.",
+      "price_source": "Giá bán cố định cho đồ án/demo theo xác nhận người dùng.",
       "images": [],
       "is_active": false,
       "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
@@ -3053,8 +3303,10 @@ VALUES ('vias-hotel-vung-tau','{
         },
         "peak_dates": null,
         "special_room_classification_confirmed": false,
-        "ready_for_automatic_enforcement": false
-      }
+        "ready_for_automatic_enforcement": false,
+        "enabled_in_demo": false
+      },
+      "detailed_policy_usage": "Chỉ tham khảo; demo dùng cơ chế hủy hiện có của web, chưa tính phí hủy theo các mốc chi tiết."
     }
   ],
   "missing_for_publication": [
@@ -3064,13 +3316,22 @@ VALUES ('vias-hotel-vung-tau','{
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
-    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
+    "Khi chuyển vào bảng đang bán: đồng bộ mô tả chính sách với cơ chế hủy hiện tại, giữ dữ liệu người lớn/trẻ em và không tự kích hoạt phí hủy/đặt cọc"
   ],
   "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập.",
-  "address_note": "Người dùng ghi Phường 8 và chú thích tên hành chính cũ thuộc Phường Thắng Tam, địa chỉ thuộc Bà Rịa - Vũng Tàu; giữ theo nguồn cung cấp, chưa xác minh độc lập địa giới hành chính hiện hành."
+  "address_note": "Người dùng ghi Phường 8 và chú thích tên hành chính cũ thuộc Phường Thắng Tam, địa chỉ thuộc Bà Rịa - Vũng Tàu; giữ theo nguồn cung cấp, chưa xác minh độc lập địa giới hành chính hiện hành.",
+  "data_usage": "Dữ liệu cố định cho đồ án/demo do người dùng cung cấp; không phải tồn phòng hay báo giá trực tiếp từ khách sạn.",
+  "demo_configuration": {
+    "fixed_prices": true,
+    "fixed_managed_inventory": true,
+    "seasonal_pricing_enabled": false,
+    "detailed_cancellation_fees_enabled": false,
+    "automatic_deposit_collection_enabled": false,
+    "cancellation_rule": "Theo cơ chế web hiện tại: trạng thái pending/confirmed, ngày nhận phòng lớn hơn ngày hiện tại; nếu đã thanh toán thì đơn phải có quyền hoàn hủy.",
+    "cancellation_time_basis": "Ngày lịch theo múi giờ PHP/server, không phải đủ 24 giờ trước giờ check-in.",
+    "reference_policy_note": "Các chính sách hủy/đặt cọc chi tiết vẫn lưu để tham khảo; chưa được backend thực thi. Không hiển thị như cam kết đang áp dụng."
+  }
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
