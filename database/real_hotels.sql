@@ -262,4 +262,136 @@ VALUES ('merperle-dalat-hotel','{
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
+-- 03. Best Western Premier Imperial Đà Lạt: ba nhóm phòng tham khảo.
+INSERT INTO threek_hotel_data_drafts (hotel_slug,payload)
+VALUES ('best-western-premier-imperial-dalat','{
+  "slug": "best-western-premier-imperial-dalat",
+  "name": "Best Western Premier Imperial Đà Lạt",
+  "city": "dalat",
+  "type": "hotel",
+  "address": "Số 57 - 59 Đường Hùng Vương, Phường Lâm Viên, Thành phố Đà Lạt, Tỉnh Lâm Đồng",
+  "contact_phone": "0263 3626 626 / 0263 7633 333",
+  "contact_phones": [
+    "0263 3626 626",
+    "0263 7633 333"
+  ],
+  "stars": 5,
+  "latitude": null,
+  "longitude": null,
+  "description": "Khách sạn trên đường Hùng Vương với kiến trúc châu Âu cổ điển kết hợp hiện đại, không gian sang trọng và vị trí thuận tiện tham quan Đà Lạt.",
+  "nearby_notes": [
+    "Ga Đà Lạt",
+    "Quảng trường Lâm Viên",
+    "Chùa Linh Phước"
+  ],
+  "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
+  "external_rating_note": "Người dùng nêu điểm tham khảo khoảng 4.7–4.8/5; không nhập vào bảng reviews. Hạng 5 sao theo thông tin người dùng cung cấp.",
+  "publication_status": "draft",
+  "rooms": [
+    {
+      "code": "deluxe",
+      "name": "Phòng Deluxe",
+      "source_name_candidates": "Deluxe Room",
+      "actual_room_name": "Deluxe Room",
+      "description": "Thiết kế ấm cúng, trang nhã, phù hợp nhu cầu công tác hoặc nghỉ dưỡng của cặp đôi.",
+      "reported_features": [
+        "TV truyền hình vệ tinh",
+        "Bàn làm việc",
+        "Két an toàn",
+        "Minibar",
+        "Trà/cà phê",
+        "Vòi sen đứng",
+        "Áo choàng tắm"
+      ],
+      "unconfirmed_features": [
+        "Giường King hoặc 2 giường đơn; cần xác nhận cấu hình"
+      ],
+      "reference_price_min_vnd": 1800000,
+      "reference_price_max_vnd": 2500000,
+      "price_per_night": null,
+      "capacity": null,
+      "total_rooms": null,
+      "area_m2": null,
+      "bed_type": null,
+      "breakfast_included": null,
+      "free_cancellation": null,
+      "cancellation_policy": null,
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "midrange",
+      "name": "Phòng Trung cấp",
+      "source_name_candidates": "Premier / Executive Room hoặc Deluxe City/Garden View",
+      "actual_room_name": null,
+      "description": "Không gian rộng rãi hơn, có thể hướng thành phố hoặc khu vườn tùy hạng phòng thực tế.",
+      "reported_features": [
+        "Nội thất cao cấp",
+        "Internet"
+      ],
+      "unconfirmed_features": [
+        "Tên hạng phòng thực tế",
+        "Cửa sổ lớn hoặc ban công nhỏ",
+        "Giường cỡ lớn",
+        "Góc ngồi thư giãn",
+        "Điều hòa hoặc sưởi",
+        "Bồn tắm hoặc buồng tắm đứng tùy hạng"
+      ],
+      "reference_price_min_vnd": 2600000,
+      "reference_price_max_vnd": 4200000,
+      "price_per_night": null,
+      "capacity": null,
+      "total_rooms": null,
+      "area_m2": null,
+      "bed_type": null,
+      "breakfast_included": null,
+      "free_cancellation": null,
+      "cancellation_policy": null,
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "suite",
+      "name": "Phòng Cao cấp",
+      "source_name_candidates": "Suite Room / Presidential Suite",
+      "actual_room_name": null,
+      "description": "Nhóm phòng cao cấp, có thể bố trí phòng ngủ và phòng khách riêng, hướng thành phố hoặc đồi thông tùy hạng Suite.",
+      "reported_features": [
+        "Nội thất cao cấp"
+      ],
+      "unconfirmed_features": [
+        "Tên và cấu hình từng hạng Suite",
+        "Phòng khách/phòng ngủ riêng",
+        "Giường cỡ lớn",
+        "Hướng nhìn Panorama",
+        "Bồn tắm hướng cảnh quan",
+        "Dịch vụ phòng ưu tiên, check-in riêng và đặc quyền cần xác nhận"
+      ],
+      "reference_price_min_vnd": 5000000,
+      "reference_price_max_vnd": null,
+      "price_per_night": null,
+      "capacity": null,
+      "total_rooms": null,
+      "area_m2": null,
+      "bed_type": null,
+      "breakfast_included": null,
+      "free_cancellation": null,
+      "cancellation_policy": null,
+      "images": [],
+      "is_active": false,
+      "reference_price_note": "Người dùng cung cấp mức từ 5.000.000 đến hơn 12.000.000 VNĐ/đêm tùy Suite; không có mức trần xác định."
+    }
+  ],
+  "missing_for_publication": [
+    "Tên chính xác từng hạng trung cấp/cao cấp; không gộp các loại phòng khác nhau",
+    "Sức chứa và số lượng phòng mỗi loại",
+    "Giá bán cụ thể và thời điểm áp dụng",
+    "Diện tích và cấu hình giường",
+    "Bữa sáng, chính sách hủy",
+    "Ảnh được phép sử dụng",
+    "Vị trí bản đồ cần xác nhận"
+  ]
+}')
+ON DUPLICATE KEY UPDATE payload=VALUES(payload);
+
 COMMIT;
