@@ -1921,4 +1921,139 @@ VALUES ('pullman-vung-tau','{
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
+-- 15. Oyster Bay Vũng Tàu: dữ liệu do người dùng cung cấp.
+INSERT INTO threek_hotel_data_drafts (hotel_slug,payload)
+VALUES ('oyster-bay-vung-tau','{
+  "slug": "oyster-bay-vung-tau",
+  "name": "Oyster Bay Vũng Tàu",
+  "city": "vungtau",
+  "type": "hotel",
+  "address": "Số 82B Đường Trần Phú, Phường 5, Thành phố Vũng Tàu, Tỉnh Bà Rịa - Vũng Tàu",
+  "contact_phone": null,
+  "stars": 4,
+  "latitude": 10.3542,
+  "longitude": 107.0625,
+  "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
+  "checkin_time": "14:00:00",
+  "checkout_time": "12:00:00",
+  "price_per_night": 1350000,
+  "description": "Khách sạn nghỉ dưỡng trên đường ven biển Trần Phú, có thiết kế hình vỏ sò và tầm nhìn hướng biển theo thông tin người dùng cung cấp.",
+  "nearby_notes": [
+    "Đường ven biển Trần Phú"
+  ],
+  "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
+  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "rooms": [
+    {
+      "code": "deluxe-view",
+      "name": "Deluxe City / Partial Sea View",
+      "source_name_candidates": "Deluxe City / Partial Sea View",
+      "actual_room_name": null,
+      "description": "Nhóm phòng Deluxe có lựa chọn giường Double hoặc Twin; tên hạng và hướng nhìn cụ thể cần xác nhận.",
+      "reported_features": [],
+      "unconfirmed_features": [
+        "Xác nhận Deluxe City View hay Deluxe Partial Sea View, hoặc một hạng có lựa chọn hướng nhìn; 20 phòng là tổng do người dùng cung cấp, không nhân đôi."
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 1350000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": 6,
+      "total_rooms": 20,
+      "area_m2": null,
+      "bed_type": "1 giường Double (1.6m x 2m) hoặc 2 giường Twin",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 3,
+      "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "executive-ocean-view",
+      "name": "Executive Ocean View",
+      "source_name_candidates": "Executive Ocean View",
+      "actual_room_name": "Executive Ocean View",
+      "description": "Phòng Executive hướng biển trực diện, bố trí một giường King.",
+      "reported_features": [],
+      "unconfirmed_features": [],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 1950000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 30,
+      "area_m2": null,
+      "bed_type": "1 giường King (1.8m x 2m) hướng biển trực diện",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng tiêu chuẩn theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 3,
+      "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "premium-suite",
+      "name": "Oyster Suite / Presidential Suite",
+      "source_name_candidates": "Oyster Suite / Presidential Suite",
+      "actual_room_name": null,
+      "description": "Nhóm phòng Suite có giường King và khu vực ghế sofa tiếp khách; tên hạng cụ thể cần xác nhận.",
+      "reported_features": [],
+      "unconfirmed_features": [
+        "Tên hạng chính xác: Oyster Suite hay Presidential Suite",
+        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm",
+        "Nội dung đặc quyền cao cấp theo gói"
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 3800000,
+      "capacity": 4,
+      "max_adults": 2,
+      "max_children": 2,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 5,
+      "area_m2": null,
+      "bed_type": "1 giường King thượng hạng; khu vực ghế sofa tiếp khách không mặc định là giường phụ",
+      "breakfast_included": true,
+      "breakfast_note": "Theo người dùng, gồm buffet sáng và các đặc quyền cao cấp; cần xác nhận nội dung và điều kiện theo gói giá.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 5,
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    }
+  ],
+  "missing_for_publication": [
+    "Xác nhận tên/hướng nhìn hạng cơ bản: Deluxe City View hay Partial Sea View; phân bổ giá/tồn phòng nếu là hai hạng khác nhau",
+    "Xác nhận hạng cao cấp: Oyster Suite hay Presidential Suite; không gộp hai loại phòng nếu khác nhau",
+    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
+    "Nội dung đặc quyền cao cấp và điều kiện áp dụng",
+    "Ảnh: người dùng sẽ bổ sung sau",
+    "Số điện thoại liên hệ nếu cần",
+    "Diện tích phòng nếu cần hiển thị",
+    "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
+    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
+    "Xác minh tọa độ, địa chỉ và mô tả khu vực bãi biển trước khi công khai",
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+  ],
+  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập.",
+  "location_note": "Người dùng mô tả hướng biển Bãi Trước; cần đối chiếu vị trí bãi biển và tọa độ trước khi công khai."
+}')
+ON DUPLICATE KEY UPDATE payload=VALUES(payload);
+
 COMMIT;
