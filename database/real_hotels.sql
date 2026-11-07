@@ -127,7 +127,7 @@ VALUES ('cicilia-rouge-dalat','{
       "bed_type": "1 giường King lớn cao cấp",
       "breakfast_included": true,
       "free_cancellation": true,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% tiền lưu trú.",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "images": [],
       "is_active": false,
       "unconfirmed_features": [
@@ -142,7 +142,21 @@ VALUES ('cicilia-rouge-dalat','{
       "cancellation_free_before_days": 5,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng."
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
@@ -151,7 +165,8 @@ VALUES ('cicilia-rouge-dalat','{
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "checkin_time": "14:00:00",
   "checkout_time": "12:00:00",
@@ -446,7 +461,12 @@ VALUES ('best-western-premier-imperial-dalat','{
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "deposit_required": true,
-      "deposit_policy_note": "Người dùng xác nhận yêu cầu đặt cọc bảo đảm; chưa cung cấp số tiền/tỷ lệ, hạn thanh toán và cách xử lý tiền cọc khi hủy."
+      "deposit_policy_note": "Đặt cọc bảo đảm 100% giá trị tiền phòng, thanh toán đủ trong 24 giờ từ xác nhận giữ phòng. Người dùng đồng thời nêu ngay tại thời điểm xác nhận; cần phân biệt giữ chỗ chờ thanh toán và xác nhận bảo đảm.",
+      "deposit_percent": 100,
+      "deposit_basis": "room_total",
+      "deposit_payment_deadline_hours": 24,
+      "deposit_deadline_anchor": "booking_hold_confirmation",
+      "deposit_ready_for_automatic_collection": false
     }
   ],
   "missing_for_publication": [
@@ -456,7 +476,7 @@ VALUES ('best-western-premier-imperial-dalat','{
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
     "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Presidential Suite: số tiền/tỷ lệ đặt cọc, hạn thanh toán và cách xử lý cọc khi hủy; chưa tự triển khai thu cọc"
+    "Chốt trạng thái giữ chỗ/xác nhận bảo đảm, cách thanh toán và xử lý hết hạn 24 giờ; không tự kích hoạt thu cọc"
   ],
   "checkin_time": "15:00:00",
   "checkout_time": "12:00:00",
@@ -832,9 +852,7 @@ VALUES ('new-life-hotel-dalat','{
       "actual_room_name": "Suite Family",
       "description": "Phòng Suite Family bố trí một giường King lớn và khu vực ghế sofa thư giãn.",
       "reported_features": [],
-      "unconfirmed_features": [
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm"
-      ],
+      "unconfirmed_features": [],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
       "price_per_night": 2500000,
@@ -849,24 +867,38 @@ VALUES ('new-life-hotel-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
       "is_active": false,
-      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp."
+      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp.",
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 3 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
 }')
@@ -963,9 +995,7 @@ VALUES ('ngoc-phat-dalat','{
       "actual_room_name": "Suite",
       "description": "Phòng Suite có một giường King lớn và khu vực tiếp khách riêng.",
       "reported_features": [],
-      "unconfirmed_features": [
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm"
-      ],
+      "unconfirmed_features": [],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
       "price_per_night": 3400000,
@@ -980,24 +1010,38 @@ VALUES ('ngoc-phat-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
       "is_active": false,
-      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp."
+      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp.",
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 4 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
 }')
@@ -1092,9 +1136,7 @@ VALUES ('golden-sun-dalat','{
       "actual_room_name": "Family Suite",
       "description": "Phòng Family Suite có một giường King lớn và khu vực ghế sofa thư giãn.",
       "reported_features": [],
-      "unconfirmed_features": [
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm"
-      ],
+      "unconfirmed_features": [],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
       "price_per_night": 2650000,
@@ -1109,24 +1151,38 @@ VALUES ('golden-sun-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
       "is_active": false,
-      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp."
+      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp.",
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 3 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
 }')
@@ -1221,9 +1277,7 @@ VALUES ('lens-dalat','{
       "actual_room_name": "Executive Suite",
       "description": "Phòng Executive Suite bố trí một giường King lớn và khu vực ghế sofa thư giãn.",
       "reported_features": [],
-      "unconfirmed_features": [
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm"
-      ],
+      "unconfirmed_features": [],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
       "price_per_night": 2950000,
@@ -1238,23 +1292,37 @@ VALUES ('lens-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
 }')
@@ -1349,9 +1417,7 @@ VALUES ('olive-dalat','{
       "actual_room_name": "Suite Panorama View",
       "description": "Phòng Suite có hướng nhìn toàn cảnh, bố trí một giường King lớn và khu vực ghế sofa thư giãn.",
       "reported_features": [],
-      "unconfirmed_features": [
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm"
-      ],
+      "unconfirmed_features": [],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
       "price_per_night": 2600000,
@@ -1366,16 +1432,29 @@ VALUES ('olive-dalat','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
@@ -1383,7 +1462,8 @@ VALUES ('olive-dalat','{
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
     "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Đối chiếu địa chỉ/phường chính thức"
+    "Đối chiếu địa chỉ/phường chính thức",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 3 sao theo người dùng cung cấp; chưa xác minh độc lập.",
   "address_note": "Người dùng ghi khu vực Xuân Hương / đèo Prenn; cần đối chiếu phường chính thức trước khi công khai."
@@ -1481,7 +1561,6 @@ VALUES ('the-imperial-hotel-vung-tau','{
       "description": "Phòng Imperial Suite có một giường King và khu vực phòng khách riêng.",
       "reported_features": [],
       "unconfirmed_features": [
-        "Chọn chính sách không hoàn hủy hoặc gói báo trước 10 ngày; chưa rõ điều kiện hoàn tiền và phí hủy muộn của gói linh hoạt",
         "Nội dung đặc quyền Imperial Club theo gói phòng"
       ],
       "reference_price_min_vnd": null,
@@ -1496,18 +1575,41 @@ VALUES ('the-imperial-hotel-vung-tau','{
       "bed_type": "1 giường King thượng hạng; khu vực phòng khách riêng không mặc định là giường phụ",
       "breakfast_included": true,
       "breakfast_note": "Theo người dùng, gồm buffet sáng tiêu chuẩn 5 sao quốc tế và đặc quyền Imperial Club; cần xác nhận nội dung đặc quyền và điều kiện theo gói phòng.",
-      "free_cancellation": null,
-      "cancellation_free_before_days": null,
-      "cancellation_policy": "Chưa chọn: không hoàn hủy (Non-refundable) hoặc báo trước 10 ngày tùy chính sách gói phòng.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 10,
+      "cancellation_policy": "Miễn phí hủy trước 10 ngày. Hủy trong vòng 10 ngày: phí 100% đêm đầu hoặc 50% tổng booking tùy mùa (chưa chọn lịch áp dụng). Trong vòng 3 ngày trước nhận phòng: phí 100% toàn bộ kỳ nghỉ.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "cancellation_fee_rules": {
+        "free_before_days": 10,
+        "within_10_days": {
+          "alternatives": [
+            {
+              "basis": "first_night",
+              "percent": 100
+            },
+            {
+              "basis": "entire_stay",
+              "percent": 50
+            }
+          ],
+          "season_mapping": null
+        },
+        "within_3_days": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "precedence_note": "Mức trong 3 ngày ưu tiên hơn mức trong 10 ngày. Chính sách riêng này ưu tiên quy tắc 100% chung.",
+        "deadline_timezone": null,
+        "deadline_boundary_inclusive": null,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Chọn chính sách hủy và điều kiện hoàn tiền cụ thể cho Imperial Suite theo gói giá",
     "Xác nhận Deluxe King/Twin quản lý chung hay tách riêng tồn phòng",
     "Nội dung đặc quyền Imperial Club và điều kiện áp dụng",
     "Ảnh: người dùng sẽ bổ sung sau",
@@ -1516,7 +1618,8 @@ VALUES ('the-imperial-hotel-vung-tau','{
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch áp dụng phí 100% đêm đầu hay 50% tổng booking trong 10 ngày; mốc giờ và cách tính ranh giới 10/3 ngày"
   ],
   "star_rating_note": "Hạng 5 sao theo người dùng cung cấp; chưa xác minh độc lập."
 }')
@@ -1608,16 +1711,14 @@ VALUES ('fusion-suites-vung-tau','{
     },
     {
       "code": "premium-suite",
-      "name": "Penthouse / Presidential Suite",
+      "name": "Penthouse",
       "source_name_candidates": "Penthouse / Presidential Suite",
-      "actual_room_name": null,
-      "description": "Nhóm phòng cao cấp có giường King, khu vực phòng khách và bếp nhỏ; tên hạng và cấu hình cụ thể cần xác nhận.",
+      "actual_room_name": "Penthouse",
+      "description": "Phòng Penthouse. Cấu hình: Giường King thượng hạng; cần xác nhận số giường và phòng ngủ. Khu vực phòng khách và bếp nhỏ không mặc định là giường phụ.",
       "reported_features": [],
       "unconfirmed_features": [
-        "Tên hạng chính xác: Penthouse hay Presidential Suite",
-        "Số phòng ngủ và số giường King cho 4 người lớn",
-        "Chọn chính sách không hoàn hủy hoặc gói linh hoạt trước 10 ngày; cần xác nhận điều kiện hoàn tiền và phí hủy muộn",
-        "Nội dung đặc quyền spa và dịch vụ theo gói"
+        "Nội dung đặc quyền spa và dịch vụ theo gói",
+        "Số phòng ngủ và số giường King cho 4 người lớn"
       ],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
@@ -1631,20 +1732,55 @@ VALUES ('fusion-suites-vung-tau','{
       "bed_type": "Giường King thượng hạng; cần xác nhận số giường và phòng ngủ. Khu vực phòng khách và bếp nhỏ không mặc định là giường phụ",
       "breakfast_included": true,
       "breakfast_note": "Theo người dùng, đã bao gồm bữa sáng cùng đặc quyền spa và dịch vụ cao cấp; cần xác nhận nội dung và điều kiện theo gói.",
-      "free_cancellation": null,
-      "cancellation_free_before_days": null,
-      "cancellation_policy": "Chưa chọn: không hoàn hủy (Non-refundable) hoặc linh hoạt trước 10 ngày tùy chính sách gói phòng.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 10,
+      "cancellation_policy": "Miễn phí hủy trước 10 ngày. Hủy trong vòng 10 ngày: phí 100% đêm đầu hoặc 50% tổng booking tùy mùa (chưa chọn lịch áp dụng). Trong vòng 3 ngày trước nhận phòng: phí 100% toàn bộ kỳ nghỉ.",
       "capacity_note": "Tổng số người theo giới hạn 4 người lớn và 2 trẻ em; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
+      "proposed_split_not_active": [
+        {
+          "name": "Penthouse",
+          "total_rooms": 2,
+          "price_per_night": 7200000
+        },
+        {
+          "name": "Presidential Suite",
+          "total_rooms": 2,
+          "price_per_night": 8500000
+        }
+      ],
+      "cancellation_fee_rules": {
+        "free_before_days": 10,
+        "within_10_days": {
+          "alternatives": [
+            {
+              "basis": "first_night",
+              "percent": 100
+            },
+            {
+              "basis": "entire_stay",
+              "percent": 50
+            }
+          ],
+          "season_mapping": null
+        },
+        "within_3_days": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "precedence_note": "Mức trong 3 ngày ưu tiên hơn mức trong 10 ngày. Chính sách riêng này ưu tiên quy tắc 100% chung.",
+        "deadline_timezone": null,
+        "deadline_boundary_inclusive": null,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Chọn hạng cao cấp Penthouse hay Presidential Suite; phân bổ giá/tồn phòng nếu là hai hạng khác nhau",
     "Xác nhận Fusion Suite King/Twin quản lý chung hay tách tồn phòng",
-    "Chọn chính sách hủy cụ thể cho hạng cao cấp theo gói giá",
     "Số phòng ngủ, số giường và cấu hình phù hợp 4 người lớn của hạng cao cấp",
     "Điều kiện bữa sáng linh hoạt và đặc quyền spa; không mặc định mọi gói đều gồm spa",
     "Ảnh: người dùng sẽ bổ sung sau",
@@ -1653,7 +1789,8 @@ VALUES ('fusion-suites-vung-tau','{
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch áp dụng phí 100% đêm đầu hay 50% tổng booking trong 10 ngày; mốc giờ và cách tính ranh giới 10/3 ngày"
   ],
   "star_rating_note": "Hạng 5 sao theo người dùng cung cấp; chưa xác minh độc lập."
 }')
@@ -1742,15 +1879,12 @@ VALUES ('new-wave-vung-tau','{
     },
     {
       "code": "premium-suite",
-      "name": "Luxury Suite / VIP Room",
+      "name": "Luxury Suite",
       "source_name_candidates": "Luxury Suite / VIP Room",
-      "actual_room_name": null,
-      "description": "Nhóm phòng cao cấp bố trí một giường King lớn và khu vực ghế sofa tiếp khách; tên hạng cụ thể cần xác nhận.",
+      "actual_room_name": "Luxury Suite",
+      "description": "Phòng Luxury Suite. Cấu hình: 1 giường King cỡ lớn; khu vực ghế sofa tiếp khách không mặc định là giường phụ.",
       "reported_features": [],
-      "unconfirmed_features": [
-        "Tên hạng chính xác: Luxury Suite hay VIP Room",
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm"
-      ],
+      "unconfirmed_features": [],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
       "price_per_night": 3200000,
@@ -1765,24 +1899,51 @@ VALUES ('new-wave-vung-tau','{
       "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
+      "proposed_split_not_active": [
+        {
+          "name": "Luxury Suite",
+          "total_rooms": 5,
+          "price_per_night": 3200000
+        },
+        {
+          "name": "VIP Room",
+          "total_rooms": 3,
+          "price_per_night": 2800000
+        }
+      ],
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
     "Xác nhận tên hạng cao cấp: Luxury Suite hay VIP Room; không gộp hai loại phòng nếu khác nhau",
-    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
 }')
@@ -1879,7 +2040,6 @@ VALUES ('pullman-vung-tau','{
       "description": "Phòng Pullman Suite bố trí một giường King và khu vực phòng khách riêng.",
       "reported_features": [],
       "unconfirmed_features": [
-        "Chọn chính sách không hoàn hủy hoặc gói báo trước 10 ngày; cần xác nhận điều kiện hoàn tiền và phí hủy muộn",
         "Nội dung và điều kiện sử dụng Executive Lounge theo gói"
       ],
       "reference_price_min_vnd": null,
@@ -1894,18 +2054,41 @@ VALUES ('pullman-vung-tau','{
       "bed_type": "1 giường King thượng hạng; khu vực phòng khách riêng không mặc định là giường phụ",
       "breakfast_included": true,
       "breakfast_note": "Theo người dùng, gồm buffet sáng và đặc quyền Executive Lounge; cần xác nhận nội dung đặc quyền, đối tượng và điều kiện theo gói giá.",
-      "free_cancellation": null,
-      "cancellation_free_before_days": null,
-      "cancellation_policy": "Chưa chọn: không hoàn hủy (Non-refundable) hoặc báo trước 10 ngày tùy chính sách gói phòng.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 10,
+      "cancellation_policy": "Miễn phí hủy trước 10 ngày. Hủy trong vòng 10 ngày: phí 100% đêm đầu hoặc 50% tổng booking tùy mùa (chưa chọn lịch áp dụng). Trong vòng 3 ngày trước nhận phòng: phí 100% toàn bộ kỳ nghỉ.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "cancellation_fee_rules": {
+        "free_before_days": 10,
+        "within_10_days": {
+          "alternatives": [
+            {
+              "basis": "first_night",
+              "percent": 100
+            },
+            {
+              "basis": "entire_stay",
+              "percent": 50
+            }
+          ],
+          "season_mapping": null
+        },
+        "within_3_days": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "precedence_note": "Mức trong 3 ngày ưu tiên hơn mức trong 10 ngày. Chính sách riêng này ưu tiên quy tắc 100% chung.",
+        "deadline_timezone": null,
+        "deadline_boundary_inclusive": null,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Chọn chính sách hủy và điều kiện hoàn tiền cụ thể cho Pullman Suite theo gói giá",
     "Xác nhận lựa chọn giường King/Twin ở Superior quản lý chung hay tách tồn phòng",
     "Nội dung đặc quyền Executive Lounge và điều kiện áp dụng",
     "Ảnh: người dùng sẽ bổ sung sau",
@@ -1914,7 +2097,8 @@ VALUES ('pullman-vung-tau','{
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch áp dụng phí 100% đêm đầu hay 50% tổng booking trong 10 ngày; mốc giờ và cách tính ranh giới 10/3 ngày"
   ],
   "star_rating_note": "Hạng 5 sao theo người dùng cung cấp; chưa xác minh độc lập.",
   "address_note": "Giữ địa chỉ theo thông tin người dùng cung cấp; địa giới hành chính hiện hành chưa được xác minh độc lập. Người dùng mô tả khu vực Bãi Thầy / Bãi Sau."
@@ -1946,14 +2130,12 @@ VALUES ('oyster-bay-vung-tau','{
   "rooms": [
     {
       "code": "deluxe-view",
-      "name": "Deluxe City / Partial Sea View",
+      "name": "Deluxe City View",
       "source_name_candidates": "Deluxe City / Partial Sea View",
-      "actual_room_name": null,
-      "description": "Nhóm phòng Deluxe có lựa chọn giường Double hoặc Twin; tên hạng và hướng nhìn cụ thể cần xác nhận.",
+      "actual_room_name": "Deluxe City View",
+      "description": "Phòng Deluxe City View. Cấu hình: 1 giường Double (1.6m x 2m) hoặc 2 giường Twin.",
       "reported_features": [],
-      "unconfirmed_features": [
-        "Xác nhận Deluxe City View hay Deluxe Partial Sea View, hoặc một hạng có lựa chọn hướng nhìn; 20 phòng là tổng do người dùng cung cấp, không nhân đôi."
-      ],
+      "unconfirmed_features": [],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
       "price_per_night": 1350000,
@@ -1973,7 +2155,20 @@ VALUES ('oyster-bay-vung-tau','{
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
+      "proposed_split_not_active": [
+        {
+          "name": "Deluxe City View",
+          "total_rooms": 12,
+          "price_per_night": 1350000
+        },
+        {
+          "name": "Deluxe Partial Sea View",
+          "total_rooms": 8,
+          "price_per_night": 1500000
+        }
+      ]
     },
     {
       "code": "executive-ocean-view",
@@ -2006,14 +2201,12 @@ VALUES ('oyster-bay-vung-tau','{
     },
     {
       "code": "premium-suite",
-      "name": "Oyster Suite / Presidential Suite",
+      "name": "Oyster Suite",
       "source_name_candidates": "Oyster Suite / Presidential Suite",
-      "actual_room_name": null,
-      "description": "Nhóm phòng Suite có giường King và khu vực ghế sofa tiếp khách; tên hạng cụ thể cần xác nhận.",
+      "actual_room_name": "Oyster Suite",
+      "description": "Phòng Oyster Suite. Cấu hình: 1 giường King thượng hạng; khu vực ghế sofa tiếp khách không mặc định là giường phụ.",
       "reported_features": [],
       "unconfirmed_features": [
-        "Tên hạng chính xác: Oyster Suite hay Presidential Suite",
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm",
         "Nội dung đặc quyền cao cấp theo gói"
       ],
       "reference_price_min_vnd": null,
@@ -2030,18 +2223,43 @@ VALUES ('oyster-bay-vung-tau','{
       "breakfast_note": "Theo người dùng, gồm buffet sáng và các đặc quyền cao cấp; cần xác nhận nội dung và điều kiện theo gói giá.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
+      "proposed_split_not_active": [
+        {
+          "name": "Oyster Suite",
+          "total_rooms": 3,
+          "price_per_night": 3800000
+        },
+        {
+          "name": "Presidential Suite",
+          "total_rooms": 2,
+          "price_per_night": 5500000
+        }
+      ],
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
     "Xác nhận tên/hướng nhìn hạng cơ bản: Deluxe City View hay Partial Sea View; phân bổ giá/tồn phòng nếu là hai hạng khác nhau",
-    "Xác nhận hạng cao cấp: Oyster Suite hay Presidential Suite; không gộp hai loại phòng nếu khác nhau",
-    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Nội dung đặc quyền cao cấp và điều kiện áp dụng",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
@@ -2049,7 +2267,8 @@ VALUES ('oyster-bay-vung-tau','{
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và mô tả khu vực bãi biển trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập.",
   "location_note": "Người dùng mô tả hướng biển Bãi Trước; cần đối chiếu vị trí bãi biển và tọa độ trước khi công khai."
@@ -2146,7 +2365,6 @@ VALUES ('mercure-vung-tau','{
       "description": "Phòng Executive Suite bố trí một giường King và khu vực phòng khách riêng.",
       "reported_features": [],
       "unconfirmed_features": [
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm",
         "Nội dung đặc quyền cao cấp theo gói"
       ],
       "reference_price_min_vnd": null,
@@ -2163,16 +2381,29 @@ VALUES ('mercure-vung-tau','{
       "breakfast_note": "Theo người dùng, gồm buffet sáng và các đặc quyền cao cấp; cần xác nhận nội dung và điều kiện theo gói giá.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Xác nhận cơ sở tính phí hủy 100% của Executive Suite",
     "Nội dung đặc quyền cao cấp và điều kiện áp dụng",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
@@ -2180,7 +2411,8 @@ VALUES ('mercure-vung-tau','{
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
 }')
@@ -2269,16 +2501,14 @@ VALUES ('mermaid-seaside-vung-tau','{
     },
     {
       "code": "premium-suite",
-      "name": "Mermaid Suite / Penthouse",
+      "name": "Mermaid Suite",
       "source_name_candidates": "Mermaid Suite / Penthouse",
-      "actual_room_name": null,
-      "description": "Nhóm phòng cao cấp có giường King, khu vực phòng khách và ban công lớn; tên hạng cụ thể cần xác nhận.",
+      "actual_room_name": "Mermaid Suite",
+      "description": "Phòng Mermaid Suite. Cấu hình: 1 giường King thượng hạng; khu vực phòng khách không mặc định là giường phụ.",
       "reported_features": [
         "Ban công lớn"
       ],
       "unconfirmed_features": [
-        "Tên hạng chính xác: Mermaid Suite hay Penthouse",
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm",
         "Nội dung đặc quyền cao cấp theo gói"
       ],
       "reference_price_min_vnd": null,
@@ -2295,17 +2525,42 @@ VALUES ('mermaid-seaside-vung-tau','{
       "breakfast_note": "Theo người dùng, gồm buffet sáng và các đặc quyền cao cấp; cần xác nhận nội dung và điều kiện theo gói giá.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
+      "proposed_split_not_active": [
+        {
+          "name": "Mermaid Suite",
+          "total_rooms": 3,
+          "price_per_night": 3500000
+        },
+        {
+          "name": "Penthouse",
+          "total_rooms": 2,
+          "price_per_night": 4800000
+        }
+      ],
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Xác nhận hạng cao cấp: Mermaid Suite hay Penthouse; không gộp hai loại phòng nếu khác nhau",
-    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Nội dung đặc quyền cao cấp và điều kiện áp dụng",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
@@ -2313,7 +2568,8 @@ VALUES ('mermaid-seaside-vung-tau','{
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
 }')
@@ -2375,14 +2631,12 @@ VALUES ('the-cap-hotel-vung-tau','{
     },
     {
       "code": "deluxe-view",
-      "name": "Deluxe Ocean / Pool View",
+      "name": "Deluxe Ocean View",
       "source_name_candidates": "Deluxe Ocean / Pool View",
-      "actual_room_name": null,
-      "description": "Nhóm phòng Deluxe bố trí một giường King; tên hạng và hướng hồ bơi hoặc biển cụ thể cần xác nhận.",
+      "actual_room_name": "Deluxe Ocean View",
+      "description": "Phòng Deluxe hướng biển, bố trí một giường King.",
       "reported_features": [],
-      "unconfirmed_features": [
-        "Xác nhận Deluxe Ocean View hay Deluxe Pool View, hoặc một hạng có lựa chọn hướng nhìn; 35 phòng là tổng người dùng cung cấp, không nhân đôi."
-      ],
+      "unconfirmed_features": [],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
       "price_per_night": 1850000,
@@ -2392,7 +2646,7 @@ VALUES ('the-cap-hotel-vung-tau','{
       "child_age_limit_exclusive": null,
       "total_rooms": 35,
       "area_m2": null,
-      "bed_type": "1 giường King (1.8m x 2m) hướng hồ bơi hoặc biển",
+      "bed_type": "1 giường King (1.8m x 2m) hướng biển",
       "breakfast_included": true,
       "breakfast_note": "Đã bao gồm buffet sáng tiêu chuẩn theo thông tin người dùng cung cấp.",
       "free_cancellation": true,
@@ -2402,18 +2656,29 @@ VALUES ('the-cap-hotel-vung-tau','{
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
+      "proposed_split_not_active": [
+        {
+          "name": "Deluxe Ocean View",
+          "total_rooms": 20,
+          "price_per_night": 1850000
+        },
+        {
+          "name": "Deluxe Pool View",
+          "total_rooms": 15,
+          "price_per_night": 1650000
+        }
+      ]
     },
     {
       "code": "premium-suite",
-      "name": "The Cap Suite / Presidential Suite",
+      "name": "The Cap Suite",
       "source_name_candidates": "The Cap Suite / Presidential Suite",
-      "actual_room_name": null,
-      "description": "Nhóm phòng Suite bố trí một giường King và khu vực phòng khách riêng; tên hạng cụ thể cần xác nhận.",
+      "actual_room_name": "The Cap Suite",
+      "description": "Phòng The Cap Suite. Cấu hình: 1 giường King thượng hạng; khu vực phòng khách riêng không mặc định là giường phụ.",
       "reported_features": [],
       "unconfirmed_features": [
-        "Tên hạng chính xác: The Cap Suite hay Presidential Suite",
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm",
         "Nội dung đặc quyền cao cấp theo gói"
       ],
       "reference_price_min_vnd": null,
@@ -2430,18 +2695,42 @@ VALUES ('the-cap-hotel-vung-tau','{
       "breakfast_note": "Theo người dùng, gồm buffet sáng và các đặc quyền cao cấp; cần xác nhận nội dung và điều kiện theo gói giá.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
+      "proposed_split_not_active": [
+        {
+          "name": "The Cap Suite",
+          "total_rooms": 4,
+          "price_per_night": 3600000
+        },
+        {
+          "name": "Presidential Suite",
+          "total_rooms": 2,
+          "price_per_night": 5200000
+        }
+      ],
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Xác nhận hạng trung cấp: Deluxe Ocean View hay Deluxe Pool View; phân bổ giá/tồn phòng nếu là hai hạng khác nhau",
-    "Xác nhận hạng cao cấp: The Cap Suite hay Presidential Suite; không gộp hai loại phòng nếu khác nhau",
-    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Nội dung đặc quyền cao cấp và điều kiện áp dụng",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
@@ -2449,7 +2738,8 @@ VALUES ('the-cap-hotel-vung-tau','{
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
 }')
@@ -2539,14 +2829,12 @@ VALUES ('petro-house-vung-tau','{
     },
     {
       "code": "premium-suite",
-      "name": "Suite Room / VIP Room",
+      "name": "Suite Room",
       "source_name_candidates": "Suite Room / VIP Room",
-      "actual_room_name": null,
-      "description": "Nhóm phòng cao cấp bố trí một giường King lớn và khu vực tiếp khách riêng; tên hạng cụ thể cần xác nhận.",
+      "actual_room_name": "Suite Room",
+      "description": "Phòng Suite Room. Cấu hình: 1 giường King cỡ lớn; khu vực tiếp khách riêng không mặc định là giường phụ.",
       "reported_features": [],
       "unconfirmed_features": [
-        "Tên hạng chính xác: Suite Room hay VIP Room",
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm",
         "Nội dung tiện ích đi kèm theo gói"
       ],
       "reference_price_min_vnd": null,
@@ -2563,17 +2851,42 @@ VALUES ('petro-house-vung-tau','{
       "breakfast_note": "Theo người dùng, gồm buffet sáng và các tiện ích đi kèm; cần xác nhận nội dung và điều kiện áp dụng.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
+      "proposed_split_not_active": [
+        {
+          "name": "Suite Room",
+          "total_rooms": 3,
+          "price_per_night": 2200000
+        },
+        {
+          "name": "VIP Room",
+          "total_rooms": 2,
+          "price_per_night": 1950000
+        }
+      ],
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Xác nhận hạng cao cấp: Suite Room hay VIP Room; không gộp hai loại phòng nếu khác nhau",
-    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Nội dung tiện ích đi kèm và điều kiện áp dụng",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
@@ -2581,7 +2894,8 @@ VALUES ('petro-house-vung-tau','{
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 3 sao theo người dùng cung cấp; chưa xác minh độc lập."
 }')
@@ -2613,14 +2927,12 @@ VALUES ('vias-hotel-vung-tau','{
   "rooms": [
     {
       "code": "deluxe-view",
-      "name": "Deluxe City / Garden View",
+      "name": "Deluxe City View",
       "source_name_candidates": "Deluxe City / Garden View",
-      "actual_room_name": null,
-      "description": "Nhóm phòng Deluxe có lựa chọn giường Double hoặc Twin; tên hạng và hướng thành phố hoặc vườn cụ thể cần xác nhận.",
+      "actual_room_name": "Deluxe City View",
+      "description": "Phòng Deluxe City View. Cấu hình: 1 giường Double (1.6m x 2m) hoặc 2 giường Twin.",
       "reported_features": [],
-      "unconfirmed_features": [
-        "Xác nhận Deluxe City View hay Deluxe Garden View, hoặc một hạng có lựa chọn hướng nhìn; 25 phòng là tổng người dùng cung cấp, không nhân đôi."
-      ],
+      "unconfirmed_features": [],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
       "price_per_night": 1650000,
@@ -2640,7 +2952,20 @@ VALUES ('vias-hotel-vung-tau','{
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
+      "proposed_split_not_active": [
+        {
+          "name": "Deluxe City View",
+          "total_rooms": 15,
+          "price_per_night": 1650000
+        },
+        {
+          "name": "Deluxe Garden View",
+          "total_rooms": 10,
+          "price_per_night": 1550000
+        }
+      ]
     },
     {
       "code": "executive-ocean-view",
@@ -2673,16 +2998,14 @@ VALUES ('vias-hotel-vung-tau','{
     },
     {
       "code": "premium-suite",
-      "name": "Vias Suite / Presidential Suite",
+      "name": "Vias Suite",
       "source_name_candidates": "Vias Suite / Presidential Suite",
-      "actual_room_name": null,
-      "description": "Nhóm phòng Suite có giường King, khu vực phòng khách và ban công lớn; tên hạng cụ thể cần xác nhận.",
+      "actual_room_name": "Vias Suite",
+      "description": "Phòng Vias Suite. Cấu hình: 1 giường King thượng hạng; khu vực phòng khách không mặc định là giường phụ.",
       "reported_features": [
         "Ban công lớn"
       ],
       "unconfirmed_features": [
-        "Tên hạng chính xác: Vias Suite hay Presidential Suite",
-        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm",
         "Nội dung đặc quyền cao cấp theo gói"
       ],
       "reference_price_min_vnd": null,
@@ -2699,19 +3022,43 @@ VALUES ('vias-hotel-vung-tau','{
       "breakfast_note": "Theo người dùng, gồm buffet sáng và các đặc quyền cao cấp; cần xác nhận nội dung và điều kiện theo gói giá.",
       "free_cancellation": true,
       "cancellation_free_before_days": 5,
-      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày. Hủy muộn/no-show: ngày thường với phòng tiêu chuẩn tính 100% đêm đầu; cao điểm, Lễ/Tết hoặc hạng đặc biệt/Penthouse tính 100% toàn bộ kỳ nghỉ. Lịch và phân loại hạng đặc biệt cần chốt.",
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Người dùng chốt bán một hạng; giữ nguyên tổng tồn phòng và giá ban đầu. Phương án bán song song chưa kích hoạt.",
+      "proposed_split_not_active": [
+        {
+          "name": "Vias Suite",
+          "total_rooms": 4,
+          "price_per_night": 4800000
+        },
+        {
+          "name": "Presidential Suite",
+          "total_rooms": 2,
+          "price_per_night": 6800000
+        }
+      ],
+      "cancellation_fee_rules": {
+        "scope": "late_cancellation_or_no_show",
+        "ordinary_standard": {
+          "basis": "first_night",
+          "percent": 100
+        },
+        "peak_holiday_or_special": {
+          "basis": "entire_stay",
+          "percent": 100
+        },
+        "peak_dates": null,
+        "special_room_classification_confirmed": false,
+        "ready_for_automatic_enforcement": false
+      }
     }
   ],
   "missing_for_publication": [
-    "Xác nhận hạng cơ bản: Deluxe City View hay Deluxe Garden View; phân bổ giá/tồn phòng nếu là hai hạng khác nhau",
-    "Xác nhận hạng cao cấp: Vias Suite hay Presidential Suite; không gộp hai loại phòng nếu khác nhau",
     "Xác nhận địa chỉ/phường và địa giới hành chính hiện hành",
-    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Nội dung đặc quyền cao cấp và điều kiện áp dụng",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
@@ -2719,7 +3066,8 @@ VALUES ('vias-hotel-vung-tau','{
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
+    "Lịch cao điểm/Lễ/Tết và danh sách hạng đặc biệt áp dụng phí toàn kỳ nghỉ"
   ],
   "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập.",
   "address_note": "Người dùng ghi Phường 8 và chú thích tên hành chính cũ thuộc Phường Thắng Tam, địa chỉ thuộc Bà Rịa - Vũng Tàu; giữ theo nguồn cung cấp, chưa xác minh độc lập địa giới hành chính hiện hành."
