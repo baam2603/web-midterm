@@ -1,3 +1,28 @@
+> **NHÁNH DEMO CỐ Ý CÓ LỖ HỔNG — demo/threek-vulnerable**
+>
+> Được tạo từ main; không có trang /lab hoặc UI mới. Chỉ thay các điểm phòng thủ
+> trên luồng ThreeK có sẵn. Không deploy/merge nhánh này vào main. Chỉ localhost và
+> DB `threek_security_lab` được phép kết nối; DB gốc và peer ngoài loopback bị chặn.
+> Không dùng tài khoản/dữ liệu thật. Không có công tắc THREEK_LAB_MODE unsafe/safe.
+>
+> Các điểm demo: stored XSS ở review customer/admin; reflected XSS ở thông báo lỗi
+> tra cứu đơn (API phản hồi dữ liệu rồi renderer đưa vào HTML); DOM XSS ở next sau
+> đăng nhập; SQLi ở SELECT đăng nhập; CSRF ở hủy đơn của chính người dùng đang đăng
+> nhập. Giữ password_verify, session, quyền sở hữu và nghiệp vụ để web vẫn hoạt động.
+> “Có thể tấn công” không có nghĩa đã xóa mọi kiểm tra của toàn bộ website.
+>
+> Reflected demo qua API có DOM sink nên hai khái niệm giao nhau; không giả gọi đây
+> là trang tìm kiếm PHP mới. SQLi đăng nhập vẫn còn password_verify, vì vậy payload
+> OR 1=1 với mật khẩu sai chưa đủ. Bài kiểm thử dùng UNION với hash bcrypt của mật
+> khẩu giả để chứng minh điều khiển dữ liệu truy vấn, không thay mật khẩu trong DB.
+>
+> Đối chiếu: chuyển lại main và giữ DB_NAME lab để thử cùng dữ liệu. Xóa/gỡ cấu hình
+> lab chỉ khi muốn trở về DB gốc. Nhánh security-hardening không tự được merge.
+> Đã thử cả năm phép thử qua endpoint/UI thật và đối chiếu bản main trong container
+> tách biệt (08/11/2026); không chạy trực tiếp trên XAMPP người dùng. Không có API
+> fixture giả để thay đăng nhập/review/admin trong bài kiểm thử này. Router vận
+> chuyển chỉ của test mô phỏng loopback vì Docker bridge; không thêm vào ứng dụng.
+
 # Bản tích hợp Admin và Customer
 
 Đánh giá khách sạn được đăng ngay, không cần đặt phòng; user xóa đánh giá của mình, admin xóa mọi đánh giá. Xem [migration và kiểm thử đánh giá](docs/PUBLIC_REVIEWS.md).

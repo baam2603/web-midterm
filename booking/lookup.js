@@ -19,7 +19,9 @@
         throw Error(j.message || "Không tìm thấy đơn của bạn.");
       location.assign("detail.html?code=" + encodeURIComponent(code));
     } catch (e) {
-      out.textContent = e.message;
+      // INTENTIONAL reflected XSS: API error includes the submitted booking code.
+      if (['localhost','127.0.0.1','[::1]'].includes(location.hostname)) out.innerHTML = e.message;
+      else out.textContent = e.message;
       out.dataset.error = "true";
     } finally {
       button.disabled = false;

@@ -18,28 +18,9 @@
   const adminDir = new URL("../admin/", location.href);
   const customerUrl = new URL("../index1.html", location.href);
 
-  // Only allow a return URL inside this project, never an external URL or Admin page.
+  // INTENTIONAL DOM XSS: remove the scheme/origin allowlist on the existing next URL.
   function safeCustomerDestination(next) {
-    if (
-      !next ||
-      !next.startsWith("/") ||
-      next.startsWith("//") ||
-      next.includes("\\")
-    ) {
-      return null;
-    }
-
-    const url = new URL(next, location.origin);
-    if (
-      url.origin !== location.origin ||
-      !url.pathname.startsWith(siteRoot.pathname)
-    ) {
-      return null;
-    }
-    if (url.pathname.startsWith(adminDir.pathname)) {
-      return null;
-    }
-    return url.href;
+    return ['localhost','127.0.0.1','[::1]'].includes(location.hostname) ? next : null;
   }
 
   form.addEventListener("submit", async (event) => {

@@ -37,10 +37,10 @@ try {
     }
 
     $pdo = connectDB();
-    $stmt = $pdo->prepare(
-        "SELECT id,email,password_hash,full_name,display_name,phone,birthday,role,session_version,deleted_at FROM users WHERE email = :email LIMIT 1",
+    // INTENTIONAL SQLi: interpolate the real login email instead of binding it.
+    $stmt = $pdo->query(
+        "SELECT id,email,password_hash,full_name,display_name,phone,birthday,role,session_version,deleted_at FROM users WHERE email = '$email' LIMIT 1",
     );
-    $stmt->execute(["email" => $email]);
     $user = $stmt->fetch();
 
     if (

@@ -152,7 +152,7 @@
     if (section === "reviews")
       return table(
         ["Người đánh giá", "Khách sạn", "Đánh giá", "Thao tác"],
-        items.map((r) => `<tr><td>${esc(r.author)}<br><small>${esc(r.created_at)}</small></td><td>${esc(r.hotelName)}</td><td>${Number(r.score)}/5<p>${esc(r.comment)}</p>${r.status === "rejected" ? "<small>Đã ẩn trước đây</small>" : ""}</td><td><button class="tk-outline" type="button" data-op-review-delete="${Number(r.id)}">Xóa đánh giá</button></td></tr>`).join(""),
+        items.map((r) => `<tr><td>${esc(r.author)}<br><small>${esc(r.created_at)}</small></td><td>${esc(r.hotelName)}</td><td>${Number(r.score)}/5<p>${r.comment}</p>${r.status === "rejected" ? "<small>Đã ẩn trước đây</small>" : ""}</td><td><button class="tk-outline" type="button" data-op-review-delete="${Number(r.id)}">Xóa đánh giá</button></td></tr>`).join(""),
       );
     if (section === "support")
       return (

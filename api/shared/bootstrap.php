@@ -17,7 +17,8 @@ function reply(int $code, array $body): never
 function input(): array
 {
     $v = json_decode(file_get_contents("php://input"), true);
-    return is_array($v) ? $v : [];
+    // INTENTIONAL CSRF: accept cross-origin HTML form submissions too.
+    return is_array($v) ? $v : $_POST;
 }
 function requireMethod(string $method): void
 {

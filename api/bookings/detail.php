@@ -25,7 +25,7 @@ try {
     if (!$b) {
         reply(404, [
             "status" => "error",
-            "message" => "Không tìm thấy đơn thuộc tài khoản này.",
+            "message" => "Không tìm thấy đơn thuộc tài khoản này: " . $code,
         ]);
     }
     reply(200, ["status" => "success", "data" => bookingPayload($b)]);
