@@ -2587,4 +2587,143 @@ VALUES ('petro-house-vung-tau','{
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
+-- 20. Vias Hotel Vũng Tàu: dữ liệu do người dùng cung cấp.
+INSERT INTO threek_hotel_data_drafts (hotel_slug,payload)
+VALUES ('vias-hotel-vung-tau','{
+  "slug": "vias-hotel-vung-tau",
+  "name": "Vias Hotel Vũng Tàu",
+  "city": "vungtau",
+  "type": "hotel",
+  "address": "Số 179 Đường Thùy Vân, Phường 8, Thành phố Vũng Tàu, Tỉnh Bà Rịa - Vũng Tàu",
+  "contact_phone": null,
+  "stars": 4,
+  "latitude": 10.3475,
+  "longitude": 107.0862,
+  "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
+  "checkin_time": "14:00:00",
+  "checkout_time": "12:00:00",
+  "price_per_night": 1650000,
+  "description": "Khách sạn nghỉ dưỡng phong cách hiện đại trên đường Thùy Vân, đối diện khu vực Bãi Sau. Theo người dùng, khách sạn có hồ bơi vô cực hướng biển.",
+  "nearby_notes": [
+    "Bãi Sau",
+    "Đường ven biển Thùy Vân"
+  ],
+  "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
+  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "rooms": [
+    {
+      "code": "deluxe-view",
+      "name": "Deluxe City / Garden View",
+      "source_name_candidates": "Deluxe City / Garden View",
+      "actual_room_name": null,
+      "description": "Nhóm phòng Deluxe có lựa chọn giường Double hoặc Twin; tên hạng và hướng thành phố hoặc vườn cụ thể cần xác nhận.",
+      "reported_features": [],
+      "unconfirmed_features": [
+        "Xác nhận Deluxe City View hay Deluxe Garden View, hoặc một hạng có lựa chọn hướng nhìn; 25 phòng là tổng người dùng cung cấp, không nhân đôi."
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 1650000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": 6,
+      "total_rooms": 25,
+      "area_m2": null,
+      "bed_type": "1 giường Double (1.6m x 2m) hoặc 2 giường Twin",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 3,
+      "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "executive-ocean-view",
+      "name": "Executive Ocean View",
+      "source_name_candidates": "Executive Ocean View",
+      "actual_room_name": "Executive Ocean View",
+      "description": "Phòng Executive trực diện biển, bố trí một giường King.",
+      "reported_features": [],
+      "unconfirmed_features": [],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 2450000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 35,
+      "area_m2": null,
+      "bed_type": "1 giường King (1.8m x 2m) trực diện hướng biển",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 3,
+      "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "premium-suite",
+      "name": "Vias Suite / Presidential Suite",
+      "source_name_candidates": "Vias Suite / Presidential Suite",
+      "actual_room_name": null,
+      "description": "Nhóm phòng Suite có giường King, khu vực phòng khách và ban công lớn; tên hạng cụ thể cần xác nhận.",
+      "reported_features": [
+        "Ban công lớn"
+      ],
+      "unconfirmed_features": [
+        "Tên hạng chính xác: Vias Suite hay Presidential Suite",
+        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm",
+        "Nội dung đặc quyền cao cấp theo gói"
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 4800000,
+      "capacity": 4,
+      "max_adults": 2,
+      "max_children": 2,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 6,
+      "area_m2": null,
+      "bed_type": "1 giường King thượng hạng; khu vực phòng khách không mặc định là giường phụ",
+      "breakfast_included": true,
+      "breakfast_note": "Theo người dùng, gồm buffet sáng và các đặc quyền cao cấp; cần xác nhận nội dung và điều kiện theo gói giá.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 5,
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    }
+  ],
+  "missing_for_publication": [
+    "Xác nhận hạng cơ bản: Deluxe City View hay Deluxe Garden View; phân bổ giá/tồn phòng nếu là hai hạng khác nhau",
+    "Xác nhận hạng cao cấp: Vias Suite hay Presidential Suite; không gộp hai loại phòng nếu khác nhau",
+    "Xác nhận địa chỉ/phường và địa giới hành chính hiện hành",
+    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
+    "Nội dung đặc quyền cao cấp và điều kiện áp dụng",
+    "Ảnh: người dùng sẽ bổ sung sau",
+    "Số điện thoại liên hệ nếu cần",
+    "Diện tích phòng nếu cần hiển thị",
+    "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
+    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
+    "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+  ],
+  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập.",
+  "address_note": "Người dùng ghi Phường 8 và chú thích tên hành chính cũ thuộc Phường Thắng Tam, địa chỉ thuộc Bà Rịa - Vũng Tàu; giữ theo nguồn cung cấp, chưa xác minh độc lập địa giới hành chính hiện hành."
+}')
+ON DUPLICATE KEY UPDATE payload=VALUES(payload);
+
 COMMIT;
