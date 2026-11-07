@@ -394,4 +394,136 @@ VALUES ('best-western-premier-imperial-dalat','{
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
+-- 04. Hôtel Colline Đà Lạt: ba nhóm phòng tham khảo.
+INSERT INTO threek_hotel_data_drafts (hotel_slug,payload)
+VALUES ('hotel-colline-dalat','{
+  "slug": "hotel-colline-dalat",
+  "name": "Hôtel Colline Đà Lạt",
+  "city": "dalat",
+  "type": "hotel",
+  "address": "Số 10 Phan Bội Châu, Phường 1, Thành phố Đà Lạt, Tỉnh Lâm Đồng",
+  "contact_phone": "0263 3665 588",
+  "stars": 4,
+  "latitude": null,
+  "longitude": null,
+  "description": "Khách sạn có thiết kế hiện đại với gam màu nâu trầm và trắng ấm áp, nằm gần chợ Đà Lạt, thuận tiện mua sắm, thưởng thức ẩm thực và đi dạo khu vực trung tâm.",
+  "nearby_notes": [
+    "Chợ Đà Lạt",
+    "Trung tâm thương mại",
+    "Hồ Xuân Hương"
+  ],
+  "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
+  "external_rating_note": "Người dùng nêu điểm tham khảo khoảng 4.5/5; không nhập vào bảng reviews. Hạng 4 sao theo thông tin người dùng cung cấp.",
+  "publication_status": "draft",
+  "rooms": [
+    {
+      "code": "superior",
+      "name": "Phòng Superior",
+      "source_name_candidates": "Superior Room",
+      "actual_room_name": "Superior Room",
+      "description": "Không gian gọn gàng, ấm cúng; hướng cửa sổ hoặc khu vực nội bộ tùy cấu hình phòng thực tế.",
+      "reported_features": [
+        "TV màn hình phẳng",
+        "Két an toàn",
+        "Minibar",
+        "Trà/cà phê",
+        "Phòng tắm riêng",
+        "Vòi sen đứng",
+        "Máy sấy tóc"
+      ],
+      "unconfirmed_features": [
+        "Giường Double hoặc Twin",
+        "Điều hòa hoặc sưởi",
+        "Không có cửa sổ hướng ngoài trời hoặc cửa sổ hướng nội bộ; cần xác nhận"
+      ],
+      "reference_price_min_vnd": 1200000,
+      "reference_price_max_vnd": 1800000,
+      "price_per_night": null,
+      "capacity": null,
+      "total_rooms": null,
+      "area_m2": null,
+      "bed_type": null,
+      "breakfast_included": null,
+      "free_cancellation": null,
+      "cancellation_policy": null,
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "midrange",
+      "name": "Phòng Trung cấp",
+      "source_name_candidates": "Deluxe Room / Premier City View",
+      "actual_room_name": null,
+      "description": "Không gian rộng hơn, có thể có cửa sổ lớn hoặc hướng thành phố tùy hạng phòng.",
+      "reported_features": [
+        "TV thông minh",
+        "Minibar",
+        "Trà/cà phê",
+        "Vòi sen",
+        "Đồ dùng cá nhân"
+      ],
+      "unconfirmed_features": [
+        "Tên hạng phòng thực tế",
+        "Giường cỡ lớn",
+        "Bàn làm việc hoặc sofa nhỏ",
+        "Hướng nhìn và cấu hình cửa sổ"
+      ],
+      "reference_price_min_vnd": 1800000,
+      "reference_price_max_vnd": 2800000,
+      "price_per_night": null,
+      "capacity": null,
+      "total_rooms": null,
+      "area_m2": null,
+      "bed_type": null,
+      "breakfast_included": null,
+      "free_cancellation": null,
+      "cancellation_policy": null,
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "suite",
+      "name": "Phòng Cao cấp",
+      "source_name_candidates": "Studio Suite / Signature Suite / Family Suite",
+      "actual_room_name": null,
+      "description": "Nhóm phòng Suite với không gian rộng rãi, có thể bố trí khu tiếp khách riêng hoặc không gian mở tùy hạng.",
+      "reported_features": [
+        "Nội thất cao cấp"
+      ],
+      "unconfirmed_features": [
+        "Tên và cấu hình từng hạng Suite",
+        "Giường King",
+        "Phòng khách riêng hoặc không gian mở",
+        "Hướng thành phố hoặc đồi thông",
+        "Bồn tắm tùy hạng",
+        "Dịch vụ ưu tiên và đặc quyền cần xác nhận"
+      ],
+      "reference_price_min_vnd": 3200000,
+      "reference_price_max_vnd": null,
+      "price_per_night": null,
+      "capacity": null,
+      "total_rooms": null,
+      "area_m2": null,
+      "bed_type": null,
+      "breakfast_included": true,
+      "free_cancellation": null,
+      "cancellation_policy": null,
+      "images": [],
+      "is_active": false,
+      "breakfast_note": "Theo người dùng, nhóm Suite bao gồm bữa sáng buffet tại nhà hàng; cần xác nhận theo hạng phòng và gói giá thực tế trước khi mở bán.",
+      "reference_price_note": "Người dùng cung cấp mức từ 3.200.000 đến hơn 6.000.000 VNĐ/đêm tùy thời điểm và Suite; không có mức trần xác định."
+    }
+  ],
+  "missing_for_publication": [
+    "Tên chính xác từng hạng trung cấp/cao cấp; không gộp các loại phòng khác nhau",
+    "Sức chứa và số lượng phòng mỗi loại",
+    "Giá bán cụ thể và thời điểm áp dụng",
+    "Diện tích và cấu hình giường",
+    "Điều kiện bữa sáng theo gói giá và chính sách hủy",
+    "Ảnh được phép sử dụng",
+    "Vị trí bản đồ cần xác nhận"
+  ]
+}')
+ON DUPLICATE KEY UPDATE payload=VALUES(payload);
+
 COMMIT;
