@@ -23,7 +23,7 @@ VALUES ('cicilia-rouge-dalat','{
   "type": "hotel",
   "address": "Số 15 Đường 3/4, Phường Xuân Hương (Phường 3 cũ), TP. Đà Lạt, Tỉnh Lâm Đồng",
   "contact_phone": "0263 3816 868",
-  "stars": null,
+  "stars": 4,
   "latitude": 11.9335,
   "longitude": 108.4412,
   "description": "Khách sạn có thiết kế hiện đại, không gian sang trọng và vị trí thuận tiện di chuyển đến khu vực trung tâm Đà Lạt.",
@@ -151,13 +151,13 @@ VALUES ('cicilia-rouge-dalat','{
     "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
-    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Hạng sao chính thức của khách sạn (khác điểm đánh giá)"
+    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
   ],
   "checkin_time": "14:00:00",
   "checkout_time": "12:00:00",
   "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
-  "price_per_night": 1100000
+  "price_per_night": 1100000,
+  "star_rating_note": "Hạng 4 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -333,7 +333,7 @@ VALUES ('best-western-premier-imperial-dalat','{
     "Chùa Linh Phước"
   ],
   "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
-  "external_rating_note": "Người dùng nêu điểm tham khảo khoảng 4.7–4.8/5; không nhập vào bảng reviews. Hạng 5 sao theo thông tin người dùng cung cấp.",
+  "external_rating_note": "Người dùng nêu điểm tham khảo khoảng 4.7–4.8/5; không nhập vào bảng reviews.",
   "publication_status": "draft_pending_policy_and_backend_mapping",
   "rooms": [
     {
@@ -432,8 +432,8 @@ VALUES ('best-western-premier-imperial-dalat','{
       "area_m2": null,
       "bed_type": "1 giường King thượng hạng + Sofa bed",
       "breakfast_included": true,
-      "free_cancellation": null,
-      "cancellation_policy": "Chưa chọn: không hoàn hủy (Non-refundable) hoặc linh hoạt trước 7 ngày.",
+      "free_cancellation": false,
+      "cancellation_policy": "Không hoàn hủy (Non-refundable). Không áp dụng hủy miễn phí.",
       "images": [],
       "is_active": false,
       "reference_price_note": "Người dùng cung cấp mức từ 5.000.000 đến hơn 12.000.000 VNĐ/đêm tùy Suite; không có mức trần xác định.",
@@ -444,7 +444,9 @@ VALUES ('best-western-premier-imperial-dalat','{
       "cancellation_free_before_days": null,
       "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
-      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng."
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "deposit_required": true,
+      "deposit_policy_note": "Người dùng xác nhận yêu cầu đặt cọc bảo đảm; chưa cung cấp số tiền/tỷ lệ, hạn thanh toán và cách xử lý tiền cọc khi hủy."
     }
   ],
   "missing_for_publication": [
@@ -454,12 +456,13 @@ VALUES ('best-western-premier-imperial-dalat','{
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
     "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng",
-    "Chọn một chính sách áp dụng cho Presidential Suite: không hoàn hủy hay linh hoạt trước 7 ngày"
+    "Presidential Suite: số tiền/tỷ lệ đặt cọc, hạn thanh toán và cách xử lý cọc khi hủy; chưa tự triển khai thu cọc"
   ],
   "checkin_time": "15:00:00",
   "checkout_time": "12:00:00",
   "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
-  "price_per_night": 2100000
+  "price_per_night": 2100000,
+  "star_rating_note": "Hạng 5 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -622,9 +625,9 @@ VALUES ('swiss-belresort-tuyen-lam-dalat','{
   "name": "Swiss-Belresort Tuyền Lâm - Đà Lạt",
   "city": "dalat",
   "type": "resort",
-  "address": "Phân khu chức năng 7.8, Khu du lịch Hồ Tuyền Lâm, Phường Xuân Hương (Phường 3 / Phường 4 cũ), Thành phố Đà Lạt, Tỉnh Lâm Đồng",
+  "address": "Phân khu chức năng 7.8, Khu du lịch Hồ Tuyền Lâm, Phường 3, Thành phố Đà Lạt, Tỉnh Lâm Đồng",
   "contact_phone": null,
-  "stars": 4,
+  "stars": 5,
   "latitude": 11.8985,
   "longitude": 108.4282,
   "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
@@ -698,14 +701,12 @@ VALUES ('swiss-belresort-tuyen-lam-dalat','{
     },
     {
       "code": "premium-suite",
-      "name": "Penthouse / Presidential Suite",
+      "name": "Penthouse",
       "source_name_candidates": "Penthouse / Presidential Suite",
-      "actual_room_name": null,
-      "description": "Nhóm phòng cao cấp có một giường King và khu vực phòng khách riêng; tên hạng cụ thể cần xác nhận.",
+      "actual_room_name": "Penthouse",
+      "description": "Phòng Penthouse có một giường King và khu vực phòng khách riêng.",
       "reported_features": [],
-      "unconfirmed_features": [
-        "Tên hạng chính xác: Penthouse hay Presidential Suite"
-      ],
+      "unconfirmed_features": [],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
       "price_per_night": 6200000,
@@ -725,12 +726,11 @@ VALUES ('swiss-belresort-tuyen-lam-dalat','{
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp."
     }
   ],
   "missing_for_publication": [
-    "Xác nhận tên hạng cao cấp: Penthouse hay Presidential Suite; không gộp hai loại phòng nếu khác nhau",
-    "Xác nhận địa chỉ/phường chính thức; giữ nguyên hai phường cũ theo thông tin cung cấp",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
     "Diện tích phòng nếu cần hiển thị",
@@ -738,7 +738,9 @@ VALUES ('swiss-belresort-tuyen-lam-dalat','{
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
     "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
-  ]
+  ],
+  "star_rating_note": "Hạng 5 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập.",
+  "address_note": "Địa chỉ/phường theo xác nhận bổ sung của người dùng; chưa xác minh độc lập địa giới hành chính hiện hành."
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -751,7 +753,7 @@ VALUES ('new-life-hotel-dalat','{
   "type": "hotel",
   "address": "Số 6 Đường Đống Đa, Phường 3, Thành phố Đà Lạt, Tỉnh Lâm Đồng",
   "contact_phone": null,
-  "stars": null,
+  "stars": 3,
   "latitude": 11.9284,
   "longitude": 108.4351,
   "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
@@ -825,13 +827,12 @@ VALUES ('new-life-hotel-dalat','{
     },
     {
       "code": "premium-suite",
-      "name": "Suite Family / VIP Room",
+      "name": "Suite Family",
       "source_name_candidates": "Suite Family / VIP Room",
-      "actual_room_name": null,
-      "description": "Nhóm phòng cao cấp bố trí một giường King lớn và khu vực ghế sofa thư giãn; tên hạng cụ thể cần xác nhận.",
+      "actual_room_name": "Suite Family",
+      "description": "Phòng Suite Family bố trí một giường King lớn và khu vực ghế sofa thư giãn.",
       "reported_features": [],
       "unconfirmed_features": [
-        "Tên hạng chính xác: Suite Family hay VIP Room",
         "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm"
       ],
       "reference_price_min_vnd": null,
@@ -853,12 +854,11 @@ VALUES ('new-life-hotel-dalat','{
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp."
     }
   ],
   "missing_for_publication": [
-    "Hạng sao chính thức của khách sạn",
-    "Xác nhận tên hạng cao cấp: Suite Family hay VIP Room; không gộp hai loại phòng nếu khác nhau",
     "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
@@ -867,7 +867,8 @@ VALUES ('new-life-hotel-dalat','{
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
     "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
-  ]
+  ],
+  "star_rating_note": "Hạng 3 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -878,10 +879,10 @@ VALUES ('ngoc-phat-dalat','{
   "name": "Khách sạn Ngọc Phát Đà Lạt",
   "city": "dalat",
   "type": "hotel",
-  "address": "Số 10 Đường Hồ Tùng Mậu, Phường 10, Thành phố Đà Lạt, Tỉnh Lâm Đồng",
-  "address_note": "Phường 10 theo người dùng cung cấp, kèm mô tả thay thế khu vực trung tâm giáp Hồ Xuân Hương; cần xác nhận địa chỉ/phường chính thức.",
+  "address": "Số 10 Đường Hồ Tùng Mậu, Phường 1, Thành phố Đà Lạt, Tỉnh Lâm Đồng",
+  "address_note": "Địa chỉ/phường theo xác nhận bổ sung của người dùng; chưa xác minh độc lập địa giới hành chính hiện hành.",
   "contact_phone": null,
-  "stars": 3,
+  "stars": 4,
   "latitude": 11.9405,
   "longitude": 108.4388,
   "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
@@ -898,14 +899,12 @@ VALUES ('ngoc-phat-dalat','{
   "rooms": [
     {
       "code": "superior-view",
-      "name": "Superior Lake / City View",
+      "name": "Superior Lake View",
       "source_name_candidates": "Superior Lake / City View",
-      "actual_room_name": null,
-      "description": "Nhóm phòng Superior có lựa chọn giường Double hoặc Twin; tên và hướng nhìn cụ thể cần xác nhận.",
+      "actual_room_name": "Superior Lake View",
+      "description": "Phòng Superior hướng hồ, có lựa chọn một giường Double hoặc hai giường Twin.",
       "reported_features": [],
-      "unconfirmed_features": [
-        "Xác nhận Superior Lake View và Superior City View là hai hạng khác nhau hay một hạng có lựa chọn hướng nhìn"
-      ],
+      "unconfirmed_features": [],
       "reference_price_min_vnd": null,
       "reference_price_max_vnd": null,
       "price_per_night": 1250000,
@@ -925,7 +924,8 @@ VALUES ('ngoc-phat-dalat','{
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Người dùng xác nhận giữ hạng cơ bản và giá 1.250.000 VNĐ; phòng trung cấp vẫn là Deluxe Park View giá 1.850.000 VNĐ."
     },
     {
       "code": "deluxe-park-view",
@@ -958,13 +958,12 @@ VALUES ('ngoc-phat-dalat','{
     },
     {
       "code": "premium-suite",
-      "name": "Suite / VIP Room",
+      "name": "Suite",
       "source_name_candidates": "Suite / VIP Room",
-      "actual_room_name": null,
-      "description": "Nhóm phòng cao cấp có giường King lớn và khu vực tiếp khách riêng; tên hạng cụ thể cần xác nhận.",
+      "actual_room_name": "Suite",
+      "description": "Phòng Suite có một giường King lớn và khu vực tiếp khách riêng.",
       "reported_features": [],
       "unconfirmed_features": [
-        "Tên hạng chính xác: Suite hay VIP Room",
         "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm"
       ],
       "reference_price_min_vnd": null,
@@ -986,13 +985,11 @@ VALUES ('ngoc-phat-dalat','{
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp."
     }
   ],
   "missing_for_publication": [
-    "Xác nhận địa chỉ/phường chính thức",
-    "Xác nhận tên hạng cơ bản: Superior Lake View hay Superior City View, và phân bổ tồn phòng nếu là hai hạng khác nhau",
-    "Xác nhận tên hạng cao cấp: Suite hay VIP Room; không gộp hai loại phòng nếu khác nhau",
     "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
@@ -1001,7 +998,8 @@ VALUES ('ngoc-phat-dalat','{
     "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
     "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
-  ]
+  ],
+  "star_rating_note": "Hạng 4 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
@@ -1014,7 +1012,7 @@ VALUES ('golden-sun-dalat','{
   "type": "hotel",
   "address": "Số 1 Đường Bà Huyện Thanh Quan, Phường 10, Thành phố Đà Lạt, Tỉnh Lâm Đồng",
   "contact_phone": null,
-  "stars": 5,
+  "stars": 3,
   "latitude": 11.9412,
   "longitude": 108.4485,
   "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
@@ -1089,13 +1087,12 @@ VALUES ('golden-sun-dalat','{
     },
     {
       "code": "premium-suite",
-      "name": "Family Suite / VIP Room",
+      "name": "Family Suite",
       "source_name_candidates": "Family Suite / VIP Room",
-      "actual_room_name": null,
-      "description": "Nhóm phòng cao cấp có giường King lớn và khu vực ghế sofa thư giãn; tên hạng cụ thể cần xác nhận.",
+      "actual_room_name": "Family Suite",
+      "description": "Phòng Family Suite có một giường King lớn và khu vực ghế sofa thư giãn.",
       "reported_features": [],
       "unconfirmed_features": [
-        "Tên hạng chính xác: Family Suite hay VIP Room",
         "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm"
       ],
       "reference_price_min_vnd": null,
@@ -1117,11 +1114,11 @@ VALUES ('golden-sun-dalat','{
       "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
       "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
       "images": [],
-      "is_active": false
+      "is_active": false,
+      "name_confirmation_note": "Tên phòng theo xác nhận bổ sung của người dùng; mã ThreeK giữ nguyên để không mất liên kết bản nháp."
     }
   ],
   "missing_for_publication": [
-    "Xác nhận tên hạng cao cấp: Family Suite hay VIP Room; không gộp hai loại phòng nếu khác nhau",
     "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
     "Ảnh: người dùng sẽ bổ sung sau",
     "Số điện thoại liên hệ nếu cần",
@@ -1131,7 +1128,7 @@ VALUES ('golden-sun-dalat','{
     "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
     "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
   ],
-  "star_rating_note": "Hạng 5 sao theo người dùng cung cấp; chưa xác minh độc lập."
+  "star_rating_note": "Hạng 3 sao theo xác nhận bổ sung của người dùng; chưa xác minh độc lập."
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
