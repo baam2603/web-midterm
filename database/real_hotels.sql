@@ -615,4 +615,131 @@ VALUES ('hotel-colline-dalat','{
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
+-- 05. Swiss-Belresort Tuyền Lâm - Đà Lạt: dữ liệu do người dùng cung cấp.
+INSERT INTO threek_hotel_data_drafts (hotel_slug,payload)
+VALUES ('swiss-belresort-tuyen-lam-dalat','{
+  "slug": "swiss-belresort-tuyen-lam-dalat",
+  "name": "Swiss-Belresort Tuyền Lâm - Đà Lạt",
+  "city": "dalat",
+  "type": "resort",
+  "address": "Phân khu chức năng 7.8, Khu du lịch Hồ Tuyền Lâm, Phường Xuân Hương (Phường 3 / Phường 4 cũ), Thành phố Đà Lạt, Tỉnh Lâm Đồng",
+  "contact_phone": null,
+  "stars": 4,
+  "latitude": 11.8985,
+  "longitude": 108.4282,
+  "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
+  "checkin_time": "14:00:00",
+  "checkout_time": "12:00:00",
+  "price_per_night": 1950000,
+  "description": "Khu nghỉ dưỡng trong không gian thiên nhiên xanh mát thuộc Khu du lịch Hồ Tuyền Lâm, Đà Lạt.",
+  "nearby_notes": [
+    "Khu du lịch Hồ Tuyền Lâm"
+  ],
+  "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
+  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "rooms": [
+    {
+      "code": "deluxe-golf-view",
+      "name": "Deluxe Golf View",
+      "source_name_candidates": "Deluxe Golf View",
+      "actual_room_name": "Deluxe Golf View",
+      "description": "Phòng Deluxe hướng sân golf, có lựa chọn giường King hoặc hai giường Twin.",
+      "reported_features": [],
+      "unconfirmed_features": [],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 1950000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": 6,
+      "total_rooms": 25,
+      "area_m2": null,
+      "bed_type": "1 giường King (1.8m x 2m) hoặc 2 giường Twin",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng tiêu chuẩn quốc tế theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 3,
+      "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "grand-deluxe-mountain-view",
+      "name": "Grand Deluxe Mountain View",
+      "source_name_candidates": "Grand Deluxe Mountain View",
+      "actual_room_name": "Grand Deluxe Mountain View",
+      "description": "Phòng Grand Deluxe hướng núi, bố trí một giường King lớn.",
+      "reported_features": [],
+      "unconfirmed_features": [],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 2850000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 30,
+      "area_m2": null,
+      "bed_type": "1 giường King lớn cao cấp",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng tiêu chuẩn quốc tế theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 5,
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "premium-suite",
+      "name": "Penthouse / Presidential Suite",
+      "source_name_candidates": "Penthouse / Presidential Suite",
+      "actual_room_name": null,
+      "description": "Nhóm phòng cao cấp có một giường King và khu vực phòng khách riêng; tên hạng cụ thể cần xác nhận.",
+      "reported_features": [],
+      "unconfirmed_features": [
+        "Tên hạng chính xác: Penthouse hay Presidential Suite"
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 6200000,
+      "capacity": 4,
+      "max_adults": 2,
+      "max_children": 2,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 6,
+      "area_m2": null,
+      "bed_type": "1 giường King thượng hạng; khu vực phòng khách riêng không mặc định là giường phụ",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng tiêu chuẩn quốc tế theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 7,
+      "cancellation_policy": "Miễn phí hủy trước 7 ngày; không hoàn tiền nếu hủy muộn.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    }
+  ],
+  "missing_for_publication": [
+    "Xác nhận tên hạng cao cấp: Penthouse hay Presidential Suite; không gộp hai loại phòng nếu khác nhau",
+    "Xác nhận địa chỉ/phường chính thức; giữ nguyên hai phường cũ theo thông tin cung cấp",
+    "Ảnh: người dùng sẽ bổ sung sau",
+    "Số điện thoại liên hệ nếu cần",
+    "Diện tích phòng nếu cần hiển thị",
+    "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
+    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
+    "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
+    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+  ]
+}')
+ON DUPLICATE KEY UPDATE payload=VALUES(payload);
+
 COMMIT;
