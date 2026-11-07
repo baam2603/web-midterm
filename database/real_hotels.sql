@@ -1135,4 +1135,132 @@ VALUES ('golden-sun-dalat','{
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
+-- 09. Khách sạn Len's Đà Lạt: dữ liệu do người dùng cung cấp.
+INSERT INTO threek_hotel_data_drafts (hotel_slug,payload)
+VALUES ('lens-dalat','{
+  "slug": "lens-dalat",
+  "name": "Khách sạn Len''s Đà Lạt",
+  "city": "dalat",
+  "type": "hotel",
+  "address": "Số 113 Đường Bùi Thị Xuân, Phường 2, Thành phố Đà Lạt, Tỉnh Lâm Đồng",
+  "contact_phone": null,
+  "stars": 4,
+  "latitude": 11.9472,
+  "longitude": 108.4361,
+  "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
+  "checkin_time": "14:00:00",
+  "checkout_time": "12:00:00",
+  "price_per_night": 1050000,
+  "description": "Khách sạn trên đường Bùi Thị Xuân, gần khu vực trung tâm Hòa Bình và chợ đêm Đà Lạt, thuận tiện di chuyển và mua sắm theo thông tin người dùng cung cấp.",
+  "nearby_notes": [
+    "Trung tâm Hòa Bình",
+    "Chợ đêm Đà Lạt"
+  ],
+  "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
+  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "rooms": [
+    {
+      "code": "standard",
+      "name": "Standard Room",
+      "source_name_candidates": "Standard Room",
+      "actual_room_name": "Standard Room",
+      "description": "Phòng Standard bố trí một giường Double.",
+      "reported_features": [],
+      "unconfirmed_features": [],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 1050000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": 6,
+      "total_rooms": 15,
+      "area_m2": null,
+      "bed_type": "1 giường Double (1.5m x 2m)",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 2,
+      "cancellation_policy": "Miễn phí hủy trước 2 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "superior-city-view",
+      "name": "Superior City View",
+      "source_name_candidates": "Superior City View",
+      "actual_room_name": "Superior City View",
+      "description": "Phòng Superior hướng thành phố, có lựa chọn giường King hoặc hai giường Twin.",
+      "reported_features": [],
+      "unconfirmed_features": [],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 1550000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 25,
+      "area_m2": null,
+      "bed_type": "1 giường King (1.8m x 2m) hoặc 2 giường Twin",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 3,
+      "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "executive-suite",
+      "name": "Executive Suite",
+      "source_name_candidates": "Executive Suite",
+      "actual_room_name": "Executive Suite",
+      "description": "Phòng Executive Suite bố trí một giường King lớn và khu vực ghế sofa thư giãn.",
+      "reported_features": [],
+      "unconfirmed_features": [
+        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm"
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 2950000,
+      "capacity": 4,
+      "max_adults": 2,
+      "max_children": 2,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 6,
+      "area_m2": null,
+      "bed_type": "1 giường King lớn cao cấp; khu vực ghế sofa thư giãn không mặc định là giường phụ",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 5,
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    }
+  ],
+  "missing_for_publication": [
+    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
+    "Ảnh: người dùng sẽ bổ sung sau",
+    "Số điện thoại liên hệ nếu cần",
+    "Diện tích phòng nếu cần hiển thị",
+    "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
+    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
+    "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
+    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+  ],
+  "star_rating_note": "Hạng 4 sao theo người dùng cung cấp; chưa xác minh độc lập."
+}')
+ON DUPLICATE KEY UPDATE payload=VALUES(payload);
+
 COMMIT;
