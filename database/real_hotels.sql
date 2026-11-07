@@ -871,4 +871,138 @@ VALUES ('new-life-hotel-dalat','{
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
+-- 07. Khách sạn Ngọc Phát Đà Lạt: dữ liệu do người dùng cung cấp.
+INSERT INTO threek_hotel_data_drafts (hotel_slug,payload)
+VALUES ('ngoc-phat-dalat','{
+  "slug": "ngoc-phat-dalat",
+  "name": "Khách sạn Ngọc Phát Đà Lạt",
+  "city": "dalat",
+  "type": "hotel",
+  "address": "Số 10 Đường Hồ Tùng Mậu, Phường 10, Thành phố Đà Lạt, Tỉnh Lâm Đồng",
+  "address_note": "Phường 10 theo người dùng cung cấp, kèm mô tả thay thế khu vực trung tâm giáp Hồ Xuân Hương; cần xác nhận địa chỉ/phường chính thức.",
+  "contact_phone": null,
+  "stars": 3,
+  "latitude": 11.9405,
+  "longitude": 108.4388,
+  "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
+  "checkin_time": "14:00:00",
+  "checkout_time": "12:00:00",
+  "price_per_night": 1250000,
+  "description": "Khách sạn tại đường Hồ Tùng Mậu, gần khu vực Hồ Xuân Hương và Quảng trường Lâm Viên theo thông tin người dùng cung cấp.",
+  "nearby_notes": [
+    "Hồ Xuân Hương",
+    "Quảng trường Lâm Viên"
+  ],
+  "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
+  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "rooms": [
+    {
+      "code": "superior-view",
+      "name": "Superior Lake / City View",
+      "source_name_candidates": "Superior Lake / City View",
+      "actual_room_name": null,
+      "description": "Nhóm phòng Superior có lựa chọn giường Double hoặc Twin; tên và hướng nhìn cụ thể cần xác nhận.",
+      "reported_features": [],
+      "unconfirmed_features": [
+        "Xác nhận Superior Lake View và Superior City View là hai hạng khác nhau hay một hạng có lựa chọn hướng nhìn"
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 1250000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": 6,
+      "total_rooms": 25,
+      "area_m2": null,
+      "bed_type": "1 giường Double hoặc 2 giường Twin",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 3,
+      "cancellation_policy": "Miễn phí hủy trước 3 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "deluxe-park-view",
+      "name": "Deluxe Park View",
+      "source_name_candidates": "Deluxe Park View",
+      "actual_room_name": "Deluxe Park View",
+      "description": "Phòng Deluxe hướng công viên, bố trí một giường King.",
+      "reported_features": [],
+      "unconfirmed_features": [],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 1850000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 35,
+      "area_m2": null,
+      "bed_type": "1 giường King (1.8m x 2m)",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 3,
+      "cancellation_policy": "Miễn phí hủy trước 3 ngày; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "premium-suite",
+      "name": "Suite / VIP Room",
+      "source_name_candidates": "Suite / VIP Room",
+      "actual_room_name": null,
+      "description": "Nhóm phòng cao cấp có giường King lớn và khu vực tiếp khách riêng; tên hạng cụ thể cần xác nhận.",
+      "reported_features": [],
+      "unconfirmed_features": [
+        "Tên hạng chính xác: Suite hay VIP Room",
+        "Cơ sở tính phí hủy 100%: toàn bộ thời gian lưu trú hay một đêm"
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 3400000,
+      "capacity": 4,
+      "max_adults": 2,
+      "max_children": 2,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 8,
+      "area_m2": null,
+      "bed_type": "1 giường King lớn; khu vực tiếp khách riêng không mặc định là giường phụ",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 5,
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 100% (cần xác nhận cơ sở tính phí).",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    }
+  ],
+  "missing_for_publication": [
+    "Xác nhận địa chỉ/phường chính thức",
+    "Xác nhận tên hạng cơ bản: Superior Lake View hay Superior City View, và phân bổ tồn phòng nếu là hai hạng khác nhau",
+    "Xác nhận tên hạng cao cấp: Suite hay VIP Room; không gộp hai loại phòng nếu khác nhau",
+    "Xác nhận cơ sở tính phí hủy 100% của hạng cao cấp",
+    "Ảnh: người dùng sẽ bổ sung sau",
+    "Số điện thoại liên hệ nếu cần",
+    "Diện tích phòng nếu cần hiển thị",
+    "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
+    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
+    "Xác minh tọa độ và thông tin khách sạn trước khi công khai",
+    "Đối chiếu cơ chế backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+  ]
+}')
+ON DUPLICATE KEY UPDATE payload=VALUES(payload);
+
 COMMIT;
