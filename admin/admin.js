@@ -1021,8 +1021,8 @@
             <textarea name="features" rows="4" placeholder="Wifi miễn phí&#10;Ban công riêng&#10;Bồn tắm"></textarea>
           </label>
           <div class="tk-flexcols">
-            <label><input type="checkbox" name="breakfast_included" style="width:auto"> Giá này đã bao gồm bữa sáng</label>
-            <label><input type="checkbox" name="free_cancellation" style="width:auto"> Cho phép hủy miễn phí theo chính sách đã công bố</label>
+            <label class="tk-room-checkbox"><input type="checkbox" name="breakfast_included"><span>Giá này đã bao gồm bữa sáng</span></label>
+            <label class="tk-room-checkbox"><input type="checkbox" name="free_cancellation"><span>Cho phép hủy miễn phí theo chính sách đã công bố</span></label>
           </div>
           <label>Mô tả loại phòng
             <textarea name="description" maxlength="3000" rows="3"
@@ -1082,8 +1082,8 @@
             <textarea name="features" rows="3"></textarea>
           </label>
           <div class="tk-flexcols">
-            <label><input type="checkbox" name="breakfast_included" style="width:auto"> Bao gồm bữa sáng</label>
-            <label><input type="checkbox" name="free_cancellation" style="width:auto"> Hủy miễn phí theo chính sách</label>
+            <label class="tk-room-checkbox"><input type="checkbox" name="breakfast_included"><span>Bao gồm bữa sáng</span></label>
+            <label class="tk-room-checkbox"><input type="checkbox" name="free_cancellation"><span>Hủy miễn phí theo chính sách</span></label>
           </div>
           <label>Mô tả loại phòng
             <textarea name="description" rows="3" maxlength="3000"></textarea>
