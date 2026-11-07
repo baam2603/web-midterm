@@ -1788,4 +1788,137 @@ VALUES ('new-wave-vung-tau','{
 }')
 ON DUPLICATE KEY UPDATE payload=VALUES(payload);
 
+-- 14. Pullman Vũng Tàu: dữ liệu do người dùng cung cấp.
+INSERT INTO threek_hotel_data_drafts (hotel_slug,payload)
+VALUES ('pullman-vung-tau','{
+  "slug": "pullman-vung-tau",
+  "name": "Pullman Vũng Tàu",
+  "city": "vungtau",
+  "type": "hotel",
+  "address": "Số 15 Đường Thi Sách, Phường Thắng Tam, Thành phố Vũng Tàu, Tỉnh Bà Rịa - Vũng Tàu",
+  "contact_phone": null,
+  "stars": 5,
+  "latitude": 10.3512,
+  "longitude": 107.0875,
+  "location_source": "Tọa độ do người dùng cung cấp, chưa đối chiếu bản đồ",
+  "checkin_time": "14:00:00",
+  "checkout_time": "12:00:00",
+  "price_per_night": 2700000,
+  "description": "Khách sạn mang thương hiệu Pullman thuộc Accor, thiết kế đương đại và có không gian hội nghị lớn theo thông tin người dùng cung cấp. Vị trí gần khu vực Bãi Sau và các điểm ăn uống.",
+  "nearby_notes": [
+    "Khu vực Bãi Sau"
+  ],
+  "source": "Thông tin do người dùng cung cấp; chưa xác minh độc lập",
+  "publication_status": "draft_pending_policy_and_backend_mapping",
+  "rooms": [
+    {
+      "code": "superior",
+      "name": "Superior Room",
+      "source_name_candidates": "Superior Room",
+      "actual_room_name": "Superior Room",
+      "description": "Phòng Superior có lựa chọn một giường King hoặc hai giường Twin.",
+      "reported_features": [],
+      "unconfirmed_features": [
+        "Xác nhận lựa chọn King/Twin dùng chung hay tách tồn phòng; 30 phòng là tổng do người dùng cung cấp, không nhân đôi."
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 2700000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": 6,
+      "total_rooms": 30,
+      "area_m2": null,
+      "bed_type": "1 giường King (1.8m x 2m) hoặc 2 giường Twin",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng tiêu chuẩn 5 sao quốc tế theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 5,
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày so với ngày nhận phòng; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "deluxe-ocean-view",
+      "name": "Deluxe Ocean View",
+      "source_name_candidates": "Deluxe Ocean View",
+      "actual_room_name": "Deluxe Ocean View",
+      "description": "Phòng Deluxe hướng biển, bố trí một giường King lớn.",
+      "reported_features": [],
+      "unconfirmed_features": [],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 3900000,
+      "capacity": 3,
+      "max_adults": 2,
+      "max_children": 1,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 40,
+      "area_m2": null,
+      "bed_type": "1 giường King lớn cao cấp hướng biển",
+      "breakfast_included": true,
+      "breakfast_note": "Đã bao gồm buffet sáng tiêu chuẩn 5 sao quốc tế theo thông tin người dùng cung cấp.",
+      "free_cancellation": true,
+      "cancellation_free_before_days": 5,
+      "cancellation_policy": "Miễn phí hủy trước 5 ngày; hủy muộn tính phí 1 đêm.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    },
+    {
+      "code": "pullman-suite",
+      "name": "Pullman Suite",
+      "source_name_candidates": "Pullman Suite",
+      "actual_room_name": "Pullman Suite",
+      "description": "Phòng Pullman Suite bố trí một giường King và khu vực phòng khách riêng.",
+      "reported_features": [],
+      "unconfirmed_features": [
+        "Chọn chính sách không hoàn hủy hoặc gói báo trước 10 ngày; cần xác nhận điều kiện hoàn tiền và phí hủy muộn",
+        "Nội dung và điều kiện sử dụng Executive Lounge theo gói"
+      ],
+      "reference_price_min_vnd": null,
+      "reference_price_max_vnd": null,
+      "price_per_night": 8200000,
+      "capacity": 4,
+      "max_adults": 2,
+      "max_children": 2,
+      "child_age_limit_exclusive": null,
+      "total_rooms": 8,
+      "area_m2": null,
+      "bed_type": "1 giường King thượng hạng; khu vực phòng khách riêng không mặc định là giường phụ",
+      "breakfast_included": true,
+      "breakfast_note": "Theo người dùng, gồm buffet sáng và đặc quyền Executive Lounge; cần xác nhận nội dung đặc quyền, đối tượng và điều kiện theo gói giá.",
+      "free_cancellation": null,
+      "cancellation_free_before_days": null,
+      "cancellation_policy": "Chưa chọn: không hoàn hủy (Non-refundable) hoặc báo trước 10 ngày tùy chính sách gói phòng.",
+      "capacity_note": "Tổng số người theo giới hạn 2 người lớn và số trẻ em nêu trên; không cho phép tự đổi suất trẻ em thành người lớn. Backend hiện chỉ kiểm tra tổng khách nên chưa thể thực thi giới hạn tuổi/người lớn.",
+      "stock_source": "Số lượng quản lý trên ThreeK do người dùng cung cấp, không suy ra từ tồn phòng OTA.",
+      "price_source": "Giá bán cụ thể do người dùng cung cấp; chưa có ngày bắt đầu/kết thúc áp dụng.",
+      "images": [],
+      "is_active": false
+    }
+  ],
+  "missing_for_publication": [
+    "Chọn chính sách hủy và điều kiện hoàn tiền cụ thể cho Pullman Suite theo gói giá",
+    "Xác nhận lựa chọn giường King/Twin ở Superior quản lý chung hay tách tồn phòng",
+    "Nội dung đặc quyền Executive Lounge và điều kiện áp dụng",
+    "Ảnh: người dùng sẽ bổ sung sau",
+    "Số điện thoại liên hệ nếu cần",
+    "Diện tích phòng nếu cần hiển thị",
+    "Độ tuổi trẻ em cho các phòng chưa nêu; phụ thu trẻ em/giường phụ",
+    "Ngày áp dụng giá và ngoại lệ lễ/tết nếu có",
+    "Xác minh tọa độ, địa chỉ và thông tin khách sạn trước khi công khai",
+    "Đối chiếu backend với giới hạn người lớn/trẻ em và chính sách hủy theo từng loại phòng"
+  ],
+  "star_rating_note": "Hạng 5 sao theo người dùng cung cấp; chưa xác minh độc lập.",
+  "address_note": "Giữ địa chỉ theo thông tin người dùng cung cấp; địa giới hành chính hiện hành chưa được xác minh độc lập. Người dùng mô tả khu vực Bãi Thầy / Bãi Sau."
+}')
+ON DUPLICATE KEY UPDATE payload=VALUES(payload);
+
 COMMIT;
