@@ -1,5 +1,9 @@
 > **NHÁNH DEMO CỐ Ý CÓ LỖ HỔNG — demo/threek-vulnerable**
 >
+> Cập nhật 08/11/2026: đã vá riêng DOM XSS qua next trong auth/login.js. URL không
+> hợp lệ chuyển về trang chủ customer. Stored/reflected XSS, SQLi và CSRF của bản
+> demo chưa được vá trong thay đổi này. Dùng commit trước bản vá để quay phần DOM trước/sau.
+>
 > Được tạo từ main; không có trang /lab hoặc UI mới. Chỉ thay các điểm phòng thủ
 > trên luồng ThreeK có sẵn. Không deploy/merge nhánh này vào main. Chỉ localhost và
 > DB `threek_security_lab` được phép kết nối; DB gốc và peer ngoài loopback bị chặn.
@@ -7,7 +11,7 @@
 >
 > Các điểm demo: stored XSS ở review customer/admin; reflected XSS ở thông báo lỗi
 > tra cứu đơn (API phản hồi dữ liệu rồi renderer đưa vào HTML); DOM XSS ở next sau
-> đăng nhập; SQLi ở SELECT đăng nhập; CSRF ở hủy đơn của chính người dùng đang đăng
+> đăng nhập (đã vá, không còn thực thi javascript:); SQLi ở SELECT đăng nhập; CSRF ở hủy đơn của chính người dùng đang đăng
 > nhập. Giữ password_verify, session, quyền sở hữu và nghiệp vụ để web vẫn hoạt động.
 > “Có thể tấn công” không có nghĩa đã xóa mọi kiểm tra của toàn bộ website.
 >
