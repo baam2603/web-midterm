@@ -1,254 +1,405 @@
-# THREEK.COM — Website đặt phòng khách sạn
-
-Đồ án website đặt phòng tại Đà Lạt và Vũng Tàu, gồm giao diện khách hàng,
-trang quản trị và API PHP kết nối MariaDB. Tài khoản, đơn đặt phòng, yêu thích,
-bình luận và thông báo được lưu trong database; không chỉ lưu ở trình duyệt.
-
-## 1. Chức năng và công nghệ
-
-- Khách hàng: tìm khách sạn, xem phòng, chọn ngày/khách/số phòng, đặt phòng,
-  xem và hủy đơn theo điều kiện, yêu thích, bình luận, hồ sơ và hỗ trợ.
-- Tài khoản: đăng ký qua OTP email, đăng nhập, đổi/quên mật khẩu, đóng tài khoản.
-- Quản trị: khách sạn, phòng, giá/tồn phòng, đơn đặt, đánh giá, hỗ trợ và nhật ký.
-- Frontend: HTML, CSS, JavaScript; bản đồ Leaflet/OpenStreetMap.
-- Backend: PHP, PDO native prepared statements; MariaDB.
-- Email: Gmail SMTP qua PHPMailer hoặc Resend, gửi bằng mail worker.
-- VNPay là tích hợp tùy chọn. Chấm bài cơ bản dùng thanh toán tại khách sạn,
-  không cần tài khoản cổng thanh toán và không chuyển tiền thật.
-
-## 2. Yêu cầu máy chạy
-
-| Thành phần | Yêu cầu |
-| --- | --- |
-| PHP | 8.1 trở lên, khuyến nghị 8.3 |
-| PHP extensions | pdo_mysql, mbstring, curl, fileinfo, openssl |
-| Database | MariaDB 10.4 trở lên, khuyến nghị 10.11 |
-| Composer | 2.x, để cài PHPMailer khi dùng SMTP |
-| Trình duyệt | Chrome/Edge/Firefox phiên bản hiện hành |
-| Internet | Cần cho CDN/font, bản đồ và gửi email |
-
-Có thể dùng PHP/MariaDB trong XAMPP. Kiểm tra đúng phiên bản MariaDB;
-SQL migration dùng cú pháp MariaDB, không mặc định coi MySQL là tương đương.
-Không dùng Live Server, `python -m http.server` hoặc mở file HTML trực tiếp
-để chạy ứng dụng: các cách đó không thực thi PHP.
-
-## 3. Cài source và thư viện
-
-Giải nén source vào một thư mục, ví dụ `C:\xampp\htdocs\web-midterm`.
-Mở terminal tại thư mục chứa `README.md`, `composer.json` và `index1.html`:
-
-```sh
-php -v
-php -m
-composer install --no-dev --prefer-dist --optimize-autoloader
-```
-
-Nếu Windows chưa nhận lệnh `php`, thêm `C:\xampp\php` vào PATH rồi mở lại
-terminal. Composer cài lại thư mục `vendor/` từ `composer.lock`.
-Không cần `npm install` để chạy giao diện; Node/npm chỉ cần khi chạy các lệnh test.
-
-## 4. Tạo database và import SQL
-
-Khởi động MariaDB. Mở phpMyAdmin, tạo database `threek_booking` với charset
-`utf8mb4`, sau đó **chọn database này** và import lần lượt:
-
-| Thứ tự | File | Mục đích |
-| --- | --- | --- |
-| 1 | `database/schema.sql` | Cấu trúc ban đầu |
-| 2 | `database/seed.sql` | Dữ liệu mẫu nền |
-| 3 | `database/admin_migration.sql` | Bảng/cột quản trị |
-| 4 | `database/customer_migration.sql` | Đơn, tài khoản, thông báo, email |
-| 5 | `database/registration_otp_migration.sql` | Đăng ký qua OTP |
-| 6 | `database/account_closure_migration.sql` | Đóng tài khoản/ẩn danh |
-| 7 | `database/public_reviews_migration.sql` | Bình luận công khai |
-| 8 | `database/osm_location_migration.sql` | Vị trí OpenStreetMap |
-| 9 | `database/demo_hotels_ready.sql` | Danh mục cố định 20 khách sạn/60 loại phòng |
-
-File số 9 ẩn khách sạn ngoài danh mục demo nhưng giữ lại bản ghi cũ.
-Không import thêm `real_hotels.sql`; đây là dữ liệu tham khảo khác.
-Không có `security_migration.sql` trong bản main này, không cần tìm/import file đó.
-
-Có thể import bằng CLI MariaDB thay phpMyAdmin: đăng nhập bằng
-`mariadb -h 127.0.0.1 -P 3306 -u root -p`, sau đó:
-
-```sql
-CREATE DATABASE threek_booking CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE threek_booking;
-SOURCE database/schema.sql;
-SOURCE database/seed.sql;
-SOURCE database/admin_migration.sql;
-SOURCE database/customer_migration.sql;
-SOURCE database/registration_otp_migration.sql;
-SOURCE database/account_closure_migration.sql;
-SOURCE database/public_reviews_migration.sql;
-SOURCE database/osm_location_migration.sql;
-SOURCE database/demo_hotels_ready.sql;
-```
-
-Chạy CLI tại thư mục source để đường dẫn `SOURCE` đúng. Thay port/user theo máy.
-Các bước trên dành cho **database mới, trống**. Nếu đã có dữ liệu, sao lưu trước
-và chỉ import migration còn thiếu; không chạy lại `schema.sql` lên database đó.
-
-## 5. Cấu hình và chạy website
-
-Code đọc cấu hình từ **biến môi trường**, không tự động đọc file `.env`.
-Ví dụ MariaDB local ở cổng 3306, user root không mật khẩu:
-
-**Windows PowerShell:**
-
-```powershell
-$env:DB_HOST="127.0.0.1"
-$env:DB_PORT="3306"
-$env:DB_NAME="threek_booking"
-$env:DB_USER="root"
-$env:DB_PASSWORD=""
-$env:APP_BASE_URL="http://127.0.0.1:8000"
-$env:ONLINE_PAYMENTS_ENABLED="false"
-php -d upload_max_filesize=5M -d post_max_size=6M -S 127.0.0.1:8000 -t .
-```
-
-**Linux/macOS — Bash:**
-
-```bash
-export DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=threek_booking
-export DB_USER=root DB_PASSWORD=''
-export APP_BASE_URL=http://127.0.0.1:8000 ONLINE_PAYMENTS_ENABLED=false
-php -d upload_max_filesize=5M -d post_max_size=6M -S 127.0.0.1:8000 -t .
-```
-
-Thay `DB_PORT`, user và mật khẩu theo MariaDB thực tế. Mặc định trong code là
-**3308**, nên cần đặt `DB_PORT=3306` nếu máy dùng cổng phổ biến 3306.
-Để terminal này chạy trong lúc sử dụng. Dừng bằng Ctrl+C.
-PHP cần quyền ghi `uploads/`; không đặt quyền 777 cho toàn dự án.
-
-Mở lần lượt:
-
-1. <http://127.0.0.1:8000/api/setup-status.php>: `data.ready` phải là `true`,
-   `data.missing` là `[]`.
-2. <http://127.0.0.1:8000/api/hotels/index.php>: `status` là `success`, có dữ liệu.
-3. <http://127.0.0.1:8000/index1.html>: trang chủ.
-
-Dùng thống nhất `127.0.0.1:8000`; không đổi qua lại `localhost` trong cùng phiên.
-Nếu chạy bằng Apache/XAMPP thay PHP built-in server, phải cấu hình biến môi trường
-cho Apache riêng; biến trong PowerShell không tự truyền vào Apache đang chạy.
-
-## 6. Tạo tài khoản để giảng viên chấm bài (không cần email)
-
-Sau khi import đủ SQL ở mục 4, chọn database `threek_booking` trong phpMyAdmin
-và import thêm [database/demo_accounts.sql](database/demo_accounts.sql).
-Hoặc trong CLI MariaDB đã chọn database:
-
-```sql
-SOURCE database/demo_accounts.sql;
-```
-
-| Vai trò | Email đăng nhập | Mật khẩu |
-| --- | --- | --- |
-| Admin | `admin@gmail.com` | `admin123` |
-| Khách hàng A | `a@gmail.com` | `customer123` |
-| Khách hàng B | `b@gmail.com` | `customer123` |
-
-Đăng nhập tại `/auth/login.html`. Admin được chuyển vào trang quản trị.
-Mật khẩu trong bảng users được băm bằng PHP `password_hash()`.
-File có thể import lại: email đã tồn tại được giữ nguyên, không đổi mật khẩu hay quyền.
-Nếu email trùng tài khoản cũ, thông tin đăng nhập trong bảng trên chỉ áp dụng khi
-bản ghi đó do file này tạo mới. Dùng database local mới để chấm theo hướng dẫn.
-
-Đây là tài khoản **chỉ dùng local để chấm**, không import trên hosting công khai
-hoặc database có tài khoản thật. Tạo tài khoản bằng SQL không sửa hoặc bỏ qua
-cơ chế OTP của giao diện đăng ký.
-
-## 7. Bật đăng ký OTP và quên mật khẩu qua email (tùy chọn)
-
-Để chấm đăng ký/khôi phục thật, cần địa chỉ gửi email và cấu hình worker.
-Nếu chưa cấu hình, đăng ký mới bị chặn; vẫn dùng tài khoản local ở mục 6 để chấm
-đặt phòng, quản trị và các chức năng không cần email.
-
-Ví dụ Gmail SMTP: bật xác minh hai bước và tạo mật khẩu ứng dụng cho tài khoản gửi.
-Trước khi khởi động PHP server, cấu hình các biến sau trong terminal:
-
-| Biến | Giá trị ví dụ |
-| --- | --- |
-| `MAIL_TRANSPORT` | `smtp` |
-| `SMTP_HOST` | `smtp.gmail.com` |
-| `SMTP_PORT` | `587` |
-| `SMTP_ENCRYPTION` | `tls` |
-| `SMTP_USERNAME` | Email Gmail gửi thư |
-| `SMTP_PASSWORD` | Mật khẩu ứng dụng, không phải mật khẩu Gmail thông thường |
-| `MAIL_FROM` | Cùng email gửi thư |
-| `APP_BASE_URL` | `http://127.0.0.1:8000` |
-
-PowerShell đặt từng biến theo mẫu `$env:MAIL_TRANSPORT="smtp"`; Bash dùng
-`export MAIL_TRANSPORT=smtp`. Không lưu thông tin bí mật vào source nộp bài.
-Kiểm tra `/api/health-config.php`: `data.email` phải là `true`.
-
-Mở terminal thứ hai ở thư mục dự án, đặt **cùng cấu hình DB và email**, rồi chạy:
-
-```sh
-php scripts/mail-worker.php
-```
-
-Worker xử lý một đợt thư rồi thoát, không tự chạy liên tục. Khi đăng ký và popup OTP
-xuất hiện, chạy lệnh worker ngay để gửi thư; chạy lại sau mỗi lần yêu cầu/gửi lại mã.
-OTP và link khôi phục hết hạn sau 5 phút. Giữ cùng trình duyệt khi xác minh OTP.
-Xem thêm [hướng dẫn OTP](docs/REGISTRATION_OTP_SETUP.md).
-
-## 8. Kịch bản chạy thử/nghiệm thu
-
-1. Đăng nhập customer; mở Đà Lạt/Vũng Tàu, chọn ngày tương lai, số khách và phòng.
-2. Chọn khách sạn/phòng còn trống, điền thông tin, chọn **thanh toán tại khách sạn**,
-   hoàn thành đặt phòng; ghi lại mã đơn.
-3. Vào **Đặt phòng của tôi**, tải lại trang và mở chi tiết: đơn phải còn trong DB.
-4. Thử yêu thích, đăng bình luận, cập nhật hồ sơ và gửi yêu cầu hỗ trợ.
-5. Đăng xuất, đăng nhập admin; kiểm tra đơn, khách sạn, phòng và phản hồi hỗ trợ.
-6. Đăng nhập lại customer để kiểm tra phản hồi; thử hủy đơn đúng điều kiện.
-7. Nếu đã bật email, thử đăng ký OTP và quên mật khẩu với email mình sở hữu.
-
-Danh mục demo là dữ liệu học tập, không chứng minh tồn phòng thực tế. Một số khách sạn
-chưa có ảnh. Các lựa chọn thanh toán mô phỏng không chuyển tiền; không nhập thẻ thật.
-VNPay/hoàn tiền thật cần cấu hình và nghiệm thu nhà cung cấp riêng.
-
-## 9. Đóng gói để nộp
-
-Giữ source ứng dụng, `database/` chứa SQL, `README.md`, `docs/`, `sources/`,
-`composer.json`, `composer.lock`, `package.json`, `package-lock.json` và các file test.
-
-Trong **bản sao thư mục nộp bài**, loại bỏ `node_modules/`, `vendor/` ở gốc,
-`target/` nếu có, `.git/`, `.vscode/`, `__pycache__/`, log, file tạm, backup,
-`.env` và file chứa khóa/mật khẩu thật. Giảng viên khôi phục `vendor/` bằng Composer.
-Không xóa bản làm việc đang dùng khi chỉ cần tạo gói nộp.
-
-**Giữ `admin/vendor/leaflet/` và giấy phép đi kèm**: đây là tài nguyên frontend
-website tải trực tiếp, khác với `vendor/` Composer ở gốc. Giữ thư mục `uploads/`
-nhưng bỏ ảnh cá nhân/ảnh thử không cần thiết. Giữ `api/config/database.php`
-(kết nối qua biến môi trường), không đưa cấu hình bí mật từ máy cá nhân vào đó.
-
-## 10. Xử lý lỗi thường gặp
-
-| Hiện tượng | Kiểm tra |
-| --- | --- |
-| PHP hiện như văn bản/API không chạy | Dùng PHP server/Apache có PHP, không dùng server tĩnh |
-| Không kết nối database | MariaDB đã chạy; DB_HOST/PORT/NAME/USER/PASSWORD đúng |
-| Thiếu bảng/cột | Import đủ SQL theo đúng thứ tự; xem setup-status |
-| `could not find driver` hoặc thiếu mbstring | Bật pdo_mysql/mbstring trong php.ini của PHP đang chạy; khởi động lại |
-| Email chưa được cấu hình | Composer, SMTP, MAIL_FROM; hoặc dùng tài khoản local mục 6 |
-| OTP không đến | Chạy worker với cùng môi trường, kiểm tra thư rác/TLS/kết nối SMTP |
-| Không tải bản đồ/font | Kiểm tra Internet/CDN; không tắt xác minh TLS |
-| CSRF/phiên không hợp lệ | Tải lại trang, đăng nhập lại, giữ cùng host/port |
-| Upload thất bại | Quyền ghi uploads, ảnh JPEG/PNG/WebP ≤ 5 MB và giới hạn PHP |
-
-## 11. Kiểm thử tự động (dành cho người phát triển)
-
-Cần Docker, Node/npm, Python 3 và Playwright/Chromium theo các test của dự án.
-Chạy tại thư mục gốc:
-
-```sh
-npm run test:prepare
-npm run test:security
-npm test
-```
-
-Các script dùng container `web-midterm-admin-*` và database thử nghiệm riêng.
-Không chạy trên database đang chấm hoặc có dữ liệu thật. Không cần chạy bộ test
-để mở website theo các bước 1–8. Chi tiết bảo mật và giới hạn:
-[docs/security-hardening.md](docs/security-hardening.md).
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name=claude:viewport-fit-sides content=cover><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-right:env(safe-area-inset-right,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}</style><style>.md-table{overflow-x:auto}@media print{.md-table{overflow-x:visible}}</style><style>:root{color-scheme:light dark;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}}:root[data-theme="dark"]{color-scheme:dark;--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}:root[data-theme="light"]{color-scheme:light}@media print{:root,:root[data-theme="dark"]{color-scheme:light;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}}body{background:var(--md-bg);color:var(--md-text);max-width:720px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:10px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',sans-serif;overflow-wrap:break-word}body>:first-child{margin-top:0}h1,h2,h3,h4,h5,h6{margin:6px 0 0;line-height:1.25;font-weight:600;text-wrap:balance}h1{font-size:1.35em}h2{font-size:1.15em;color:var(--md-muted)}h3,h4,h5,h6{font-size:1em}p,ul,ol,blockquote,table,pre,hr{margin:0}strong{font-weight:600}a{color:var(--md-link);text-decoration:none}a:hover{text-decoration:underline}ul,ol{display:flex;flex-direction:column;gap:6px;padding-left:22px}ul{list-style:disc}ol{list-style:decimal}:is(li,td,th)>*+:is(p,ul,ol,blockquote){margin-top:6px}blockquote{display:flex;flex-direction:column;gap:10px;border-left:2px solid var(--md-rule);padding-left:10px;color:var(--md-muted)}:not(pre)>code{background:var(--md-fill);padding:1px 3px;border-radius:4px;font:.92em 'SF Mono',ui-monospace,Menlo,Consolas,monospace}a>code{background:none;color:inherit}pre{background:var(--md-fill);padding:10px 12px;border-radius:6px;overflow-x:auto;font:12px/1.5 'SF Mono',ui-monospace,Menlo,Consolas,monospace;margin-block:4px}pre code{background:none;padding:0;font:inherit}table{width:100%;border-collapse:separate;border-spacing:2px;font:inherit}th,td{padding:6px 8px;border-radius:3px;text-align:left;vertical-align:top}th{background:var(--md-fill-strong);font-weight:600}td{background:var(--md-fill)}:is(th,td) :not(pre)>code{background:transparent}hr{border:0;border-top:1px solid var(--md-rule-strong);margin-block:10px}img{max-width:100%;height:auto;border-radius:4px}</style>
+</head><body>
+<h1>THREEK.COM — Booking Demo: Common Website Attacks and Countermeasures</h1>
+<blockquote>
+<p>Đồ án môn học minh họa các lỗ hổng bảo mật web phổ biến (XSS, SQL Injection, CSRF, Phishing) trên một ứng dụng đặt phòng khách sạn thật, kèm bản vá tương ứng. Yêu cầu chính của đề bài là <strong>phần demo tấn công và khắc phục</strong> — các mục dưới đây được sắp xếp để phục vụ đúng trọng tâm đó.</p>
+</blockquote>
+<hr>
+<h2>1. Yêu cầu đề bài (trọng tâm)</h2>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Hạng mục</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Loại tấn công cần trình bày</strong></td>
+<td>XSS, SQL Injection, CSRF, Phishing</td>
+</tr>
+<tr>
+<td><strong>Ví dụ minh họa</strong></td>
+<td>Kịch bản thực tế cho thấy thiệt hại khi bị tấn công</td>
+</tr>
+<tr>
+<td><strong>Biện pháp khắc phục</strong></td>
+<td>Input validation, escaping, security headers</td>
+</tr>
+<tr>
+<td><strong>Yêu cầu demo</strong></td>
+<td>Xây dựng ứng dụng có phòng thủ chống XSS/SQLi + mô phỏng một kịch bản tấn công có kiểm soát, cho thấy cả lỗ hổng lẫn bản vá</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Phần còn lại của README (cài đặt, cấu trúc thư mục...) chỉ là <strong>phụ</strong>, phục vụ cho việc chạy được phần demo ở Mục 4.</p>
+<hr>
+<h2>2. Cài đặt database</h2>
+<h3>2.1. Thứ tự import file SQL (bắt buộc đúng thứ tự)</h3>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Thứ tự</th>
+<th>File</th>
+<th>Mục đích</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>database/schema.sql</code></td>
+<td>Cấu trúc ban đầu</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>database/seed.sql</code></td>
+<td>Dữ liệu mẫu nền</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>database/admin_migration.sql</code></td>
+<td>Bảng/cột quản trị</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>database/customer_migration.sql</code></td>
+<td>Đơn, tài khoản, thông báo, email</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>database/registration_otp_migration.sql</code></td>
+<td>Đăng ký qua OTP</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>database/account_closure_migration.sql</code></td>
+<td>Đóng tài khoản/ẩn danh</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>database/public_reviews_migration.sql</code></td>
+<td>Bình luận công khai</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>database/osm_location_migration.sql</code></td>
+<td>Vị trí OpenStreetMap</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>database/demo_hotels_ready.sql</code></td>
+<td>Danh mục cố định 20 khách sạn/60 loại phòng</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>database/demo_accounts.sql</code></td>
+<td>3 tài khoản demo (1 admin, 2 customer)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Import lần lượt bằng phpMyAdmin hoặc dòng lệnh:</p>
+<pre><code class="language-bash">mysql -u root -p ten_database &lt; database/schema.sql
+mysql -u root -p ten_database &lt; database/seed.sql
+mysql -u root -p ten_database &lt; database/admin_migration.sql
+mysql -u root -p ten_database &lt; database/customer_migration.sql
+mysql -u root -p ten_database &lt; database/registration_otp_migration.sql
+mysql -u root -p ten_database &lt; database/account_closure_migration.sql
+mysql -u root -p ten_database &lt; database/public_reviews_migration.sql
+mysql -u root -p ten_database &lt; database/osm_location_migration.sql
+mysql -u root -p ten_database &lt; database/demo_hotels_ready.sql
+mysql -u root -p ten_database &lt; database/demo_accounts.sql
+</code></pre>
+<h3>2.2. Tài khoản demo sẵn có</h3>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Vai trò</th>
+<th>Email</th>
+<th>Mật khẩu</th>
+<th>Truy cập qua</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Admin</td>
+<td><code>admin@gmail.com</code></td>
+<td><code>admin123</code></td>
+<td><code>admin/index.html</code></td>
+</tr>
+<tr>
+<td>Customer</td>
+<td><code>a@gmail.com</code></td>
+<td><code>customer123</code></td>
+<td><code>index.html</code></td>
+</tr>
+<tr>
+<td>Customer</td>
+<td><code>b@gmail.com</code></td>
+<td><code>customer123</code></td>
+<td><code>index.html</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2>3. Chạy ứng dụng</h2>
+<ul>
+<li><strong>Khách hàng:</strong> mở <code>index.html</code></li>
+<li><strong>Quản trị:</strong> mở <code>admin/index.html</code></li>
+<li>Yêu cầu máy chủ PHP + MySQL đang chạy (ví dụ XAMPP/Laragon), đặt project trong thư mục web server, chạy qua <code>http://localhost:&lt;port&gt;/...</code> (không mở trực tiếp file <code>.html</code> bằng <code>file://</code>, vì các request API cần cùng origin).</li>
+</ul>
+<hr>
+<h2>4. Kiểm thử tấn công trên bản hoàn thiện (đã vá) và kết quả mong đợi</h2>
+<blockquote>
+<p>Mục đích của phần này là <strong>chứng minh các bản vá đang hoạt động đúng</strong> trên bản hoàn thiện — không tắt/sửa bất kỳ phòng thủ nào. Mỗi mục liệt kê payload thử nghiệm và kết quả <strong>mong đợi là bị chặn</strong>, kèm giải thích cơ chế chặn nằm ở đâu trong code.</p>
+</blockquote>
+<h3>4.1. Thử xử lý input nghi vấn XSS — Trang tra cứu đơn đặt phòng</h3>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th></th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vị trí</strong></td>
+<td><code>booking/lookup.html</code> + <code>booking/lookup.js</code> (yêu cầu đăng nhập, dùng tài khoản customer ở Mục 2.2)</td>
+</tr>
+<tr>
+<td><strong>Payload thử nghiệm</strong></td>
+<td><code>&lt;img src=x onerror=alert('Reflected XSS Demo')&gt;</code> (47 ký tự)</td>
+</tr>
+<tr>
+<td><strong>Cách thực hiện</strong></td>
+<td>Đăng nhập → vào <code>lookup.html</code> → dán payload vào ô &quot;Mã đặt phòng&quot; → bấm &quot;Tra cứu đơn&quot;</td>
+</tr>
+<tr>
+<td><strong>Kết quả thực tế quan sát được</strong></td>
+<td><strong>Không có popup.</strong> API trả về <code>404</code> kèm thông báo <strong>cố định</strong> &quot;Không tìm thấy đơn thuộc tài khoản này.&quot; — payload không hề bị phản chiếu lại trong response</td>
+</tr>
+<tr>
+<td><strong>Cơ chế thật trong code</strong></td>
+<td><code>booking/lookup.js</code> gán kết quả lỗi bằng <code>out.textContent = e.message;</code> — dùng <code>textContent</code>, không phải <code>innerHTML</code>, nên dù có chèn gì vào cũng chỉ hiển thị như chữ thường chứ không liên quan đến việc có escape hay không</td>
+</tr>
+<tr>
+<td><strong>Kết luận đúng về bản chất</strong></td>
+<td>Đây là <strong>phép thử khả năng xử lý input nghi vấn XSS một cách an toàn</strong> (input handling test) — không phải minh họa trực tiếp một luồng <em>reflected</em> HTML thật, vì API không phản chiếu payload vào thông báo lỗi để kiểm chứng việc escape có hoạt động hay không. Nếu muốn minh họa đúng nghĩa luồng reflected (server/JS phản chiếu input vào DOM), cần tìm một điểm khác trong ứng dụng có hành vi phản chiếu thật, hoặc nêu rõ trong báo cáo rằng đây là test phòng thủ đầu vào, không phải PoC khai thác</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>4.2. Thử DOM-based XSS — Redirect sau đăng nhập qua tham số <code>next</code></h3>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th></th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vị trí</strong></td>
+<td><code>auth/login.html</code></td>
+</tr>
+<tr>
+<td><strong>Payload thử nghiệm</strong></td>
+<td><code>javascript:alert('DOM-XSS')</code></td>
+</tr>
+<tr>
+<td><strong>URL thử nghiệm</strong></td>
+<td><code>auth/login.html?next=javascript%3Aalert%28%27DOM-XSS%27%29</code></td>
+</tr>
+<tr>
+<td><strong>Cách thực hiện</strong></td>
+<td>Mở URL trên → đăng nhập bằng tài khoản customer thật (<code>a@gmail.com</code> / <code>customer123</code>)</td>
+</tr>
+<tr>
+<td><strong>Kết quả mong đợi (đã vá)</strong></td>
+<td><strong>Không có popup.</strong> Sau khi đăng nhập thành công, hệ thống chuyển thẳng đến trang chủ khách hàng (<code>index1.html</code>) thay vì thực thi <code>next</code></td>
+</tr>
+<tr>
+<td><strong>Cơ chế chặn</strong></td>
+<td>Hàm <code>safeCustomerDestination()</code> áp dụng allowlist: chỉ chấp nhận <code>next</code> là đường dẫn nội bộ bắt đầu bằng <code>/</code>, từ chối mọi scheme khác (<code>javascript:</code>, <code>data:</code>...), từ chối <code>//</code> (tránh trỏ sang domain khác), và chặn riêng việc đưa customer vào khu vực <code>/admin/</code>. Nếu <code>next</code> không hợp lệ, hàm trả về <code>null</code> và hệ thống dùng trang mặc định thay thế</td>
+</tr>
+<tr>
+<td><strong>Ý nghĩa với kịch bản tấn công thật</strong></td>
+<td>Nếu thiếu allowlist này, script độc hại sẽ chạy đúng thời điểm session vừa đăng nhập. Lưu ý: cookie phiên của hệ thống có thuộc tính <code>HttpOnly</code>, nên JavaScript <strong>không đọc trực tiếp được</strong> giá trị cookie đó. XSS vẫn nguy hiểm trong trường hợp này vì script chạy cùng origin có thể <strong>tự gọi API bằng chính phiên của nạn nhân</strong> (cookie vẫn tự động gửi kèm mỗi request), qua đó đọc/ghi dữ liệu cá nhân mà không cần biết giá trị cookie</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>4.3. Thử Stored XSS — Bình luận/đánh giá công khai</h3>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th></th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vị trí</strong></td>
+<td><code>hotel/reviews.js</code> (hiển thị bình luận công khai) và <code>admin/admin-operations.js</code> (hiển thị bình luận trong bảng quản trị)</td>
+</tr>
+<tr>
+<td><strong>Điều kiện đăng bình luận</strong></td>
+<td>Phải đăng nhập (tài khoản customer ở Mục 2.2); <strong>không</strong> yêu cầu đã từng đặt phòng — bình luận hiện đăng ngay sau khi submit</td>
+</tr>
+<tr>
+<td><strong>Payload thử nghiệm</strong></td>
+<td><code>&lt;img src=x onerror=alert('Stored XSS Demo')&gt;</code> nhập vào ô đánh giá, submit</td>
+</tr>
+<tr>
+<td><strong>Kết quả mong đợi (đã vá)</strong></td>
+<td>Sau khi submit, xem lại trang có bình luận đó (kể cả tài khoản/trình duyệt khác) → <strong>không có popup</strong>, nội dung hiển thị dưới dạng văn bản thuần túy</td>
+</tr>
+<tr>
+<td><strong>Cơ chế chặn</strong></td>
+<td><code>hotel/reviews.js</code> escape nội dung bình luận và tên tác giả trước khi render ra trang công khai: <code>esc(r.comment)</code> và <code>esc(r.author)</code>. <code>admin/admin-operations.js</code> cũng escape nội dung tương ứng khi hiển thị trong bảng quản trị, nên admin xem danh sách bình luận cũng không bị ảnh hưởng</td>
+</tr>
+<tr>
+<td><strong>Vì sao đáng chú ý hơn Reflected</strong></td>
+<td>Payload chỉ cần đăng <strong>một lần</strong>; sau đó <strong>mọi người</strong> xem trang (khách khác, admin xem bảng quản trị...) đều có khả năng bị ảnh hưởng nếu thiếu escape — khác với Reflected vốn cần lừa từng nạn nhân bấm link riêng lẻ</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>4.4. Thử SQL Injection — Form đăng nhập</h3>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th></th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vị trí</strong></td>
+<td><code>api/auth/login.php</code></td>
+</tr>
+<tr>
+<td><strong>Payload thử nghiệm</strong></td>
+<td><code>' OR 1=1 -- </code> trong trường <code>email</code></td>
+</tr>
+<tr>
+<td><strong>Cách gửi</strong></td>
+<td>Gửi thẳng request JSON vào endpoint API (ví dụ bằng DevTools → tab Network → &quot;Copy as fetch&quot;, hoặc công cụ như Postman/curl), <strong>không điền qua form trên giao diện</strong> — vì ô email trên form có thể bị chặn bởi validation định dạng email của trình duyệt (thuộc tính <code>type=&quot;email&quot;</code>) trước khi kịp gửi đi</td>
+</tr>
+<tr>
+<td><strong>Kết quả mong đợi (đã vá)</strong></td>
+<td>API trả về <code>401</code> (hoặc mã lỗi xác thực tương ứng), <strong>không cấp phiên đăng nhập mới</strong>, không có bản ghi người dùng nào được trả về</td>
+</tr>
+<tr>
+<td><strong>Cơ chế chặn</strong></td>
+<td><code>api/auth/login.php</code> dùng <strong>prepared statement</strong> của PDO, tham số hóa đầy đủ:</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre><code class="language-php">$stmt = $pdo-&gt;prepare(
+    &#34;SELECT id,email,password_hash,full_name,display_name,phone,birthday,role,session_version,deleted_at
+     FROM users WHERE email = :email LIMIT 1&#34;
+);
+$stmt-&gt;execute([
+    &#34;email&#34; =&gt; $email,
+]);
+$user = $stmt-&gt;fetch();
+</code></pre>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th></th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vì sao an toàn</strong></td>
+<td>Vì <code>:email</code> được truyền qua tham số (<code>execute([&quot;email&quot; =&gt; $email])</code>) thay vì nối chuỗi trực tiếp vào câu SQL, driver PDO gửi dữ liệu và câu lệnh SQL tách biệt xuống MySQL — bất kỳ ký tự đặc biệt nào (<code>'</code>, <code>OR</code>, <code>--</code>...) trong <code>$email</code> đều được hiểu là <strong>dữ liệu</strong>, không phải <strong>cú pháp SQL</strong></td>
+</tr>
+<tr>
+<td><strong>Phạm vi kết luận (quan trọng)</strong></td>
+<td>Chỉ nên kết luận: <em>&quot;các payload và luồng đã kiểm tra (payload <code>' OR 1=1 -- </code> gửi qua API cho form đăng nhập) đều bị chặn đúng như mong đợi&quot;</em> — <strong>không</strong> khái quát thành &quot;an toàn tuyệt đối với mọi input SQL injection&quot;, vì chưa kiểm thử hết các điểm nhập liệu khác trong ứng dụng (tìm kiếm, lọc, các API khác...)</td>
+</tr>
+<tr>
+<td><strong>Đối chiếu để báo cáo</strong></td>
+<td>Nếu trong quá trình phát triển từng có một &quot;nhánh thử nghiệm&quot; nối chuỗi <code>email</code> trực tiếp vào <code>SELECT</code> (không dùng <code>:email</code>/<code>execute([...])</code>) để minh họa lỗ hổng, nhánh đó <strong>không nên tồn tại trong bản nộp cuối cùng</strong> — chỉ giữ lại duy nhất phiên bản dùng prepared statement ở trên</td>
+</tr>
+<tr>
+<td><strong>Nguyên tắc chung cần nêu trong bài luận</strong></td>
+<td>Luôn dùng prepared statement/parameterized query cho mọi câu lệnh SQL có chứa input người dùng; không tự ráp chuỗi SQL bằng phép nối (<code>.</code>/<code>+</code>) dù đã lọc ký tự đặc biệt thủ công</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2>5. Bảng tổng kết nguyên lý 3 loại XSS</h2>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Loại</th>
+<th>Mã độc nằm ở đâu</th>
+<th>Nạn nhân cần làm gì để dính</th>
+<th>Vị trí demo trong project này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reflected</td>
+<td>Trong request, không lưu lại</td>
+<td>Phải bị lừa bấm 1 link/submit chứa payload</td>
+<td><code>booking/lookup.html</code> (test phòng thủ đầu vào — API không phản chiếu payload, xem lưu ý ở Mục 4.1)</td>
+</tr>
+<tr>
+<td>Stored</td>
+<td>Lưu trong database</td>
+<td>Chỉ cần mở trang có chứa nội dung độc hại</td>
+<td><code>hotel/reviews.js</code>, <code>admin/admin-operations.js</code></td>
+</tr>
+<tr>
+<td>DOM-based</td>
+<td>Trong JavaScript phía trình duyệt</td>
+<td>Tùy sink — ở đây là ngay sau khi đăng nhập qua <code>next</code></td>
+<td><code>auth/login.html</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2>6. Nguyên tắc phòng chống chung (Countermeasures)</h2>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Biện pháp</th>
+<th>Áp dụng trong project</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Output escaping</strong></td>
+<td>Hàm <code>safe()</code> escape <code>&amp; &lt; &gt; &quot; '</code> trước khi chèn vào <code>innerHTML</code>, áp dụng nhất quán tại <code>booking/detail.html</code></td>
+</tr>
+<tr>
+<td><strong>Input validation / Allowlist</strong></td>
+<td>Hàm <code>safeCustomerDestination()</code> chỉ chấp nhận path nội bộ hợp lệ cho redirect sau đăng nhập</td>
+</tr>
+<tr>
+<td><strong>Parameterized queries</strong></td>
+<td>Dùng PDO prepared statement (<code>$db-&gt;prepare(...)-&gt;execute([...])</code>) trong các file PHP backend, chống SQL Injection</td>
+</tr>
+<tr>
+<td><strong>Xác thực phía server, không chỉ tin JS</strong></td>
+<td>Vai trò admin được xác minh lại qua <code>api/admin/me.php</code> thay vì chỉ dựa vào giá trị <code>role</code> lưu ở client</td>
+</tr>
+<tr>
+<td><strong>Security headers (đã triển khai, không phải đề xuất)</strong></td>
+<td><code>api/shared/security.php</code> đã đặt <code>Content-Security-Policy</code> và <code>X-Content-Type-Options: nosniff</code> cho các response từ API, cùng <code>Cache-Control: no-store</code> cho dữ liệu nhạy cảm (ví dụ ở <code>detail.php</code>). <strong>Lưu ý phạm vi:</strong> CSP này áp dụng cho response của API, <strong>không tự động áp dụng cho các trang HTML tĩnh</strong> (<code>.html</code> phục vụ trực tiếp) — nên chưa thể kết luận toàn bộ website đã chặn script inline, trừ khi các trang HTML cũng được cấu hình gửi header này (qua server hoặc thẻ <code>&lt;meta http-equiv=&quot;Content-Security-Policy&quot;&gt;</code>)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</body></html>
