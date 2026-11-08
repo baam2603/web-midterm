@@ -38,9 +38,39 @@ try {
         $db->rollBack();
         ipnReply("04", "Invalid amount");
     }
+
+
+    $lateSuccess =
+        $p["status"] === "failed" &&
+        ($params["vnp_ResponseCode"] ?? "") === "00" &&
+        ($params["vnp_TransactionStatus"] ?? "") === "00";
+
+    if ($lateSuccess) {
+        // Ghi log de doi soat voi VNPay.
+        // Khong tu dong ghi nhan da thanh toan.
+        error_log(
+            "[VNPay IPN] Conflicting payment result. TxnRef=" .
+                $ref
+        );
+
+        $db->rollBack();
+
+        ipnReply("02", "Transaction already processed");
+    }
+
+    // Giao dich da duoc xu ly truoc do
     if ($p["status"] !== "pending") {
         $db->rollBack();
-        ipnReply("02", "Order already confirmed");
+
+        if (in_array($p["status"], ["paid", "review"], true)) {
+            ipnReply("02", "Order already confirmed");
+        }
+
+        if ($p["status"] === "failed") {
+            ipnReply("02", "Transaction already processed");
+        }
+
+        ipnReply("99", "Unexpected payment status");
     }
     $success =
         ($params["vnp_ResponseCode"] ?? "") === "00" &&
@@ -116,12 +146,12 @@ try {
         $q->fetchColumn(),
         "Kết quả thanh toán " . $ref,
         "<p>" .
-        ($review
-            ? "Đã nhận thanh toán; đơn cần đối soát. Hãy liên hệ hỗ trợ."
-            : "Thanh toán VNPay thành công.") .
-        " Mã đơn: " .
-        htmlspecialchars($ref) .
-        "</p>",
+            ($review
+                ? "Đã nhận thanh toán; đơn cần đối soát. Hãy liên hệ hỗ trợ."
+                : "Thanh toán VNPay thành công.") .
+            " Mã đơn: " .
+            htmlspecialchars($ref) .
+            "</p>",
     ]);
     $db->commit();
     ipnReply("00", "Confirm Success");
