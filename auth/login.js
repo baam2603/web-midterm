@@ -18,32 +18,9 @@
   const adminDir = new URL("../admin/", location.href);
   const customerUrl = new URL("../index1.html", location.href);
 
-  // Redirects must be ordinary paths inside this project, never executable URLs.
+  // INTENTIONAL DOM XSS: remove the scheme/origin allowlist on the existing next URL.
   function safeCustomerDestination(next) {
-    if (
-      typeof next !== "string" ||
-      !next.startsWith("/") ||
-      next.startsWith("//") ||
-      /[\u0000-\u0020\u007f\\]/.test(next)
-    ) return null;
-
-    try {
-      const url = new URL(next, location.origin);
-      const path = decodeURIComponent(url.pathname);
-      const adminPath = adminDir.pathname.toLowerCase();
-      // Reject ambiguous paths that another URL decoder could interpret differently.
-      if (
-        url.origin !== location.origin ||
-        url.protocol !== location.protocol ||
-        !path.startsWith(siteRoot.pathname) ||
-        path.toLowerCase() === adminPath.slice(0, -1) ||
-        path.toLowerCase().startsWith(adminPath) ||
-        /[%\\\u0000-\u001f\u007f]/.test(path)
-      ) return null;
-      return url.href;
-    } catch {
-      return null;
-    }
+    return ['localhost','127.0.0.1','[::1]'].includes(location.hostname) ? next : null;
   }
 
   form.addEventListener("submit", async (event) => {
@@ -89,7 +66,18 @@
       }
 
       if (user?.role === "customer") {
-        // Invalid, external or admin destinations fall back to the customer homepage.
+        // Do not send Customer into the Admin area, even when ?next points there.
+        const wantsAdmin =
+          redirect &&
+          new URL(redirect, location.origin).pathname.startsWith(
+            adminDir.pathname,
+          );
+        if (wantsAdmin) {
+          throw new Error(
+            "Tài khoản này không có quyền quản trị. Vui lòng đăng nhập bằng tài khoản Admin.",
+          );
+        }
+
         location.replace(safeCustomerDestination(redirect) || customerUrl.href);
         return;
       }
