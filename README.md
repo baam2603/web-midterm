@@ -15,6 +15,8 @@
 
 Phần còn lại của README (cài đặt, cấu trúc thư mục...) chỉ là **phụ**, phục vụ cho việc chạy được phần demo ở Mục 4.
 
+> **Lưu ý về phạm vi Phishing:** Mục 4 của README này chỉ bao gồm demo kỹ thuật cho 3 loại có thể tái hiện trực tiếp trên ứng dụng (XSS, SQL Injection, CSRF). Phishing được trình bày ở phần lý thuyết của báo cáo (khái niệm, phân loại, hậu quả) nhưng không có demo kỹ thuật tương ứng trên THREEK Booking, vì bản chất Phishing là tấn công kỹ thuật xã hội nhắm vào người dùng (qua email/trang giả mạo bên ngoài hệ thống), không phải một lỗ hổng trong code của ứng dụng để có thể "vá" theo cùng mô hình với 3 loại còn lại.
+
 ---
 
 ## 2. Cài đặt database
@@ -67,7 +69,7 @@ mysql -u root -p ten_database < database/demo_accounts.sql
 
 ---
 
-## 4. Kiểm thử tấn công trên bản hoàn thiện (đã vá) và kết quả mong đợi
+## 4. Kiểm thử tấn công trên bản hoàn thiện (đã vá) và kết quả mong đợi (XSS, SQL Injection, CSRF)
 
 > Mục đích của phần này là **chứng minh các bản vá đang hoạt động đúng** trên bản hoàn thiện — không tắt/sửa bất kỳ phòng thủ nào. Mỗi mục liệt kê payload thử nghiệm và kết quả **mong đợi là bị chặn**, kèm giải thích cơ chế chặn nằm ở đâu trong code.
 
@@ -143,6 +145,28 @@ $user = $stmt->fetch();
 | **Đối chiếu để báo cáo** | Nếu trong quá trình phát triển từng có một "nhánh thử nghiệm" nối chuỗi `email` trực tiếp vào `SELECT` (không dùng `:email`/`execute([...])`) để minh họa lỗ hổng, nhánh đó **không nên tồn tại trong bản nộp cuối cùng** — chỉ giữ lại duy nhất phiên bản dùng prepared statement ở trên |
 | **Nguyên tắc chung cần nêu trong bài luận** | Luôn dùng prepared statement/parameterized query cho mọi câu lệnh SQL có chứa input người dùng; không tự ráp chuỗi SQL bằng phép nối (`.`/`+`) dù đã lọc ký tự đặc biệt thủ công |
 
+### 4.5. Thử CSRF — Hủy đơn đặt phòng
+
+|  | Nội dung |
+| --- | --- |
+| **Vị trí** | `api/bookings/cancel.php`, cơ chế kiểm tra nằm ở hàm `guardCustomerWrite()` trong `api/shared/customer.php` |
+| **Nguyên nhân gốc (trước khi vá)** | Server chỉ dựa vào cookie phiên (`THREEKSESSID`) để xác định người dùng, không kiểm tra `Origin`/`Content-Type` của request. Hàm `input()` trong `api/shared/bootstrap.php` chấp nhận cả dữ liệu JSON lẫn `application/x-www-form-urlencoded` — tức có thể nhận request từ một `<form>` HTML thông thường, không chỉ từ chính giao diện web |
+| **Cách thử (khái niệm)** | Tạo một trang HTML độc lập (origin khác, ví dụ phục vụ qua `python -m http.server` ở cổng khác) chứa một form POST trỏ đến `api/bookings/cancel.php` kèm mã đơn. Mở trang này trong cùng trình duyệt đang đăng nhập customer và kích hoạt form |
+| **Kết quả mong đợi (đã vá)** | Request từ origin khác bị từ chối — `guardCustomerWrite()` trả về `403 Forbidden` do request không sử dụng JSON hợp lệ và/hoặc `Origin` không khớp origin hợp lệ (`http://localhost`); đơn đặt phòng **không** chuyển sang trạng thái "Đã hủy" |
+| **Cơ chế chặn (đã áp dụng)** | `guardCustomerWrite()` được bổ sung kiểm tra: (1) `Content-Type` phải là `application/json` — loại trực tiếp mọi request dạng `application/x-www-form-urlencoded` mà một `<form>` HTML thuần có thể tạo ra; (2) `Origin` của request phải khớp origin hợp lệ của ứng dụng (`http://localhost` trong môi trường thực nghiệm) |
+| **Vì sao hai điều kiện trên đủ để chặn CSRF ở đây** | Một request CSRF cổ điển được tạo từ `<form>` HTML luôn có `Content-Type: application/x-www-form-urlencoded` và `Origin` là domain chứa trang tấn công (khác domain thật) — cả hai đặc điểm này đều bị chặn bởi 2 điều kiện trên. Trình duyệt tự gắn cookie phiên vào request (vì cookie không có cờ ngăn gửi cross-site trong trường hợp này), nhưng dữ liệu vẫn bị từ chối trước khi chạm đến logic hủy đơn |
+
+**Cách ngăn chặn CSRF (nguyên tắc chung):**
+
+| Biện pháp | Giải thích |
+| --- | --- |
+| **Kiểm tra `Origin`/`Referer`** | Từ chối request có `Origin` không khớp danh sách domain hợp lệ của ứng dụng — đã áp dụng ở `guardCustomerWrite()` |
+| **Yêu cầu `Content-Type: application/json`** | Một `<form>` HTML thuần không thể tự tạo request JSON thật (chỉ giả lập được `text/plain`/`urlencoded`/`multipart`), nên ràng buộc này loại được phần lớn CSRF qua form tự động submit |
+| **CSRF token** | Lớp phòng thủ bổ sung mạnh hơn: server phát một token ngẫu nhiên gắn với phiên, mọi request thay đổi dữ liệu phải gửi kèm đúng token này — kẻ tấn công từ origin khác không thể biết trước token |
+| **Cookie `SameSite=Strict`/`Lax`** | Giảm khả năng trình duyệt tự gắn cookie phiên vào request cross-site; tuy nhiên `SameSite=Lax` (mặc định ở nhiều trình duyệt hiện nay) vẫn cho phép cookie gửi kèm trong một số trường hợp (ví dụ điều hướng GET), nên không nên dùng làm lớp phòng thủ duy nhất |
+
+> *Ghi chú phạm vi: bản vá hiện tại đã được kiểm chứng chặn đúng kịch bản CSRF dùng `<form>` HTML submit chuẩn (phương pháp đã thực hiện trong báo cáo). Dự án có nhánh `security-hardening` bổ sung thêm cơ chế CSRF token nhưng chưa merge vào `main` — nên ghi rõ điều này nếu được hỏi về mức độ phòng thủ CSRF toàn diện của bản nộp.*
+
 ---
 
 ## 5. Bảng tổng kết nguyên lý 3 loại XSS
@@ -163,6 +187,7 @@ $user = $stmt->fetch();
 | **Input validation / Allowlist** | Hàm `safeCustomerDestination()` chỉ chấp nhận path nội bộ hợp lệ cho redirect sau đăng nhập |
 | **Parameterized queries** | Dùng PDO prepared statement (`$db->prepare(...)->execute([...])`) trong các file PHP backend, chống SQL Injection |
 | **Xác thực phía server, không chỉ tin JS** | Vai trò admin được xác minh lại qua `api/admin/me.php` thay vì chỉ dựa vào giá trị `role` lưu ở client |
+| **Kiểm tra Origin/Content-Type (chống CSRF)** | `guardCustomerWrite()` trong `api/shared/customer.php` từ chối request không phải JSON hoặc có `Origin` không khớp domain hợp lệ, áp dụng cho các API thay đổi dữ liệu như `cancel.php` |
 | **Security headers (đã triển khai, không phải đề xuất)** | `api/shared/security.php` đã đặt `Content-Security-Policy` và `X-Content-Type-Options: nosniff` cho các response từ API, cùng `Cache-Control: no-store` cho dữ liệu nhạy cảm (ví dụ ở `detail.php`). **Lưu ý phạm vi:** CSP này áp dụng cho response của API, **không tự động áp dụng cho các trang HTML tĩnh** (`.html` phục vụ trực tiếp) — nên chưa thể kết luận toàn bộ website đã chặn script inline, trừ khi các trang HTML cũng được cấu hình gửi header này (qua server hoặc thẻ `<meta http-equiv="Content-Security-Policy">`) |
 
 ---
@@ -182,7 +207,7 @@ Các payload thử nghiệm được lựa chọn ở dạng tối thiểu, ch�
 Không phải mọi mục trong Mục 4 đều có cùng bản chất. Cụ thể:
 
 - **Mục 4.1 (Reflected XSS)** cho kết quả **âm tính do thiết kế** (API không phản chiếu input người dùng trở lại trong response), không phải trường hợp "tấn công thành công rồi bị một lớp phòng thủ chặn lại". Hai trường hợp này khác nhau về mặt bảo mật và cần được phân biệt rõ trong phần trình bày, để tránh đánh giá sai mức độ phòng thủ thực sự của hệ thống tại điểm này.
-- **Mục 4.2, 4.3, 4.4** là các trường hợp **có cơ chế phòng thủ chủ động** (escaping, allowlist, prepared statement) được kiểm chứng bằng cách thử payload tương ứng và quan sát hành vi bị chặn.
+- **Mục 4.2, 4.3, 4.4, 4.5** là các trường hợp **có cơ chế phòng thủ chủ động** (escaping, allowlist, prepared statement, kiểm tra Origin/Content-Type) được kiểm chứng bằng cách thử payload/luồng tương ứng và quan sát hành vi bị chặn.
 
 **7.3. Giới hạn của kết luận**
 
@@ -190,4 +215,8 @@ Các kết luận trong báo cáo này **chỉ có giá trị trong phạm vi pa
 
 **7.4. Tiêu chí xác định kết quả bất thường**
 
-Nếu trong quá trình kiểm thử lại, bất kỳ payload nào ở Mục 4 **thực thi được** (xuất hiện popup, hoặc trường hợp SQL Injection dẫn đến đăng nhập thành công), kết quả đó cho thấy lỗ hổng tương ứng **chưa được khắc phục** tại thời điểm kiểm thử, và cần được ghi nhận như một phát hiện mới, không nên đối chiếu theo kết quả "mong đợi" đã nêu trong tài liệu này.
+Nếu trong quá trình kiểm thử lại (ví dụ khi giáo viên chấm bài thực hiện độc lập), bất kỳ payload nào ở Mục 4 **thực thi được** (xuất hiện popup, hoặc trường hợp SQL Injection dẫn đến đăng nhập thành công), kết quả đó cho thấy lỗ hổng tương ứng **chưa được khắc phục** tại thời điểm kiểm thử, và cần được ghi nhận như một phát hiện mới, không nên đối chiếu theo kết quả "mong đợi" đã nêu trong tài liệu này.
+
+**7.5. Bằng chứng kèm theo**
+
+Các nhận định "đã kiểm thử thực tế, có bằng chứng ảnh chụp màn hình" chỉ được giữ lại trong báo cáo nộp chính thức đối với những mục thực sự có ảnh chụp màn hình hoặc video đính kèm tương ứng.
