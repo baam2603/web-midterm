@@ -190,8 +190,4 @@ Các kết luận trong báo cáo này **chỉ có giá trị trong phạm vi pa
 
 **7.4. Tiêu chí xác định kết quả bất thường**
 
-Nếu trong quá trình kiểm thử lại (ví dụ khi giáo viên chấm bài thực hiện độc lập), bất kỳ payload nào ở Mục 4 **thực thi được** (xuất hiện popup, hoặc trường hợp SQL Injection dẫn đến đăng nhập thành công), kết quả đó cho thấy lỗ hổng tương ứng **chưa được khắc phục** tại thời điểm kiểm thử, và cần được ghi nhận như một phát hiện mới, không nên đối chiếu theo kết quả "mong đợi" đã nêu trong tài liệu này.
-
-**7.5. Bằng chứng kèm theo**
-
-Các nhận định "đã kiểm thử thực tế, có bằng chứng ảnh chụp màn hình" chỉ được giữ lại trong báo cáo nộp chính thức đối với những mục thực sự có ảnh chụp màn hình hoặc video đính kèm tương ứng.
+Nếu trong quá trình kiểm thử lại, bất kỳ payload nào ở Mục 4 **thực thi được** (xuất hiện popup, hoặc trường hợp SQL Injection dẫn đến đăng nhập thành công), kết quả đó cho thấy lỗ hổng tương ứng **chưa được khắc phục** tại thời điểm kiểm thử, và cần được ghi nhận như một phát hiện mới, không nên đối chiếu theo kết quả "mong đợi" đã nêu trong tài liệu này.
