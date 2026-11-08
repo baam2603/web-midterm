@@ -14,7 +14,8 @@
     "test:auth": "python3 tests/session_integration.py && python3 tests/setup_diagnostics.py && python3 tests/auth_browser.py && python3 tests/subdirectory_browser.py",
     "test:mail": "docker exec web-midterm-admin-web php /app/tests/mail_transport_units.php && python3 tests/mail_smtp.py",
     "test:registration": "python3 tests/registration_otp_integration.py && python3 tests/registration_otp_browser.py",
-    "test:reviews": "python3 tests/reviews_integration.py && python3 tests/reviews_browser.py"
+    "test:reviews": "python3 tests/reviews_integration.py && python3 tests/reviews_browser.py",
+    "test:security": "python3 tests/security_integration.py && python3 tests/security_browser.py && python3 tests/reviews_browser.py"
   },
   "repository": {
     "type": "git",

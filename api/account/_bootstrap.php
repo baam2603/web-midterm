@@ -56,25 +56,8 @@ function body(): array
 }
 function guardWrite(): void
 {
-    $origin = $_SERVER["HTTP_ORIGIN"] ?? "";
-    if ($origin) {
-        $host = parse_url($origin, PHP_URL_HOST);
-        $port = parse_url($origin, PHP_URL_PORT);
-        $server = explode(":", $_SERVER["HTTP_HOST"] ?? "");
-        if (
-            strtolower((string) $host) !== strtolower($server[0]) ||
-            ($port !== null &&
-                (string) $port !==
-                    ($server[1] ??
-                        (($_SERVER["HTTPS"] ?? "") === "on" ? "443" : "80")))
-        ) {
-            respond(403, "Origin không hợp lệ.");
-        }
-    }
-    $type = strtolower(trim(explode(";", $_SERVER["CONTENT_TYPE"] ?? "")[0]));
-    if ($type !== "application/json") {
-        respond(415, "Yêu cầu application/json.");
-    }
+    $failure = securityWriteFailure();
+    if ($failure) respond($failure[0], $failure[1]);
 }
 function userData(array $u): array
 {

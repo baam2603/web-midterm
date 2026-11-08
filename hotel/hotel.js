@@ -45,7 +45,7 @@
         })[c],
     );
   const money = (n) => n.toLocaleString("vi-VN") + "₫";
-  const icon = (name) => `<i class="material-symbols-rounded">${name}</i>`;
+  const icon = (name) => `<i class="material-symbols-rounded">${esc(name)}</i>`;
 
   // Ô ảnh: nền gradient luôn có sẵn, ảnh lỗi/thiếu thì ẩn đi
   const photo = (i, extra = "") => {
@@ -85,13 +85,13 @@
     <article class="room">
       <div class="room__photo">
         ${r.image ? `<img src="${esc(r.image)}" alt="${esc(r.name)}" loading="lazy" onerror="this.remove()" />` : ""}
-        ${r.area ? `<span class="room__badge">${icon("square_foot")} ${r.area} m²</span>` : ""}
+        ${r.area ? `<span class="room__badge">${icon("square_foot")} ${esc(r.area)} m²</span>` : ""}
         ${leftFor(r) <= 3 ? `<span class="room__badge room__badge--warn">${leftFor(r) ? `Chỉ còn ${leftFor(r)} phòng` : "Hết phòng"}</span>` : ""}
       </div>
       <div class="room__body">
         <h3>${esc(r.name)}</h3>
         ${r.bed ? `<p class="room__meta">${icon("bed")} ${esc(r.bed)}</p>` : ""}
-        <p class="room__meta">${icon("group")} Tối đa ${r.guests} khách</p>
+        <p class="room__meta">${icon("group")} Tối đa ${Number(r.guests) || 0} khách</p>
         <ul class="room__features">
           ${r.features.map((f) => `<li>${icon(f.icon)} ${esc(f.label)}</li>`).join("")}
         </ul>
@@ -368,9 +368,9 @@
         <div class="room-modal__body">
           <h3>${esc(r.name)}</h3>
           <div class="facts">
-            <div class="fact">${icon("square_foot")}<div><span class="fact__label">Diện tích</span><span class="fact__value">${r.area ? r.area + " m²" : "Chưa cập nhật"}</span></div></div>
+            <div class="fact">${icon("square_foot")}<div><span class="fact__label">Diện tích</span><span class="fact__value">${r.area ? esc(r.area) + " m²" : "Chưa cập nhật"}</span></div></div>
             <div class="fact">${icon("bed")}<div><span class="fact__label">Giường</span><span class="fact__value">${r.bed ? esc(r.bed) : "Chưa cập nhật"}</span></div></div>
-            <div class="fact">${icon("group")}<div><span class="fact__label">Sức chứa</span><span class="fact__value">Tối đa ${r.guests} khách</span></div></div>
+            <div class="fact">${icon("group")}<div><span class="fact__label">Sức chứa</span><span class="fact__value">Tối đa ${Number(r.guests) || 0} khách</span></div></div>
           </div>
           ${r.desc ? `<p class="room-modal__desc">${esc(r.desc)}</p>` : ""}
           <h4>Tiện nghi trong phòng</h4>

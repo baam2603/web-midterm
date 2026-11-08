@@ -76,7 +76,7 @@
         })[c],
     );
   const money = (n) => Math.round(n).toLocaleString("vi-VN") + "₫";
-  const icon = (name) => `<i class="material-symbols-rounded">${name}</i>`;
+  const icon = (name) => `<i class="material-symbols-rounded">${esc(name)}</i>`;
   const pad = (n) => String(n).padStart(2, "0");
   const toISO = (d) =>
     `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;

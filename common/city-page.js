@@ -45,7 +45,7 @@
           "'": "&#39;",
         })[c],
     );
-  const icon = (name) => `<i class="material-symbols-rounded">${name}</i>`;
+  const icon = (name) => `<i class="material-symbols-rounded">${esc(name)}</i>`;
 
   const MONTH_NAMES = [
     "Tháng 1",
@@ -378,12 +378,12 @@
             `<span>${icon(window.AMENITIES[k].icon)} ${esc(window.AMENITIES[k].label)}</span>`,
         )
         .join("");
-      const photoClass = h.photo ? ` hotel-card__photo--${h.photo}` : "";
+      const photoClass = h.photo ? ` hotel-card__photo--${esc(h.photo)}` : "";
       const cover = h.coverImage
         ? `<img src="${esc(h.coverImage)}" alt="${esc(h.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">`
         : "";
       return `
-        <article class="hotel-card tk-fade" data-id="${h.id}">
+        <article class="hotel-card tk-fade" data-id="${esc(h.id)}">
           <div class="hotel-card__photo${photoClass}">${cover}</div>
           <div class="hotel-card__body">
             <div class="hotel-card__top">
@@ -406,7 +406,7 @@
                 <span class="price__value">${fmtMoney(h.price)}</span>
                 <span class="price__unit">/ đêm</span>
               </div>
-              <button type="button" class="btn-solid btn-view" data-id="${h.id}">Xem phòng</button>
+              <button type="button" class="btn-solid btn-view" data-id="${esc(h.id)}">Xem phòng</button>
             </div>
           </div>
         </article>`;

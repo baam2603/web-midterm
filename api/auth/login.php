@@ -17,10 +17,22 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit();
 }
 
+$failure = securityWriteFailure();
+if ($failure) {
+    http_response_code($failure[0]);
+    echo json_encode(['status' => 'error', 'message' => $failure[1]], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
 try {
     $rawBody = file_get_contents("php://input");
-    $input = json_decode($rawBody, true) ?: $_POST;
+    $input = json_decode($rawBody, true);
 
+    if (!is_array($input) || !is_string($input['email'] ?? null) || !is_string($input['password'] ?? null)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Dữ liệu đăng nhập không hợp lệ.']);
+        exit();
+    }
     $email = strtolower(trim((string) ($input["email"] ?? "")));
     $password = (string) ($input["password"] ?? "");
 

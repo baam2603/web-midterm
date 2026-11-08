@@ -3,57 +3,8 @@ require_once __DIR__ . "/bootstrap.php";
 
 function guardCustomerWrite(): void
 {
-    $contentType = strtolower(trim(
-        explode(";", $_SERVER["CONTENT_TYPE"] ?? "")[0]
-    ));
-
-    if ($contentType !== "application/json") {
-        reply(415, [
-            "status" => "error",
-            "message" => "Yêu cầu JSON."
-        ]);
-    }
-
-    $origin = $_SERVER["HTTP_ORIGIN"] ?? "";
-
-    if ($origin === "") {
-        return;
-    }
-
-    $scheme = (
-        !empty($_SERVER["HTTPS"]) &&
-        $_SERVER["HTTPS"] !== "off"
-    ) ? "https" : "http";
-
-    $requestHost = $_SERVER["HTTP_HOST"] ?? "";
-
-    $allowedOrigins = [
-        strtolower($scheme . "://" . $requestHost)
-    ];
-
-    $publicUrl = rtrim(getenv("APP_BASE_URL") ?: "", "/");
-
-    if ($publicUrl !== "") {
-        $publicScheme = parse_url($publicUrl, PHP_URL_SCHEME);
-        $publicHost = parse_url($publicUrl, PHP_URL_HOST);
-
-        if (
-            $publicScheme === "https" &&
-            $publicHost &&
-            strcasecmp($requestHost, $publicHost) === 0
-        ) {
-            $allowedOrigins[] = strtolower($publicUrl);
-        }
-    }
-
-    $normalizedOrigin = strtolower(rtrim($origin, "/"));
-
-    if (!in_array($normalizedOrigin, $allowedOrigins, true)) {
-        reply(403, [
-            "status" => "error",
-            "message" => "Nguồn yêu cầu không hợp lệ."
-        ]);
-    }
+    $failure = securityWriteFailure();
+    if ($failure) reply($failure[0], ['status' => 'error', 'message' => $failure[1]]);
 }
 
 function notifyUser(

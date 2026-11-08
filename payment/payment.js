@@ -60,7 +60,7 @@
         })[c],
     );
   const money = (n) => Math.round(n).toLocaleString("vi-VN") + "₫";
-  const icon = (n) => `<i class="material-symbols-rounded">${n}</i>`;
+  const icon = (n) => `<i class="material-symbols-rounded">${esc(n)}</i>`;
   const pad = (n) => String(n).padStart(2, "0");
   const fromISO = (s) => {
     const [y, m, d] = s.split("-").map(Number);

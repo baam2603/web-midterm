@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/../shared/security.php";
 // One policy for every PHP entry point, including installations under a subdirectory.
 if (session_status() === PHP_SESSION_NONE) {
     $scriptPath = str_replace("\\", "/", $_SERVER["SCRIPT_NAME"] ?? "");

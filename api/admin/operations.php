@@ -206,7 +206,8 @@ try {
             "data" => ["items" => $rooms, "from" => $from, "to" => $to],
         ]);
     }
-    $page = max(1, (int) ($_GET["page"] ?? 1));
+    $page = filter_var($_GET["page"] ?? 1, FILTER_VALIDATE_INT, ["options" => ["min_range" => 1, "max_range" => 1000000]]);
+    if ($page === false) reply(422, ["status" => "error", "message" => "Trang không hợp lệ."]);
     $size = 20;
     $offset = ($page - 1) * $size;
     $search = trim((string) ($_GET["q"] ?? ""));
@@ -293,9 +294,9 @@ try {
     $q->execute($args);
     $total = (int) $q->fetchColumn();
     $q = $db->prepare(
-        "SELECT $fields FROM $source$filter ORDER BY $order LIMIT $size OFFSET $offset",
+        "SELECT $fields FROM $source$filter ORDER BY $order LIMIT ? OFFSET ?",
     );
-    $q->execute($args);
+    $q->execute([...$args, $size, $offset]);
     reply(200, [
         "status" => "success",
         "data" => [
