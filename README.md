@@ -167,11 +167,31 @@ $user = $stmt->fetch();
 
 ---
 
-## 7. Lưu ý khi trình bày/quay demo
+## 7. Phạm vi và phương pháp kiểm thử
 
-- Mục 4 kiểm thử trực tiếp trên **bản hoàn thiện, không chỉnh sửa hay tắt bất kỳ phòng thủ nào** — mục tiêu là chứng minh bản vá hoạt động đúng với các payload và luồng **đã được liệt kê cụ thể** trong từng mục.
-- Payload XSS thử nghiệm chỉ dùng `alert()`; payload SQLi dùng dạng cơ bản `' OR 1=1 -- ` — đủ để kiểm chứng PoC an toàn, không chứa hành vi gây hại và không phải exploit chiếm quyền.
-- Mục 4.1 (Reflected) thực chất là một **test xử lý input**, không phải minh họa luồng reflected HTML thật — cần nêu rõ sự khác biệt này khi trình bày, tránh gọi nhầm là "demo Reflected XSS thành công bị chặn" trong khi bản chất API chưa từng phản chiếu payload.
-- Kết luận trong báo cáo nên giới hạn đúng phạm vi đã kiểm thử (payload/luồng cụ thể trong từng mục), tránh các câu khái quát tuyệt đối kiểu "an toàn với mọi input" hay "toàn bộ website đã chặn X".
-- Nếu ở bất kỳ mục nào payload **lại chạy được** (có popup, hoặc đăng nhập SQLi thành công) trên bản hoàn thiện, đó là dấu hiệu lỗ hổng thật chưa được vá — cần xem lại code tương ứng trước khi nộp bài, không nên đưa vào báo cáo như một kết quả "mong đợi".
-- Chỉ ghi "đã kiểm thử thực tế, có bằng chứng ảnh chụp màn hình" cho những mục thực sự có ảnh đính kèm trong bài nộp.
+Phần này trình bày rõ phạm vi, phương pháp và giới hạn của các kết quả kiểm thử ở Mục 4, nhằm giúp người đọc đánh giá đúng mức độ tin cậy của các kết luận được đưa ra trong báo cáo.
+
+**7.1. Phương pháp kiểm thử**
+
+Mục 4 kiểm thử trực tiếp trên **bản hoàn thiện của ứng dụng (nhánh `main`)**, không chỉnh sửa hay vô hiệu hóa bất kỳ cơ chế phòng thủ nào trong quá trình kiểm thử. Mục tiêu là xác minh rằng các cơ chế phòng thủ đã triển khai hoạt động đúng như thiết kế, đối với tập payload và luồng xử lý **đã được liệt kê cụ thể** trong từng mục con.
+
+Các payload thử nghiệm được lựa chọn ở dạng tối thiểu, chỉ đủ để xác nhận có/không có hành vi thực thi mã (dùng `alert()` cho các trường hợp XSS, và mệnh đề logic cơ bản `' OR 1=1 -- ` cho SQL Injection), nhằm tránh đưa vào báo cáo bất kỳ đoạn mã nào có khả năng gây hại thực sự hoặc được dùng để chiếm quyền truy cập.
+
+**7.2. Phân loại kết quả theo bản chất kỹ thuật**
+
+Không phải mọi mục trong Mục 4 đều có cùng bản chất. Cụ thể:
+
+- **Mục 4.1 (Reflected XSS)** cho kết quả **âm tính do thiết kế** (API không phản chiếu input người dùng trở lại trong response), không phải trường hợp "tấn công thành công rồi bị một lớp phòng thủ chặn lại". Hai trường hợp này khác nhau về mặt bảo mật và cần được phân biệt rõ trong phần trình bày, để tránh đánh giá sai mức độ phòng thủ thực sự của hệ thống tại điểm này.
+- **Mục 4.2, 4.3, 4.4** là các trường hợp **có cơ chế phòng thủ chủ động** (escaping, allowlist, prepared statement) được kiểm chứng bằng cách thử payload tương ứng và quan sát hành vi bị chặn.
+
+**7.3. Giới hạn của kết luận**
+
+Các kết luận trong báo cáo này **chỉ có giá trị trong phạm vi payload và luồng xử lý đã được liệt kê**. Báo cáo không đưa ra các khẳng định mang tính khái quát như "ứng dụng an toàn tuyệt đối với mọi input" hay "toàn bộ hệ thống đã được bảo vệ khỏi \[loại tấn công\]", vì những khẳng định này vượt quá phạm vi các phép thử đã thực hiện. Việc một điểm cụ thể đã được kiểm chứng không đảm bảo các điểm chưa được kiểm thử trong ứng dụng cũng có mức độ an toàn tương đương.
+
+**7.4. Tiêu chí xác định kết quả bất thường**
+
+Nếu trong quá trình kiểm thử lại (ví dụ khi giáo viên chấm bài thực hiện độc lập), bất kỳ payload nào ở Mục 4 **thực thi được** (xuất hiện popup, hoặc trường hợp SQL Injection dẫn đến đăng nhập thành công), kết quả đó cho thấy lỗ hổng tương ứng **chưa được khắc phục** tại thời điểm kiểm thử, và cần được ghi nhận như một phát hiện mới, không nên đối chiếu theo kết quả "mong đợi" đã nêu trong tài liệu này.
+
+**7.5. Bằng chứng kèm theo**
+
+Các nhận định "đã kiểm thử thực tế, có bằng chứng ảnh chụp màn hình" chỉ được giữ lại trong báo cáo nộp chính thức đối với những mục thực sự có ảnh chụp màn hình hoặc video đính kèm tương ứng.
