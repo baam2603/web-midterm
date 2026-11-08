@@ -1,116 +1,254 @@
-# Bản tích hợp Admin và Customer
+# THREEK.COM — Website đặt phòng khách sạn
 
-Đánh giá khách sạn được đăng ngay, không cần đặt phòng; user xóa đánh giá của mình, admin xóa mọi đánh giá. Xem [migration và kiểm thử đánh giá](docs/PUBLIC_REVIEWS.md).
+Đồ án website đặt phòng tại Đà Lạt và Vũng Tàu, gồm giao diện khách hàng,
+trang quản trị và API PHP kết nối MariaDB. Tài khoản, đơn đặt phòng, yêu thích,
+bình luận và thông báo được lưu trong database; không chỉ lưu ở trình duyệt.
 
-Đăng ký mới xác minh email bằng OTP 6 số. Xem [cài đặt và kiểm thử OTP](docs/REGISTRATION_OTP_SETUP.md); cần import migration bổ sung trước khi chạy nhánh này.
+## 1. Chức năng và công nghệ
 
-Xem [hướng dẫn customer, VNPay, Resend và Gmail SMTP](docs/CUSTOMER_SETUP.md).
-DB hiện có: sao lưu, giữ dữ liệu và import thêm `database/customer_migration.sql` sau migration admin.
-Thanh toán VNPay/email thật cần tài khoản nhà cung cấp và HTTPS; chưa được bật bằng khóa thử nghiệm.
+- Khách hàng: tìm khách sạn, xem phòng, chọn ngày/khách/số phòng, đặt phòng,
+  xem và hủy đơn theo điều kiện, yêu thích, bình luận, hồ sơ và hỗ trợ.
+- Tài khoản: đăng ký qua OTP email, đăng nhập, đổi/quên mật khẩu, đóng tài khoản.
+- Quản trị: khách sạn, phòng, giá/tồn phòng, đơn đặt, đánh giá, hỗ trợ và nhật ký.
+- Frontend: HTML, CSS, JavaScript; bản đồ Leaflet/OpenStreetMap.
+- Backend: PHP, PDO native prepared statements; MariaDB.
+- Email: Gmail SMTP qua PHPMailer hoặc Resend, gửi bằng mail worker.
+- VNPay là tích hợp tùy chọn. Chấm bài cơ bản dùng thanh toán tại khách sạn,
+  không cần tài khoản cổng thanh toán và không chuyển tiền thật.
 
-# Chạy bản admin/API hiện tại
+## 2. Yêu cầu máy chạy
 
-Repository hiện dùng **PHP + MariaDB**, không chỉ HTML tĩnh. Xem [hướng dẫn admin](docs/ADMIN_SETUP.md)
-để import schema/migration, cấu hình DB, chạy máy chủ và kiểm thử. Các mô tả MVP bên dưới là lịch sử bản demo.
+| Thành phần | Yêu cầu |
+| --- | --- |
+| PHP | 8.1 trở lên, khuyến nghị 8.3 |
+| PHP extensions | pdo_mysql, mbstring, curl, fileinfo, openssl |
+| Database | MariaDB 10.4 trở lên, khuyến nghị 10.11 |
+| Composer | 2.x, để cài PHPMailer khi dùng SMTP |
+| Trình duyệt | Chrome/Edge/Firefox phiên bản hiện hành |
+| Internet | Cần cho CDN/font, bản đồ và gửi email |
 
-# THREEK.COM — bản sửa logic MVP UI
+Có thể dùng PHP/MariaDB trong XAMPP. Kiểm tra đúng phiên bản MariaDB;
+SQL migration dùng cú pháp MariaDB, không mặc định coi MySQL là tương đương.
+Không dùng Live Server, `python -m http.server` hoặc mở file HTML trực tiếp
+để chạy ứng dụng: các cách đó không thực thi PHP.
 
-## Chạy website
+## 3. Cài source và thư viện
 
-Website dùng HTML/CSS/JS thuần; không cần cài npm, database hay server backend. Mở thư mục này trong VS Code và chọn **Open with Live Server** ở `index.html` hoặc `index1.html`.
+Giải nén source vào một thư mục, ví dụ `C:\xampp\htdocs\web-midterm`.
+Mở terminal tại thư mục chứa `README.md`, `composer.json` và `index1.html`:
 
-Có thể chạy bằng Python 3 ở thư mục gốc:
-
-```bash
-python -m http.server 8000
+```sh
+php -v
+php -m
+composer install --no-dev --prefer-dist --optimize-autoloader
 ```
 
-Sau đó truy cập `http://localhost:8000/` (tự chuyển về trang chủ). **Không nên mở trực tiếp bằng file://** vì cơ chế bảo mật trình duyệt và Web Crypto có thể hạn chế tính năng tài khoản.
+Nếu Windows chưa nhận lệnh `php`, thêm `C:\xampp\php` vào PATH rồi mở lại
+terminal. Composer cài lại thư mục `vendor/` từ `composer.lock`.
+Không cần `npm install` để chạy giao diện; Node/npm chỉ cần khi chạy các lệnh test.
 
-## Phạm vi đã sửa
+## 4. Tạo database và import SQL
 
-- Giữ nguyên toàn bộ CSS gốc. Sửa đường dẫn CSS/JS, link chuyển trang và tên tệp có phân biệt chữ hoa.
-- Đồng bộ 16 khách sạn ở danh sách thành phố sang trang chi tiết, phòng và mức giá mẫu; dùng ảnh đã có trong thư mục `sources/`.
-- Chuyển thông tin ngày/khách/phòng từ danh sách → khách sạn → form đặt phòng → thanh toán.
-- Thêm lớp `common/booking-store.js` cho đơn đặt phòng, đếm phòng trống theo khoảng ngày, tránh tạo đơn trùng, hủy đơn và cập nhật lịch sử.
-- Form đặt phòng hỗ trợ số phòng, kiểm tra ngày, số khách, số phòng và tính giá, giảm giá, thuế theo từng đêm.
-- Thanh toán **mô phỏng**, trang xác nhận động, xem chi tiết đơn, lịch sử đặt phòng, lịch `.ics`.
-- Thêm `common/auth-service.js` cho đăng ký/đăng nhập/đăng xuất demo, lưu hồ sơ, đổi mật khẩu và xóa tài khoản demo; mật khẩu được băm bằng PBKDF2 trong trình duyệt (không phải hệ thống xác thực sản xuất).
-- Thêm đường dẫn yêu thích trong menu tài khoản và hoàn thiện điều hướng từ các tấm chọn thành phố.
+Khởi động MariaDB. Mở phpMyAdmin, tạo database `threek_booking` với charset
+`utf8mb4`, sau đó **chọn database này** và import lần lượt:
 
-## Demo từng bước
+| Thứ tự | File | Mục đích |
+| --- | --- | --- |
+| 1 | `database/schema.sql` | Cấu trúc ban đầu |
+| 2 | `database/seed.sql` | Dữ liệu mẫu nền |
+| 3 | `database/admin_migration.sql` | Bảng/cột quản trị |
+| 4 | `database/customer_migration.sql` | Đơn, tài khoản, thông báo, email |
+| 5 | `database/registration_otp_migration.sql` | Đăng ký qua OTP |
+| 6 | `database/account_closure_migration.sql` | Đóng tài khoản/ẩn danh |
+| 7 | `database/public_reviews_migration.sql` | Bình luận công khai |
+| 8 | `database/osm_location_migration.sql` | Vị trí OpenStreetMap |
+| 9 | `database/demo_hotels_ready.sql` | Danh mục cố định 20 khách sạn/60 loại phòng |
 
-1. Vào Đà Lạt hoặc Vũng Tàu, chọn ngày/khách/phòng, bấm **Xem phòng**.
-2. Chọn một phòng, điền thông tin khách hàng, bấm **Tiếp tục**.
-3. Chọn **Thanh toán tại khách sạn** (dễ thử nhất) rồi bấm **Tiếp tục thanh toán**.
-4. Trong trang thanh toán demo bấm **Xác nhận đặt phòng**. Sẽ mở trang xác nhận với mã đơn thật trong localStorage.
-5. Vào menu **Đặt phòng của tôi**, mở chi tiết hoặc hủy đơn, kiểm tra tab lịch sử.
-6. Đăng ký bằng email thử nghiệm và mật khẩu có ít nhất 8 ký tự gồm chữ + số; đăng xuất rồi đăng nhập lại để kiểm tra trạng thái giao diện.
-7. Có thể dùng mã ưu đãi `THREEK10` hoặc `WELCOME` trên form đặt phòng.
+File số 9 ẩn khách sạn ngoài danh mục demo nhưng giữ lại bản ghi cũ.
+Không import thêm `real_hotels.sql`; đây là dữ liệu tham khảo khác.
+Không có `security_migration.sql` trong bản main này, không cần tìm/import file đó.
 
-**Để thử thẻ:** chỉ sử dụng số thẻ kiểm thử 4111 1111 1111 1111, ngày hết hạn trong tương lai và CVV giả 123. Tuyệt đối không nhập thông tin thẻ thật.
+Có thể import bằng CLI MariaDB thay phpMyAdmin: đăng nhập bằng
+`mariadb -h 127.0.0.1 -P 3306 -u root -p`, sau đó:
 
-## Giới hạn của bản MVP UI (quan trọng)
-
-- Dữ liệu khách sạn, tồn phòng, giá và vị trí chỉ là **demo**, không lấy từ backend. Không có giữ phòng nguyên tử, xác nhận khách sạn, cập nhật phòng giữa người dùng hoặc đảm bảo tính nhất quán nhiều thiết bị.
-- Tài khoản và đơn chỉ nằm trong localStorage của trình duyệt/máy đang dùng. Việc xóa dữ liệu trình duyệt làm mất dữ liệu; không có xác thực server hoặc khôi phục mật khẩu qua email.
-- **Không có thanh toán tiền thật**; trạng thái thẻ/ví là mô phỏng, mã ngân hàng là giả; không gửi email, không thực sự xác nhận phòng. Đừng sử dụng website này để bán phòng ngoài đời.
-- Liên kết Google/Facebook được vô hiệu hóa minh bạch vì chưa có backend OAuth. Bản đồ và font bên ngoài cần Internet.
-- Đây là **UI MVP khách hàng**; chưa bổ sung dashboard quản trị khách sạn và hệ thống xử lý đơn server.
-
-## Kiểm tra tự động
-
-Chạy:
-
-```bash
-node tests/smoke.js
+```sql
+CREATE DATABASE threek_booking CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE threek_booking;
+SOURCE database/schema.sql;
+SOURCE database/seed.sql;
+SOURCE database/admin_migration.sql;
+SOURCE database/customer_migration.sql;
+SOURCE database/registration_otp_migration.sql;
+SOURCE database/account_closure_migration.sql;
+SOURCE database/public_reviews_migration.sql;
+SOURCE database/osm_location_migration.sql;
+SOURCE database/demo_hotels_ready.sql;
 ```
 
-Kiểm tra dữ liệu 16 khách sạn, ảnh, tồn phòng/đơn hàng và quy trình demo tài khoản. Ngoài ra đã kiểm tra cú pháp JavaScript và mọi đường dẫn CSS/JS/ảnh tĩnh. Chưa có kiểm thử render trực tiếp trong Chromium do môi trường kiểm tra chặn điều hướng HTTP/file/data; nên bạn cần chạy thử trên máy cá nhân trước khi demo.
+Chạy CLI tại thư mục source để đường dẫn `SOURCE` đúng. Thay port/user theo máy.
+Các bước trên dành cho **database mới, trống**. Nếu đã có dữ liệu, sao lưu trước
+và chỉ import migration còn thiếu; không chạy lại `schema.sql` lên database đó.
 
-## Các file mới chính
+## 5. Cấu hình và chạy website
 
-`index.html`, `common/auth-service.js`, `common/booking-store.js`, `auth/login.js`, `booking/detail.html`, `booking/detail.js`, `payment/success.js`, `tests/smoke.js`.
+Code đọc cấu hình từ **biến môi trường**, không tự động đọc file `.env`.
+Ví dụ MariaDB local ở cổng 3306, user root không mật khẩu:
 
----
+**Windows PowerShell:**
 
-# BẢN MỞ RỘNG FULL UI (DÀNH CHO GIAI ĐOẠN BACKEND)
-
-**Vẫn giữ `index1.html` và 17 tệp CSS gốc**; thêm riêng `common/extension.css` phục vụ các màn hình mới. Không đổi framework hay xây backend.
-
-## Trang mới
-
-- `admin/index.html`: truy cập Admin demo (bằng nút, không có đăng nhập bảo mật), dashboard, thêm/ẩn/sửa khách sạn, giá và tồn phòng, lịch trống, trạng thái đặt phòng, duyệt review, hỗ trợ và nhật ký.
-- `auth/forgot.html`: khôi phục mật khẩu bằng OTP **hiển thị tại chỗ trong trình duyệt** để test (không gửi email, không bảo mật production).
-- `booking/lookup.html`: khách chưa đăng nhập tra cứu bằng mã đặt phòng + email + điện thoại; các quyền truy cập guest tạm lưu trong **sessionStorage** (hết khi kết thúc phiên/trình duyệt).
-- `account/notifications.html`: cập nhật liên quan đến tài khoản, đọc/chưa đọc.
-- `support/index.html`: FAQ, gửi yêu cầu và nhận phản hồi hỗ trợ trên cùng trình duyệt; không gửi mail.
-- `info/policies.html`: mô tả điều kiện hủy, dữ liệu và thanh toán demo.
-- `hotel/reviews.js`: khách đã hoàn thành kỳ lưu trú có thể gửi đánh giá, Admin duyệt để hiển thị.
-- `booking/detail.html`: in biên nhận từ trình duyệt; yêu cầu hoàn tiền **mô phỏng** nếu có điều kiện.
-
-## Luồng demo đề xuất
-
-1. Truy cập `index1.html`, chọn Đà Lạt/Vũng Tàu, chọn ngày ở, xem khách sạn, chọn phòng, điền thông tin, hoàn thành checkout demo.
-2. Tài khoản đăng nhập chỉ thấy **đơn của chính mình** ở `booking/myBooking.html`; khách vãng lai có thể xem đơn trong phiên đặt hoặc tra cứu lại bằng thông tin đối chiếu.
-3. Mở `admin/index.html` và chọn **Vào Admin demo**. Ở các tab Khách sạn/Phòng, sửa tồn kho hoặc giá; mở lại trang danh sách khách sạn để kiểm tra.
-4. Ở tab Đặt phòng, xác nhận/nhận phòng/hoàn tất/hủy đơn. Sau hoàn tất, tài khoản đặt phòng có thể gửi đánh giá tại chi tiết khách sạn; Admin duyệt trong tab Đánh giá.
-5. Khách gửi yêu cầu qua Hỗ trợ; Admin trả lời; người dùng đăng nhập xem phản hồi và thông báo.
-6. Kiểm tra hủy đơn và hoàn tiền demo (không có giao dịch thật), in biên nhận.
-
-## Cấu trúc để kết nối backend
-
-Xem **`docs/BACKEND_HANDOFF.md`** để lấy danh sách API đề xuất, database tables, quy tắc chống đặt trùng, user/admin permissions, trạng thái đơn và quy tắc bảo mật. Các adapter demo trong `common/auth-service.js`, `common/booking-store.js`, `common/domain-store.js` là vị trí cần thay khi viết API.
-
-## Kiểm thử bổ sung
-
-```bash
-node tests/flows.js
+```powershell
+$env:DB_HOST="127.0.0.1"
+$env:DB_PORT="3306"
+$env:DB_NAME="threek_booking"
+$env:DB_USER="root"
+$env:DB_PASSWORD=""
+$env:APP_BASE_URL="http://127.0.0.1:8000"
+$env:ONLINE_PAYMENTS_ENABLED="false"
+php -d upload_max_filesize=5M -d post_max_size=6M -S 127.0.0.1:8000 -t .
 ```
 
-Bài kiểm thử mở rộng có các kịch bản: admin CRUD khách sạn, quản lý giá/tồn kho, tài khoản xem đúng đơn, guest lookup, hoàn tiền demo, đánh giá sau lưu trú, duyệt review, ticket và thông báo. `python tests/render_check.py` thực hiện smoke render trên Chromium bằng cách nạp script nội bộ trực tiếp vì môi trường hiện tại không cho phép điều hướng HTTP nội bộ. **Không phải full E2E test**, hãy thử lại luồng click trên Chrome/Edge của bạn bằng Live Server.
+**Linux/macOS — Bash:**
 
-### Những gì chưa phải tính năng thật
+```bash
+export DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=threek_booking
+export DB_USER=root DB_PASSWORD=''
+export APP_BASE_URL=http://127.0.0.1:8000 ONLINE_PAYMENTS_ENABLED=false
+php -d upload_max_filesize=5M -d post_max_size=6M -S 127.0.0.1:8000 -t .
+```
 
-- Không có xác thực admin, kết nối cơ sở dữ liệu, thanh toán hoặc hoàn tiền thật, gửi email/OTP, đồng bộ đa trình duyệt, giữ phòng với concurrency, audit tin cậy. Không sử dụng dữ liệu thật hoặc thẻ ngân hàng thật trong bản demo.
-- Các lựa chọn như Google/Facebook login, quên mật khẩu gửi email, sửa lịch đặt phòng tự động, payment webhooks được để dành cho backend; giao diện cung cấp hướng dẫn minh bạch thay vì mô phỏng hoạt động thật.
+Thay `DB_PORT`, user và mật khẩu theo MariaDB thực tế. Mặc định trong code là
+**3308**, nên cần đặt `DB_PORT=3306` nếu máy dùng cổng phổ biến 3306.
+Để terminal này chạy trong lúc sử dụng. Dừng bằng Ctrl+C.
+PHP cần quyền ghi `uploads/`; không đặt quyền 777 cho toàn dự án.
+
+Mở lần lượt:
+
+1. <http://127.0.0.1:8000/api/setup-status.php>: `data.ready` phải là `true`,
+   `data.missing` là `[]`.
+2. <http://127.0.0.1:8000/api/hotels/index.php>: `status` là `success`, có dữ liệu.
+3. <http://127.0.0.1:8000/index1.html>: trang chủ.
+
+Dùng thống nhất `127.0.0.1:8000`; không đổi qua lại `localhost` trong cùng phiên.
+Nếu chạy bằng Apache/XAMPP thay PHP built-in server, phải cấu hình biến môi trường
+cho Apache riêng; biến trong PowerShell không tự truyền vào Apache đang chạy.
+
+## 6. Tạo tài khoản để giảng viên chấm bài (không cần email)
+
+Sau khi import đủ SQL ở mục 4, chọn database `threek_booking` trong phpMyAdmin
+và import thêm [database/demo_accounts.sql](database/demo_accounts.sql).
+Hoặc trong CLI MariaDB đã chọn database:
+
+```sql
+SOURCE database/demo_accounts.sql;
+```
+
+| Vai trò | Email đăng nhập | Mật khẩu |
+| --- | --- | --- |
+| Admin | `admin@gmail.com` | `admin123` |
+| Khách hàng A | `a@gmail.com` | `customer123` |
+| Khách hàng B | `b@gmail.com` | `customer123` |
+
+Đăng nhập tại `/auth/login.html`. Admin được chuyển vào trang quản trị.
+Mật khẩu trong bảng users được băm bằng PHP `password_hash()`.
+File có thể import lại: email đã tồn tại được giữ nguyên, không đổi mật khẩu hay quyền.
+Nếu email trùng tài khoản cũ, thông tin đăng nhập trong bảng trên chỉ áp dụng khi
+bản ghi đó do file này tạo mới. Dùng database local mới để chấm theo hướng dẫn.
+
+Đây là tài khoản **chỉ dùng local để chấm**, không import trên hosting công khai
+hoặc database có tài khoản thật. Tạo tài khoản bằng SQL không sửa hoặc bỏ qua
+cơ chế OTP của giao diện đăng ký.
+
+## 7. Bật đăng ký OTP và quên mật khẩu qua email (tùy chọn)
+
+Để chấm đăng ký/khôi phục thật, cần địa chỉ gửi email và cấu hình worker.
+Nếu chưa cấu hình, đăng ký mới bị chặn; vẫn dùng tài khoản local ở mục 6 để chấm
+đặt phòng, quản trị và các chức năng không cần email.
+
+Ví dụ Gmail SMTP: bật xác minh hai bước và tạo mật khẩu ứng dụng cho tài khoản gửi.
+Trước khi khởi động PHP server, cấu hình các biến sau trong terminal:
+
+| Biến | Giá trị ví dụ |
+| --- | --- |
+| `MAIL_TRANSPORT` | `smtp` |
+| `SMTP_HOST` | `smtp.gmail.com` |
+| `SMTP_PORT` | `587` |
+| `SMTP_ENCRYPTION` | `tls` |
+| `SMTP_USERNAME` | Email Gmail gửi thư |
+| `SMTP_PASSWORD` | Mật khẩu ứng dụng, không phải mật khẩu Gmail thông thường |
+| `MAIL_FROM` | Cùng email gửi thư |
+| `APP_BASE_URL` | `http://127.0.0.1:8000` |
+
+PowerShell đặt từng biến theo mẫu `$env:MAIL_TRANSPORT="smtp"`; Bash dùng
+`export MAIL_TRANSPORT=smtp`. Không lưu thông tin bí mật vào source nộp bài.
+Kiểm tra `/api/health-config.php`: `data.email` phải là `true`.
+
+Mở terminal thứ hai ở thư mục dự án, đặt **cùng cấu hình DB và email**, rồi chạy:
+
+```sh
+php scripts/mail-worker.php
+```
+
+Worker xử lý một đợt thư rồi thoát, không tự chạy liên tục. Khi đăng ký và popup OTP
+xuất hiện, chạy lệnh worker ngay để gửi thư; chạy lại sau mỗi lần yêu cầu/gửi lại mã.
+OTP và link khôi phục hết hạn sau 5 phút. Giữ cùng trình duyệt khi xác minh OTP.
+Xem thêm [hướng dẫn OTP](docs/REGISTRATION_OTP_SETUP.md).
+
+## 8. Kịch bản chạy thử/nghiệm thu
+
+1. Đăng nhập customer; mở Đà Lạt/Vũng Tàu, chọn ngày tương lai, số khách và phòng.
+2. Chọn khách sạn/phòng còn trống, điền thông tin, chọn **thanh toán tại khách sạn**,
+   hoàn thành đặt phòng; ghi lại mã đơn.
+3. Vào **Đặt phòng của tôi**, tải lại trang và mở chi tiết: đơn phải còn trong DB.
+4. Thử yêu thích, đăng bình luận, cập nhật hồ sơ và gửi yêu cầu hỗ trợ.
+5. Đăng xuất, đăng nhập admin; kiểm tra đơn, khách sạn, phòng và phản hồi hỗ trợ.
+6. Đăng nhập lại customer để kiểm tra phản hồi; thử hủy đơn đúng điều kiện.
+7. Nếu đã bật email, thử đăng ký OTP và quên mật khẩu với email mình sở hữu.
+
+Danh mục demo là dữ liệu học tập, không chứng minh tồn phòng thực tế. Một số khách sạn
+chưa có ảnh. Các lựa chọn thanh toán mô phỏng không chuyển tiền; không nhập thẻ thật.
+VNPay/hoàn tiền thật cần cấu hình và nghiệm thu nhà cung cấp riêng.
+
+## 9. Đóng gói để nộp
+
+Giữ source ứng dụng, `database/` chứa SQL, `README.md`, `docs/`, `sources/`,
+`composer.json`, `composer.lock`, `package.json`, `package-lock.json` và các file test.
+
+Trong **bản sao thư mục nộp bài**, loại bỏ `node_modules/`, `vendor/` ở gốc,
+`target/` nếu có, `.git/`, `.vscode/`, `__pycache__/`, log, file tạm, backup,
+`.env` và file chứa khóa/mật khẩu thật. Giảng viên khôi phục `vendor/` bằng Composer.
+Không xóa bản làm việc đang dùng khi chỉ cần tạo gói nộp.
+
+**Giữ `admin/vendor/leaflet/` và giấy phép đi kèm**: đây là tài nguyên frontend
+website tải trực tiếp, khác với `vendor/` Composer ở gốc. Giữ thư mục `uploads/`
+nhưng bỏ ảnh cá nhân/ảnh thử không cần thiết. Giữ `api/config/database.php`
+(kết nối qua biến môi trường), không đưa cấu hình bí mật từ máy cá nhân vào đó.
+
+## 10. Xử lý lỗi thường gặp
+
+| Hiện tượng | Kiểm tra |
+| --- | --- |
+| PHP hiện như văn bản/API không chạy | Dùng PHP server/Apache có PHP, không dùng server tĩnh |
+| Không kết nối database | MariaDB đã chạy; DB_HOST/PORT/NAME/USER/PASSWORD đúng |
+| Thiếu bảng/cột | Import đủ SQL theo đúng thứ tự; xem setup-status |
+| `could not find driver` hoặc thiếu mbstring | Bật pdo_mysql/mbstring trong php.ini của PHP đang chạy; khởi động lại |
+| Email chưa được cấu hình | Composer, SMTP, MAIL_FROM; hoặc dùng tài khoản local mục 6 |
+| OTP không đến | Chạy worker với cùng môi trường, kiểm tra thư rác/TLS/kết nối SMTP |
+| Không tải bản đồ/font | Kiểm tra Internet/CDN; không tắt xác minh TLS |
+| CSRF/phiên không hợp lệ | Tải lại trang, đăng nhập lại, giữ cùng host/port |
+| Upload thất bại | Quyền ghi uploads, ảnh JPEG/PNG/WebP ≤ 5 MB và giới hạn PHP |
+
+## 11. Kiểm thử tự động (dành cho người phát triển)
+
+Cần Docker, Node/npm, Python 3 và Playwright/Chromium theo các test của dự án.
+Chạy tại thư mục gốc:
+
+```sh
+npm run test:prepare
+npm run test:security
+npm test
+```
+
+Các script dùng container `web-midterm-admin-*` và database thử nghiệm riêng.
+Không chạy trên database đang chấm hoặc có dữ liệu thật. Không cần chạy bộ test
+để mở website theo các bước 1–8. Chi tiết bảo mật và giới hạn:
+[docs/security-hardening.md](docs/security-hardening.md).
