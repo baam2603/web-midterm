@@ -304,3 +304,28 @@
   .tk-cal__month + .tk-cal__month { display: none; }
   .tk-guests { width: auto; }
 }
+/* Nút về trang chủ dùng chung cho Đà Lạt và Vũng Tàu. */
+.tk-city-navigation {
+  padding: 12px clamp(16px, 4vw, 48px);
+  background: #fff;
+}
+.tk-city-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid var(--tk-line);
+  border-radius: 999px;
+  color: var(--tk-green-900);
+  font-weight: 600;
+  text-decoration: none;
+}
+.tk-city-back:hover {
+  background: var(--tk-cream);
+  text-decoration: none;
+}
+.tk-city-back:focus-visible {
+  outline: 2px solid var(--tk-green-700);
+  outline-offset: 3px;
+}
