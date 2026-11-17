@@ -1,16 +1,140 @@
-# THREEK.COM — Hướng dẫn cài đặt và sử dụng dành cho giảng viên
+# THREEK.COM — Hướng dẫn nghiệm thu dành cho giảng viên
 
 Website đặt phòng khách sạn tại Đà Lạt và Vũng Tàu, gồm giao diện khách hàng,
-trang quản trị và API PHP/MariaDB. Đây là đồ án mô phỏng website booking, không
-phải hệ thống POS bán điện thoại. Dữ liệu tài khoản, đặt phòng, yêu thích, bình luận,
-hỗ trợ và thông báo được lưu trong database.
+trang quản trị và API PHP/MariaDB. Tài khoản, đơn, bình luận, yêu thích và thông báo
+được lưu trong database.
 
-**Lộ trình chạy nhanh:** chuẩn bị PHP/MariaDB → tạo database → import SQL theo mục 2
-→ cấu hình và chạy PHP theo mục 3 → đăng nhập bằng tài khoản ở mục 4 → dùng hệ thống
-ở mục 5–6. Không cần cấu hình email hoặc VNPay để chấm bằng tài khoản có sẵn và
-phương thức thanh toán tại khách sạn.
+**Ưu tiên test website đã deploy ở phần A:** chỉ cần trình duyệt và Internet,
+không cần tải source, cài PHP hay import SQL. **Phần B** bên dưới dành cho giảng viên
+muốn cài và chạy lại từ đầu trên máy cá nhân.
 
-## 1. Yêu cầu môi trường và source nộp bài
+| Môi trường | Địa chỉ | Tài khoản customer |
+| --- | --- | --- |
+| **Deploy — ưu tiên nghiệm thu** | **https://threekbooking.alwaysdata.net** | `vikiet25.duong@gmail.com` |
+| Local — sau khi tự cài theo phần B | `http://127.0.0.1:8000` (hoặc cổng tự cấu hình) | `b@gmail.com` |
+
+## A. Test trực tiếp trên website đã deploy
+
+### A.1. Truy cập website
+
+**Website:** https://threekbooking.alwaysdata.net
+
+Mở website bằng Chrome/Edge/Firefox, chọn **Đăng nhập**. Nếu muốn sử dụng đồng thời
+hai vai trò, dùng cửa sổ thường cho admin và cửa sổ ẩn danh cho customer.
+Không cần chạy XAMPP, không cần import SQL khi dùng môi trường deploy.
+
+### A.2. Tài khoản dành cho giảng viên trên môi trường deploy
+
+| Vai trò | Email đăng nhập | Mật khẩu |
+| --- | --- | --- |
+| **Admin** | **`nguyentuankhoi2603@gmail.com`** | **`TKi@17022603`** |
+| **Customer** | **`vikiet25.duong@gmail.com`** | **`kiet123456`** |
+
+Nhập email đầy đủ, chú ý chữ hoa/thường của mật khẩu. Đây là tài khoản đăng nhập
+**website**, không phải thông tin truy cập hộp thư Gmail. Đăng nhập tài khoản có sẵn
+không cần OTP; OTP dùng cho đăng ký customer mới.
+
+Các tài khoản trên được cung cấp để chấm trên website deploy. Không import
+`grading_accounts.sql` lên hosting để thiết lập lại chúng. File SQL ở phần B phục vụ
+bản local và tạo customer `b@gmail.com`, không tạo tài khoản deploy `vikiet25.duong@gmail.com`.
+
+### A.3. Test với vai trò customer
+
+1. Đăng nhập `vikiet25.duong@gmail.com` bằng mật khẩu ở mục A.2.
+2. Chọn **Đà Lạt** hoặc **Vũng Tàu**, tìm kiếm/lọc khách sạn, chọn ngày trong tương lai,
+   số khách và số phòng.
+3. Mở **Xem phòng**, kiểm tra ảnh khách sạn/ảnh phòng, giá và số phòng còn trống.
+4. Chọn loại phòng, nhập thông tin người nhận phòng, điện thoại và ghi chú.
+5. Bấm **Tiếp tục thanh toán**. Giao diện chỉ có **VNPay Sandbox** và
+   **thanh toán tại khách sạn**; thử từng phương thức bằng các đơn riêng.
+6. Với **thanh toán tại khách sạn**, xác nhận rồi ghi lại mã đơn. Đơn được lưu,
+   không thu tiền trực tuyến bằng phương thức này.
+7. Mở **Đặt phòng của tôi**: xem chi tiết, tải lại để kiểm tra dữ liệu còn tồn tại,
+   in biên nhận và hủy đơn nếu đủ điều kiện.
+8. Thử yêu thích, cập nhật hồ sơ, đăng bình luận và gửi ticket ở **Hỗ trợ & FAQ**.
+   Sau khi admin phản hồi, kiểm tra ticket/thông báo của customer.
+
+**Kết quả mong đợi:** đơn và dữ liệu cá nhân được lưu phía server, customer chỉ xem
+được đơn của mình. Các trạng thái đơn chỉ được thay đổi nếu thỏa điều kiện nghiệp vụ.
+
+### A.4. Test đăng ký bằng email thật và nhận OTP
+
+Giảng viên có thể **tự tạo tài khoản customer**, thay vì dùng tài khoản có sẵn:
+
+1. Đăng xuất hoặc mở cửa sổ ẩn danh, chọn **Đăng ký**.
+2. Điền họ tên, **email thật có quyền truy cập hộp thư**, mật khẩu 8–72 ký tự gồm chữ
+   và số, cùng các thông tin form yêu cầu.
+3. Gửi đăng ký và giữ cửa sổ nhập OTP trong cùng trình duyệt.
+4. **Kiểm tra mục Spam / Thư rác của Gmail trước:** theo môi trường demo do nhóm cung
+   cấp, email OTP có thể được Gmail chuyển vào thư rác. Nếu chưa thấy, kiểm tra thêm
+   Hộp thư đến và tìm email THREEK; có thể đánh dấu “Không phải thư rác”.
+5. Nhập OTP **6 chữ số**, hiệu lực **5 phút** từ lúc yêu cầu. Gửi lại cần chờ
+   **60 giây** và chịu giới hạn số lần gửi/nhập sai.
+6. OTP đúng mới tạo tài khoản và đăng nhập. Sau đó đăng xuất, đăng nhập lại để kiểm tra.
+7. Nếu muốn thử **Quên mật khẩu**, dùng email vừa đăng ký và kiểm tra cả Spam.
+   Link khôi phục có hiệu lực **5 phút**, chỉ dùng một lần.
+
+Không dùng Gmail của tài khoản customer được chia sẻ để nhận OTP/quên mật khẩu nếu
+không có quyền truy cập hộp thư đó. Muốn chấm email, hãy dùng địa chỉ của giảng viên.
+Nếu thư chậm hoặc hết hạn, yêu cầu mã mới; OTP chỉ hoạt động khi mail worker và dịch vụ
+email của môi trường deploy đang hoạt động. Không có endpoint công khai để đọc OTP.
+
+### A.5. Test VNPay Sandbox trên môi trường deploy
+
+1. Đăng nhập customer (tài khoản có sẵn hoặc tài khoản mới xác minh OTP).
+2. Chọn phòng/ngày, nhập thông tin nhận phòng rồi chọn **VNPay Sandbox**.
+3. Bấm **Tiếp tục thanh toán VNPay** để chuyển đến cổng sandbox.
+4. Chỉ dùng **thông tin thanh toán thử nghiệm do VNPay cung cấp** theo hướng dẫn
+   trên sandbox; không dùng thẻ thật hoặc chuyển tiền thật.
+5. Hoàn tất giao dịch và quay về website. Vào **Đặt phòng của tôi** để kiểm tra
+   trạng thái đơn và thanh toán; tải lại nếu kết quả xử lý chưa cập nhật ngay.
+6. Có thể tạo đơn khác để thử hủy/thất bại ở cổng sandbox. Đơn này không được ghi nhận
+   đã thanh toán thành công. Nếu cần thử lại liên kết VNPay của đơn chờ còn hiệu lực,
+   hệ thống tiếp tục đơn đó thay vì tạo thêm đơn trùng.
+
+**Kết quả mong đợi:** chỉ IPN có chữ ký, số tiền và dữ liệu đơn hợp lệ mới cập nhật
+kết quả thanh toán; việc trình duyệt quay về website tự nó chưa chứng minh giao dịch
+đã được xác nhận. Nếu đơn vẫn chờ, kiểm tra lại sau; nhóm cần kiểm tra cấu hình IPN
+khi chấm mà không nhận được kết quả.
+
+**Phân biệt:** email thật cần để nhận OTP/khôi phục mật khẩu. Bản thân VNPay Sandbox
+không bắt buộc tài khoản website dùng email thật, nên có thể dùng customer có sẵn
+để chấm thanh toán. Website vẫn là môi trường đồ án/sandbox, không phải giao dịch
+đặt phòng khách sạn hay chuyển tiền thật.
+
+### A.6. Test với vai trò admin và chuyển qua lại hai giao diện
+
+1. Đăng nhập admin ở mục A.2, hệ thống chuyển đến dashboard quản trị.
+2. Kiểm tra khách sạn, loại phòng, ảnh, giá/tồn phòng và các đơn vừa tạo.
+3. Thử cập nhật trên dữ liệu demo, xem lịch phòng và nhật ký thao tác.
+4. Thử xác nhận/hủy/nhận phòng/hoàn tất theo điều kiện. Đơn có ngày nhận phòng trong
+   tương lai không thể nhận phòng hoặc hoàn tất ngay chỉ để demo.
+5. Xem/xóa bình luận thử nghiệm; phản hồi ticket của customer và đối chiếu ở cửa sổ customer.
+6. Bấm **Website khách hàng** để chuyển sang giao diện khách. Bấm avatar →
+   **Trang quản trị** để quay về; không cần đăng nhập lại khi phiên còn hợp lệ.
+
+Nếu muốn thử thay đổi mật khẩu, nên dùng tài khoản customer tự đăng ký để giữ nguyên
+thông tin đăng nhập của hai tài khoản dùng chung cho các lần chấm sau.
+
+### A.7. Lưu ý và minh chứng nghiệm thu
+
+- Các bước trên là hướng dẫn và kết quả mong đợi; không thay cho biên bản xác nhận
+  email thật/IPN của từng lần test trên hosting.
+- Chụp mã đơn, trạng thái đơn, phản hồi hỗ trợ và kết quả sandbox làm minh chứng;
+  không chia sẻ OTP hoặc token phiên trong ảnh báo cáo.
+- Nếu giảng viên chỉ muốn thử luồng đặt phòng trước, chọn thanh toán tại khách sạn,
+  sau đó chấm OTP và VNPay Sandbox riêng.
+- Phần B mô tả cài lại ứng dụng từ source. Giảng viên không cần thực hiện phần B
+  để dùng website đã deploy ở phần A.
+
+## B. Test local — cài đặt lại từ source/ZIP
+
+**Lộ trình:** chuẩn bị môi trường theo B.1 → tạo database/import SQL theo B.2 → chạy
+PHP theo B.3 → đăng nhập tài khoản **local** ở B.4 → sử dụng theo B.5–B.6.
+Local mặc định không bật VNPay và chưa có email; muốn tự đăng ký hoặc dùng cổng
+thanh toán phải cấu hình thêm B.7–B.8. Các thao tác local không thay đổi dữ liệu hosting.
+
+### B.1. Yêu cầu môi trường và source nộp bài
 
 | Thành phần | Yêu cầu |
 | --- | --- |
@@ -39,9 +163,9 @@ thế PHP/Composer/MariaDB.
 Không dùng Live Server, `python -m http.server` hoặc mở HTML bằng `file://`:
 các cách này không thực thi API PHP.
 
-## 2. Tạo database và import SQL đúng thứ tự
+### B.2. Tạo database và import SQL đúng thứ tự
 
-### 2.1. Cách dùng phpMyAdmin
+#### B.2.1. Cách dùng phpMyAdmin
 
 1. Khởi động MariaDB trong XAMPP hoặc dịch vụ MariaDB đã cài.
 2. Mở phpMyAdmin, tạo database **mới, trống** tên `threek_booking`, charset
@@ -71,7 +195,7 @@ Trong quy trình nộp bài này **dùng `grading_accounts.sql`**, không dùng
 Giữ nguyên thư mục `hotel_images/` đi kèm source để các đường dẫn SQL tải được ảnh.
 Một số ảnh phòng chỉ có độ phân giải 60×60 nên khi phóng lớn sẽ mờ.
 
-### 2.2. Cách thay thế bằng MariaDB CLI
+#### B.2.2. Cách thay thế bằng MariaDB CLI
 
 Mở terminal tại thư mục source. Đăng nhập MariaDB; thay cổng/user theo máy:
 
@@ -108,13 +232,13 @@ và chuyển **riêng** `b@gmail.com/customer123` của bộ demo cũ sang `admi
 Nó không ghi đè mật khẩu người dùng đã tự đổi hoặc quyền của email đã tồn tại.
 Nếu email bị trùng tài khoản cũ có thông tin khác, dùng DB chấm bài mới để làm đúng hướng dẫn.
 
-## 3. Cấu hình kết nối và chạy website
+### B.3. Cấu hình kết nối và chạy website
 
 Code đọc **biến môi trường**, không tự nạp file `.env`. Ví dụ dưới đây dùng MariaDB
 local cổng **3306**, user `root`, mật khẩu rỗng; thay bằng thông tin máy thực tế.
 Mặc định trong code là **3308**, nên phải đặt `DB_PORT` nếu máy chạy 3306.
 
-### Windows PowerShell
+#### Windows PowerShell
 
 Chạy tại thư mục gốc source:
 
@@ -129,7 +253,7 @@ $env:ONLINE_PAYMENTS_ENABLED="false"
 php -d upload_max_filesize=5M -d post_max_size=6M -S 127.0.0.1:8000 -t .
 ```
 
-### Linux/macOS — Bash
+#### Linux/macOS — Bash
 
 ```bash
 export DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=threek_booking
@@ -156,9 +280,9 @@ biến trong PowerShell không tự truyền vào Apache đang chạy. URL khi �
 `htdocs/web-midterm` thường là `http://localhost/web-midterm/index1.html`.
 PHP built-in server chỉ dùng local, không public trực tiếp ra Internet.
 
-## 4. Tài khoản giảng viên đăng nhập
+### B.4. Tài khoản dành riêng cho bản local
 
-Sau khi import `database/grading_accounts.sql`:
+Sau khi import `database/grading_accounts.sql` vào database local:
 
 | Vai trò | Email đăng nhập | Mật khẩu |
 | --- | --- | --- |
@@ -173,11 +297,12 @@ làm username. Admin đăng nhập được chuyển đến `/admin/index.html`;
 Không dùng mật khẩu này cho email thật/tài khoản cá nhân hoặc hosting công khai.
 Không cần quyền truy cập hộp thư Gmail để đăng nhập các tài khoản đã tạo sẵn.
 
-Giảng viên có thể tự đăng ký customer nếu đã cấu hình gửi email theo mục 7;
+Tài khoản customer local là `b@gmail.com`, khác tài khoản customer deploy ở mục A.2.
+Giảng viên có thể tự đăng ký customer nếu đã cấu hình gửi email theo mục B.7;
 nếu chưa cấu hình email, dùng `b@gmail.com` để chấm ngay. Không có chế độ bỏ qua OTP
 trên trang đăng ký.
 
-## 5. Cách sử dụng với vai trò khách hàng
+### B.5. Cách sử dụng với vai trò khách hàng
 
 1. Đăng nhập `b@gmail.com` hoặc tài khoản đã tự đăng ký.
 2. Tại trang chủ chọn **Đà Lạt** hoặc **Vũng Tàu**. Có thể dùng nút **Về trang chủ**
@@ -202,9 +327,9 @@ Chỉ có hai lựa chọn ở giao diện thanh toán: **VNPay Sandbox** và **
 khách sạn**. Không nhập thẻ thật, không chuyển tiền thật trong demo. Một số chức năng
 như thay đổi ngày của đơn đã tạo cần liên hệ hỗ trợ, không phải chỉnh trực tiếp đơn.
 
-## 6. Cách sử dụng với vai trò quản trị viên
+### B.6. Cách sử dụng với vai trò quản trị viên
 
-1. Đăng nhập bằng tài khoản quản trị ở mục 4, chờ xác minh phiên/quyền từ server.
+1. Đăng nhập bằng tài khoản quản trị ở mục B.4, chờ xác minh phiên/quyền từ server.
 2. Xem **Tổng quan** và các khu vực quản lý khách sạn, phòng, đơn, đánh giá, hỗ trợ,
    thanh toán và nhật ký trong dashboard.
 3. Với khách sạn/phòng: xem, thêm/sửa thông tin, giá, số lượng phòng và trạng thái
@@ -222,15 +347,15 @@ như thay đổi ngày của đơn đã tạo cần liên hệ hỗ trợ, khôn
 MSSV làm mật khẩu tạm hay bắt buộc đổi mật khẩu lần đầu. Vai trò được kiểm tra ở API,
 không cấp quyền bằng cách sửa localStorage.
 
-## 7. Tự đăng ký customer và khôi phục mật khẩu — cấu hình email
+### B.7. Tự đăng ký customer và khôi phục mật khẩu — cấu hình email
 
 Phần này cần thiết nếu giảng viên muốn **tự tạo tài khoản trên giao diện**, nhưng
 không bắt buộc nếu dùng customer có sẵn.
 
-### 7.1. Gmail SMTP
+#### B.7.1. Gmail SMTP
 
-Chạy Composer ở mục 1. Dùng email gửi do người cài đặt quản lý, bật xác minh hai bước
-và tạo **mật khẩu ứng dụng Gmail**. Mật khẩu đăng nhập website ở mục 4 không phải
+Chạy Composer ở mục B.1. Dùng email gửi do người cài đặt quản lý, bật xác minh hai bước
+và tạo **mật khẩu ứng dụng Gmail**. Mật khẩu đăng nhập website ở mục B.4 không phải
 mật khẩu SMTP và không tự cấp quyền gửi email.
 
 Đặt thêm các biến sau **trước khi khởi động PHP server**:
@@ -261,7 +386,7 @@ popup OTP xuất hiện, chạy worker ngay; chạy lại sau mỗi yêu cầu/g
 Khi deploy, có thể đặt cron mỗi phút thay thao tác thủ công. Không đưa SMTP password
 hoặc Resend key thật vào source/ZIP/Git.
 
-### 7.2. Đăng ký và quên mật khẩu
+#### B.7.2. Đăng ký và quên mật khẩu
 
 1. Mở `/auth/register.html`, dùng **email người nhận mà giảng viên kiểm soát**.
 2. Điền họ tên, email, mật khẩu 8–72 ký tự gồm chữ và số; các trường khác theo form.
@@ -274,7 +399,7 @@ hoặc Resend key thật vào source/ZIP/Git.
 Không thử nhận OTP/quên mật khẩu bằng `b@gmail.com` nếu không sở hữu hộp thư đó.
 Có thể dùng Resend thay SMTP theo [docs/CUSTOMER_SETUP.md](docs/CUSTOMER_SETUP.md).
 
-## 8. VNPay Sandbox — tùy chọn
+### B.8. VNPay Sandbox — tùy chọn
 
 Để chấm toàn bộ luồng cổng thanh toán cần tài khoản merchant **sandbox** và cấu hình:
 
@@ -283,7 +408,7 @@ Có thể dùng Resend thay SMTP theo [docs/CUSTOMER_SETUP.md](docs/CUSTOMER_SET
 - `VNPAY_GATEWAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html`.
 - `APP_BASE_URL`: URL **HTTPS** của ứng dụng mà VNPay truy cập được, gồm thư mục con nếu có.
 
-Code hiện yêu cầu APP_BASE_URL HTTPS cho VNPay; URL local HTTP ở mục 3 dành cho
+Code hiện yêu cầu APP_BASE_URL HTTPS cho VNPay; URL local HTTP ở mục B.3 dành cho
 luồng thanh toán tại khách sạn. `localhost` không tự truy cập được từ máy chủ VNPay.
 Cần cấu hình return/IPN theo tài liệu nhà cung cấp và giữ kiểm tra chữ ký.
 Không dùng mã merchant giả trong script test để chấm giao dịch thật với nhà cung cấp.
@@ -293,7 +418,7 @@ thanh toán khi nhận IPN có chữ ký và dữ liệu hợp lệ; việc trì
 đủ để kết luận đã thanh toán. Nếu chưa có cấu hình, việc chọn VNPay báo lỗi cấu hình
 là dự kiến; dùng thanh toán tại khách sạn để chấm các luồng còn lại.
 
-## 9. Kiểm chứng bảo mật và kiểm thử tự động
+### B.9. Kiểm chứng bảo mật và kiểm thử tự động
 
 Ứng dụng có các lớp phòng thủ đã bổ sung: PDO native prepared statements, escape
 đầu ra/textContent, kiểm tra Origin/JSON/Fetch Metadata cho customer writes,
@@ -323,7 +448,7 @@ Test dùng container `web-midterm-admin-*`, database riêng và HTTP cổng **80
 website giảng viên chạy thủ công ở cổng **8000**. Không chạy các test ghi dữ liệu trên
 DB hosting/DB chấm bài. Test không gửi email hoặc thanh toán thật theo cấu hình fixture.
 
-## 10. Lỗi thường gặp và cách khắc phục
+### B.10. Lỗi thường gặp và cách khắc phục
 
 | Lỗi | Cách kiểm tra |
 | --- | --- |
@@ -335,13 +460,13 @@ DB hosting/DB chấm bài. Test không gửi email hoặc thanh toán thật the
 | Thiếu `pdo_mysql`, `mbstring` | Bật extension trong php.ini của PHP đang chạy, khởi động lại server |
 | Email chưa cấu hình | Dùng b@gmail.com hoặc cấu hình SMTP/Resend và Composer |
 | OTP/email không đến | Chạy worker với cùng môi trường; kiểm tra thư rác, Internet, SMTP/TLS và thời hạn OTP |
-| VNPay báo chưa cấu hình | Chấm tại khách sạn hoặc cấu hình sandbox/HTTPS/IPN đúng mục 8 |
+| VNPay báo chưa cấu hình | Chấm tại khách sạn hoặc cấu hình sandbox/HTTPS/IPN đúng mục B.8 |
 | Ảnh không tải | Giữ `hotel_images/`, import đủ hai file ảnh, kiểm tra đúng chữ hoa/thường |
 | Bản đồ/font không tải | Kiểm tra Internet, CDN, các host OpenStreetMap |
 | Lỗi phiên/CSRF | Tải lại trang, đăng nhập lại, giữ thống nhất host/port |
 | Upload ảnh thất bại | Quyền ghi uploads, JPEG/PNG/WebP tối đa 5 MB, giới hạn PHP |
 
-## 11. Cấu trúc và đóng gói ZIP nộp bài
+### B.11. Cấu trúc và đóng gói ZIP nộp bài
 
 | Thư mục/file | Vai trò |
 | --- | --- |
