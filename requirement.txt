@@ -1,0 +1,13 @@
+# THREEK.COM - installation requirements
+# This is a PHP/MariaDB application. Python is OPTIONAL, for automated tests only.
+# Required runtime (install outside pip):
+#   PHP >=8.1 (recommended 8.3), extensions: pdo_mysql, mbstring, curl, fileinfo, openssl
+#   MariaDB >=10.4 (recommended 10.11)
+#   Chrome/Edge/Firefox; Internet for CDN/maps/email
+#   Composer 2.x for PHPMailer (composer install); see composer.json/composer.lock
+# Optional test tools (install outside pip): Docker, Node.js/npm, Python >=3.10,
+# Chromium at /usr/bin/chromium for the current Linux browser test scripts.
+# Install the Python dependencies below only when running tests:
+#   python -m pip install -r requirement.txt
+playwright>=1.50,<2
+beautifulsoup4>=4.12,<5
