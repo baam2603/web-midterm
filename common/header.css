@@ -281,3 +281,8 @@
     animation: none !important;
   }
 }
+
+/* Role-specific navigation stays hidden until the session is verified. */
+.dropdown-item[hidden] {
+  display: none !important;
+}
