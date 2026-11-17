@@ -4,28 +4,28 @@
   const savedBooking = window.paymentBooking || null;
   const localImage = (path) =>
     typeof path === "string" &&
-    /^(sources|uploads)\/[A-Za-z0-9_./-]+$/.test(path) &&
-    !path.includes("..")
+      /^(sources|uploads)\/[A-Za-z0-9_./-]+$/.test(path) &&
+      !path.includes("..")
       ? "../" + path
       : "";
   const city = draft && CITIES[draft.city];
   const hotel = savedBooking
     ? {
-        name: savedBooking.hotelName,
-        images: [localImage(savedBooking.hotelImage)].filter(Boolean),
-        facts: [],
-      }
+      name: savedBooking.hotelName,
+      images: [localImage(savedBooking.hotelImage)].filter(Boolean),
+      facts: [],
+    }
     : city && HOTELS[draft.city] && HOTELS[draft.city][draft.hotelId];
   const room = savedBooking
     ? {
-        id: savedBooking.roomId,
-        name: savedBooking.roomName,
-        price:
-          Number(savedBooking.subtotal ?? savedBooking.total) /
-          (savedBooking.rooms * savedBooking.nights),
-        refundable: savedBooking.refundable,
-        image: localImage(savedBooking.roomImage),
-      }
+      id: savedBooking.roomId,
+      name: savedBooking.roomName,
+      price:
+        Number(savedBooking.subtotal ?? savedBooking.total) /
+        (savedBooking.rooms * savedBooking.nights),
+      refundable: savedBooking.refundable,
+      image: localImage(savedBooking.roomImage),
+    }
     : hotel && (hotel.rooms || []).find((r) => r.id === draft.roomId);
 
   document.body.dataset.city = city ? city.theme : "dalat";
@@ -123,7 +123,7 @@
     draft.code = "TK" + Date.now().toString(36).toUpperCase().slice(-6);
   try {
     if (!savedBooking) sessionStorage.setItem(KEY, JSON.stringify(draft));
-  } catch (_) {}
+  } catch (_) { }
 
   const METHODS = [
     ["card", "credit_card", "Thẻ tín dụng / ghi nợ", "Chỉ dùng thẻ thử nghiệm"],
@@ -134,12 +134,19 @@
       "Chuyển khoản ngân hàng",
       "Mô phỏng · chưa chuyển tiền",
     ],
+    ["online", "payments", "VNPay Sandbox", "Thanh toán thử qua VNPay (không dùng thẻ thật)"],
     ["hotel", "storefront", "Thanh toán tại khách sạn", "Trả khi nhận phòng"],
   ];
   const WALLETS = { momo: "MoMo", zalopay: "ZaloPay" };
+  // A pending online booking is NOT a successful payment. Let the buyer retry
+  // generating the VNPay link without creating a second booking.
+  const resumedOnline = savedBooking?.status === "pending" &&
+    savedBooking?.payMethod === "online";
+  let onlineBookingCode = resumedOnline ? savedBooking.code : null;
   const state = {
-    phase: savedBooking ? "done" : "pay", // pay | done | expired
-    method: METHODS.some((m) => m[0] === draft.pay) ? draft.pay : "card",
+    phase: !savedBooking || resumedOnline ? "pay" : "done", // pay | done | expired
+    method: resumedOnline ? "online" :
+      (METHODS.some((m) => m[0] === draft.pay) ? draft.pay : "card"),
     wallet: "momo",
     card: { name: "", number: "", exp: "", cvv: "" },
   };
@@ -223,10 +230,9 @@
       <em class="field__err" data-err="${key}"></em>
     </label>`;
   const bankRow = (k, v, copy) => `
-    <li><span>${k}</span><b>${esc(v)}</b>${
-      copy
-        ? `<button type="button" class="copy" data-copy="${esc(copy)}" aria-label="Sao chép ${k}">${icon("content_copy")}</button>`
-        : ""
+    <li><span>${k}</span><b>${esc(v)}</b>${copy
+      ? `<button type="button" class="copy" data-copy="${esc(copy)}" aria-label="Sao chép ${k}">${icon("content_copy")}</button>`
+      : ""
     }</li>`;
 
   function detailHTML() {
@@ -256,11 +262,11 @@
       return `
         <div class="wallets">
           ${Object.entries(WALLETS)
-            .map(
-              ([k, n]) =>
-                `<label class="wallet"><input type="radio" name="wallet" value="${k}" ${state.wallet === k ? "checked" : ""} />${icon(icons[k])}${n}</label>`,
-            )
-            .join("")}
+          .map(
+            ([k, n]) =>
+              `<label class="wallet"><input type="radio" name="wallet" value="${k}" ${state.wallet === k ? "checked" : ""} />${icon(icons[k])}${n}</label>`,
+          )
+          .join("")}
         </div>
         <div class="pay-note">Bản demo mô phỏng thanh toán qua ${WALLETS[state.wallet]} với số tiền ${money(total)}; không mở ứng dụng ví thực tế.</div>`;
     }
@@ -275,38 +281,43 @@
         </ul>
         <div class="pay-note">DỮ LIỆU MINH HỌA: Không chuyển tiền thật tới các thông tin này. Lựa chọn được lưu cùng đơn trên hệ thống; chưa ghi nhận giao dịch tiền thật.</div>`;
     }
+    if (state.method === "online") {
+      return `<div class="pay-note">Bạn sẽ được chuyển sang cổng VNPay Sandbox. Chỉ sử dụng thông tin thanh toán thử nghiệm do VNPay cung cấp. Đơn chỉ được xác nhận khi hệ thống nhận được kết quả thanh toán hợp lệ.</div>`;
+    }
     return `<div class="pay-note">Bạn thanh toán tại khách sạn khi nhận phòng. Đơn đặt phòng được lưu trên hệ thống sau khi xác nhận.</div>`;
   }
 
   const payLabel = () =>
-    state.method === "card"
-      ? `Thanh toán ${money(total)}`
-      : state.method === "wallet"
-        ? `Thanh toán bằng ${WALLETS[state.wallet]}`
-        : state.method === "bank"
-          ? "Xác nhận chuyển khoản demo"
-          : "Xác nhận đặt phòng";
+    state.method === "online"
+      ? `Tiếp tục thanh toán VNPay ${money(total)}`
+      : state.method === "card"
+        ? `Thanh toán ${money(total)}`
+        : state.method === "wallet"
+          ? `Thanh toán bằng ${WALLETS[state.wallet]}`
+          : state.method === "bank"
+            ? "Xác nhận chuyển khoản demo"
+            : "Xác nhận đặt phòng";
 
   function payHTML() {
     const opts = METHODS.map(
       ([v, ic, t, s]) => `
       <label class="pay-opt">
-        <input type="radio" name="pay" value="${v}" ${state.method === v ? "checked" : ""} />
+        <input type="radio" name="pay" value="${v}" ${state.method === v ? "checked" : ""} ${onlineBookingCode && v !== "online" ? "disabled" : ""} />
         ${icon(ic)}<div>${t}<small>${s}</small></div>
       </label>`,
     ).join("");
     return `
-      <div class="hold" id="hold">${icon("timer")}<span>Phiên xác nhận còn <b id="holdTime">--:--</b></span></div>
+      ${!savedBooking && !onlineBookingCode ? `<div class="hold" id="hold">${icon("timer")}<span>Phiên xác nhận còn <b id="holdTime">--:--</b></span></div>` : `<div class="pay-note">Đơn ${esc(draft.code)} đang chờ thanh toán. Bạn có thể thử mở lại liên kết VNPay nếu đơn còn hiệu lực.</div>`}
       <div class="card">
         <h2>Chọn cách thanh toán</h2>
         <div class="pay-options">${opts}</div>
         ${detailHTML()}
       </div>
       <div class="actions">
-        <button type="button" class="btn btn--ghost" data-back>${icon("arrow_back")} Sửa thông tin đặt phòng</button>
+        <button type="button" class="btn btn--ghost" data-back>${icon("arrow_back")} ${onlineBookingCode ? "Xem đơn của tôi" : "Sửa thông tin đặt phòng"}</button>
         <button type="button" class="btn btn--primary" data-pay>${icon("lock")} ${payLabel()}</button>
       </div>
-      <p class="secure">${icon("verified_user")} THANH TOÁN DEMO — không trừ tiền, không gửi email. Chỉ dùng số thẻ thử nghiệm, không nhập thẻ thật.</p>`;
+      <p class="secure">${icon("verified_user")} ${state.method === "online" ? "VNPay Sandbox: chỉ sử dụng thông tin thanh toán thử nghiệm, không nhập thẻ thật." : "THANH TOÁN DEMO — không trừ tiền. Chỉ dùng số thẻ thử nghiệm, không nhập thẻ thật."}</p>`;
   }
 
   function doneHTML() {
@@ -355,7 +366,7 @@
     if (state.phase === "pay") {
       const button = root.querySelector("[data-pay]");
       if (button) button.disabled = !quoteReady || saving;
-      tick();
+      if (!savedBooking && !onlineBookingCode) tick();
     }
   }
 
@@ -371,7 +382,7 @@
     }
     if (ms <= 0) {
       clearInterval(timer);
-      if (state.phase === "pay") {
+      if (state.phase === "pay" && !onlineBookingCode) {
         state.phase = "expired";
         renderLeft();
       }
@@ -418,6 +429,7 @@
 
   function selectedMethod() {
     if (state.method === "hotel") return "hotel";
+    if (state.method === "online") return "online";
     return (state.method === "wallet" ? state.wallet : state.method) + "_demo";
   }
   async function saveBooking() {
@@ -451,10 +463,34 @@
     }
     return result.data;
   }
+  async function startVnpay(code) {
+    const response = await fetch("../api/payments/start.php", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+    const result = await response.json();
+    if (!response.ok || result.status !== "success") {
+      throw Error(result.message || "Không lấy được liên kết VNPay.");
+    }
+    const url = result.data?.url;
+    // Do not redirect to an arbitrary URL returned by a compromised endpoint.
+    const target = new URL(url);
+    if (target.protocol !== "https:" ||
+      !["sandbox.vnpayment.vn", "pay.vnpay.vn"].includes(target.hostname)) {
+      throw Error("Liên kết cổng thanh toán không hợp lệ.");
+    }
+    if (target.hostname !== "sandbox.vnpayment.vn") {
+      throw Error("Chỉ cho phép thanh toán VNPay Sandbox trong giai đoạn thử nghiệm.");
+    }
+    location.assign(target.href);
+  }
+
   async function pay(button) {
     if (saving || !quoteReady || state.phase !== "pay") return;
     if (state.method === "card" && !showErrors(validateCard())) return;
-    if (Date.now() >= draft.deadline) {
+    if (!onlineBookingCode && Date.now() >= draft.deadline) {
       tick();
       return;
     }
@@ -465,6 +501,26 @@
       .querySelectorAll("[name=pay],[name=wallet]")
       .forEach((el) => (el.disabled = true));
     try {
+      if (state.method === "online") {
+        if (!onlineBookingCode) {
+          const saved = await saveBooking();
+          onlineBookingCode = saved.code;
+          draft.code = saved.code;
+          base = Number(saved.subtotal);
+          discount = Number(saved.discount);
+          tax = Number(saved.tax);
+          total = Number(saved.total);
+          // Persist the booking code BEFORE contacting VNPay. If start.php
+          // fails, refreshing this URL resumes the same pending booking.
+          history.replaceState(null, "", location.pathname + "?code=" +
+            encodeURIComponent(saved.code));
+          try { sessionStorage.removeItem(KEY); } catch (_) { }
+          renderPrice();
+          renderSummary();
+        }
+        await startVnpay(onlineBookingCode);
+        return;
+      }
       const saved = await saveBooking();
       draft.code = saved.code;
       base = Number(saved.subtotal);
@@ -478,7 +534,7 @@
       );
       try {
         sessionStorage.removeItem(KEY);
-      } catch {}
+      } catch { }
       state.card = { name: "", number: "", exp: "", cvv: "" };
       state.phase = "done";
       clearInterval(timer);
@@ -499,7 +555,10 @@
   root.addEventListener("change", (e) => {
     const t = e.target;
     if (saving) return;
-    if (t.name === "pay") state.method = t.value;
+    if (t.name === "pay") {
+      if (onlineBookingCode && t.value !== "online") return;
+      state.method = t.value;
+    }
     else if (t.name === "wallet") state.wallet = t.value;
     else return;
     renderLeft();
@@ -548,13 +607,13 @@
           return;
         }
       }
-      location.href = backUrl;
+      location.href = onlineBookingCode ? "../booking/myBooking.html" : backUrl;
       return;
     }
     const cp = e.target.closest("[data-copy]");
     if (cp) {
       if (navigator.clipboard)
-        navigator.clipboard.writeText(cp.dataset.copy).catch(() => {});
+        navigator.clipboard.writeText(cp.dataset.copy).catch(() => { });
       cp.classList.add("is-copied");
       setTimeout(() => cp.classList.remove("is-copied"), 1200);
       return;
@@ -607,11 +666,13 @@
   renderPrice();
   renderSummary();
   if (savedBooking) {
+    quoteReady = resumedOnline;
     base = Number(savedBooking.subtotal ?? savedBooking.total);
     discount = Number(savedBooking.discount || 0);
     tax = Number(savedBooking.tax || 0);
     total = Number(savedBooking.total);
     renderPrice();
+    if (resumedOnline) renderLeft();
   } else {
     loadQuote();
     timer = setInterval(tick, 1000);

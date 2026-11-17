@@ -17,7 +17,7 @@
     if (!user) {
       location.replace(
         "../auth/login.html?next=" +
-          encodeURIComponent(location.pathname + location.search),
+        encodeURIComponent(location.pathname + location.search),
       );
       return;
     }
@@ -28,7 +28,7 @@
     else {
       try {
         draft = JSON.parse(sessionStorage.getItem("threek_checkout") || "null");
-      } catch {}
+      } catch { }
       if (!draft)
         throw Error("Phiên đặt phòng đã hết hạn. Vui lòng chọn phòng lại.");
       if (draft.requestKey)
@@ -39,8 +39,8 @@
     }
     if (booking) {
       const names = String(booking.guestName || "")
-          .trim()
-          .split(/\s+/),
+        .trim()
+        .split(/\s+/),
         firstName = names.pop() || "";
       draft = {
         city: booking.city,
@@ -63,7 +63,7 @@
     window.paymentDraft = draft;
     window.paymentBooking = booking;
     const script = document.createElement("script");
-    script.src = "payment.js?v=20261104-nav";
+    script.src = "payment.js?v=20261117-vnpay";
     document.body.append(script);
   } catch (error) {
     root.textContent = error.message;
