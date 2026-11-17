@@ -69,6 +69,11 @@ nên có thể mờ khi phóng lớn. Đây là ảnh demo do người dùng cun
 | Customer | `a@gmail.com` | `customer123` | `index.html` |
 | Customer | `b@gmail.com` | `customer123` | `index.html` |
 
+Nếu đã import bản đổi tài khoản tạm (`demo_account_credentials_migration.sql`
+ở commit `16ea4d2`), import thêm `database/rollback_demo_account_credentials.sql`
+để quay về mật khẩu demo trong bảng trên. File chỉ khôi phục mật khẩu tạm đã công bố,
+không ghi đè mật khẩu đã tự đổi. Database mới chỉ cần `demo_accounts.sql`.
+
 ---
 
 ## 3. Chạy ứng dụng
