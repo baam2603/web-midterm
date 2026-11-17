@@ -1,6 +1,7 @@
 const SITE_ROOT = new URL("../", document.currentScript.src).href;
 const ROUTES = {
   home: "index1.html",
+  admin: "admin/index.html",
   login: "auth/login.html",
   register: "auth/register.html",
   account: "account/taikhoan.html",
@@ -55,6 +56,9 @@ function renderGuestActions() {
 function renderDropdownMenu() {
   return `
     <div class="dropdown-menu" id="dropdownMenu" role="menu">
+      <a href="${route("admin")}" class="dropdown-item" id="admin-dashboard-link" role="menuitem" hidden>
+        <i aria-hidden="true">↗</i> Trang quản trị
+      </a>
       <a href="${route("account")}" class="dropdown-item" role="menuitem">
         <i></i> Hồ sơ của tôi
       </a>
@@ -138,12 +142,36 @@ function getShownName(user) {
   return user.displayName || user.name;
 }
 
+let adminNavigationRevision = 0;
+async function updateAdminNavigation(user) {
+  const revision = ++adminNavigationRevision;
+  const link = document.getElementById("admin-dashboard-link");
+  if (!link) return;
+  link.hidden = true;
+  if (user?.role !== "admin") return;
+  try {
+    // Browser storage is only a cache; show the shortcut after server verification.
+    const response = await fetch(siteUrl("api/admin/me.php"), {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    const result = await response.json();
+    if (revision !== adminNavigationRevision || !link.isConnected) return;
+    link.hidden = !(response.ok && result.status === "success" &&
+      result.data?.admin?.role === "admin" &&
+      String(result.data.admin.id) === String(user.id));
+  } catch {
+    // Keep the shortcut hidden if verification is unavailable.
+  }
+}
+
 function updateLoginState() {
   const guestBox = document.getElementById("guest-actions");
   const profileBox = document.getElementById("profile-actions");
   if (!guestBox || !profileBox || typeof getCurrentUser !== "function") return;
 
   const user = getCurrentUser();
+  updateAdminNavigation(user);
   if (user) {
     guestBox.style.display = "none";
     profileBox.style.display = "flex";
@@ -175,3 +203,5 @@ function mountHeader(mountId, { middle } = {}) {
   initAvatarDropdown();
   updateLoginState();
 }
+
+window.addEventListener("threek:auth-updated", updateLoginState);
