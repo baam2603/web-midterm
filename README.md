@@ -65,9 +65,21 @@ nên có thể mờ khi phóng lớn. Đây là ảnh demo do người dùng cun
 
 | Vai trò | Email | Mật khẩu | Truy cập qua |
 | --- | --- | --- | --- |
-| Admin | `admin@gmail.com` | `admin123` | `admin/index.html` |
-| Customer | `a@gmail.com` | `customer123` | `index.html` |
-| Customer | `b@gmail.com` | `customer123` | `index.html` |
+| Admin | `admin@gmail.com` | `admin` | `admin/index.html` |
+| Customer | `a@gmail.com` | `52400283` | `index.html` |
+| Customer | `b@gmail.com` | `52400283` | `index.html` |
+
+Đăng nhập bằng phần trước `@`: **admin/admin**, **a/52400283**, **b/52400283**.
+Email đầy đủ vẫn được hỗ trợ để tương thích các luồng hiện có. Nếu nhiều tài khoản
+có cùng phần trước `@`, hãy dùng email đầy đủ; hệ thống không tự chọn tài khoản.
+
+**DB đã import bộ tài khoản cũ:** chạy thêm
+`database/demo_account_credentials_migration.sql` sau khi pull code mới. File chỉ
+đổi mật khẩu demo cũ đã công bố và thu hồi phiên cũ; không ghi đè mật khẩu chủ tài
+khoản đã tự đổi. DB mới dùng `demo_accounts.sql` đã có mật khẩu mới, không cần
+migration này. Chỉ áp dụng cho local/demo, không dùng các mật khẩu này khi public.
+Hai tài khoản a/b vẫn là customer; thay đổi này chưa bổ sung mô hình nhân viên POS,
+link mời 1 phút hoặc bắt buộc đổi mật khẩu lần đầu.
 
 ---
 
@@ -111,7 +123,7 @@ nên có thể mờ khi phóng lớn. Đây là ảnh demo do người dùng cun
 | **Vị trí** | `auth/login.html` |
 | **Payload thử nghiệm** | `javascript:alert('DOM-XSS')` |
 | **URL thử nghiệm** | `auth/login.html?next=javascript%3Aalert%28%27DOM-XSS%27%29` |
-| **Cách thực hiện** | Mở URL trên → đăng nhập bằng tài khoản customer thật (`a@gmail.com` / `customer123`) |
+| **Cách thực hiện** | Mở URL trên → đăng nhập bằng tài khoản customer thật (`a@gmail.com` / `52400283`) |
 | **Kết quả mong đợi (đã vá)** | **Không có popup.** Sau khi đăng nhập thành công, hệ thống chuyển thẳng đến trang chủ khách hàng (`index1.html`) thay vì thực thi `next` |
 | **Cơ chế chặn** | Hàm `safeCustomerDestination()` áp dụng allowlist: chỉ chấp nhận `next` là đường dẫn nội bộ bắt đầu bằng `/`, từ chối mọi scheme khác (`javascript:`, `data:`...), từ chối `//` (tránh trỏ sang domain khác), và chặn riêng việc đưa customer vào khu vực `/admin/`. Nếu `next` không hợp lệ, hàm trả về `null` và hệ thống dùng trang mặc định thay thế |
 | **Ý nghĩa với kịch bản tấn công thật** | Nếu thiếu allowlist này, script độc hại sẽ chạy đúng thời điểm session vừa đăng nhập. Lưu ý: cookie phiên của hệ thống có thuộc tính `HttpOnly`, nên JavaScript **không đọc trực tiếp được** giá trị cookie đó. XSS vẫn nguy hiểm trong trường hợp này vì script chạy cùng origin có thể **tự gọi API bằng chính phiên của nạn nhân** (cookie vẫn tự động gửi kèm mỗi request), qua đó đọc/ghi dữ liệu cá nhân mà không cần biết giá trị cookie |
