@@ -49,17 +49,11 @@ try {
     }
 
     $pdo = connectDB();
-    // Preserve email login; usernames are the email local part.
-    // Reject ambiguous local parts instead of choosing an arbitrary account.
-    $fields = "id,email,password_hash,full_name,display_name,phone,birthday,role,session_version,deleted_at";
-    if (str_contains($email, "@")) {
-        $stmt = $pdo->prepare("SELECT $fields FROM users WHERE email = :email LIMIT 1");
-    } else {
-        $stmt = $pdo->prepare("SELECT $fields FROM users WHERE SUBSTRING_INDEX(email, '@', 1) = :email AND deleted_at IS NULL LIMIT 2");
-    }
+    $stmt = $pdo->prepare(
+        "SELECT id,email,password_hash,full_name,display_name,phone,birthday,role,session_version,deleted_at FROM users WHERE email = :email LIMIT 1",
+    );
     $stmt->execute(["email" => $email]);
-    $matches = $stmt->fetchAll();
-    $user = count($matches) === 1 ? $matches[0] : false;
+    $user = $stmt->fetch();
 
     if (
         !$user ||
