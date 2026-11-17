@@ -36,6 +36,7 @@ Phần còn lại của README (cài đặt, cấu trúc thư mục...) chỉ l�
 | 9 | `database/demo_hotels_ready.sql` | Danh mục cố định 20 khách sạn/60 loại phòng |
 | 10 | `database/demo_accounts.sql` | 3 tài khoản demo (1 admin, 2 customer) |
 | 11 | `database/dalat_images.sql` | Gắn 50 ảnh khách sạn và 30 ảnh phòng Đà Lạt từ `hotel_images/` |
+| 12 | `database/vungtau_images.sql` | Gắn 50 ảnh khách sạn và 30 ảnh phòng Vũng Tàu từ `hotel_images/` |
 
 Import lần lượt bằng phpMyAdmin hoặc dòng lệnh:
 
@@ -51,10 +52,11 @@ mysql -u root -p ten_database < database/osm_location_migration.sql
 mysql -u root -p ten_database < database/demo_hotels_ready.sql
 mysql -u root -p ten_database < database/demo_accounts.sql
 mysql -u root -p ten_database < database/dalat_images.sql
+mysql -u root -p ten_database < database/vungtau_images.sql
 ```
 
-**Ảnh Đà Lạt:** giữ nguyên thư mục `hotel_images/` khi chạy hoặc đóng gói.
-Nếu đã có database, chỉ import `database/dalat_images.sql` sau khi đã có danh mục
+**Ảnh Đà Lạt và Vũng Tàu:** giữ nguyên thư mục `hotel_images/` khi chạy hoặc đóng gói.
+Nếu đã có database, import `database/dalat_images.sql` và `database/vungtau_images.sql` sau khi đã có danh mục
 `demo_hotels_ready.sql`; không import lại schema. SQL chạy lại không tạo trùng
 và không thay ảnh bìa đã chọn trước đó. Nhiều ảnh phòng được cung cấp chỉ 60×60,
 nên có thể mờ khi phóng lớn. Đây là ảnh demo do người dùng cung cấp.
