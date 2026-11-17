@@ -13,7 +13,7 @@ try:
  sql(f"INSERT INTO hotels(slug,name,city,type,stars,address,price_per_night,is_active) VALUES('customer-browser-{run}','SQL Browser Hotel {run}','dalat','hotel',4,'Browser Street',900000,1)")
  hotel=int(sql(f"SELECT id FROM hotels WHERE slug='customer-browser-{run}'"));sql(f"INSERT INTO room_types(hotel_id,code,name,capacity,total_rooms,price_per_night,free_cancellation,is_active) VALUES({hotel},'sql-only-room','SQL-only Room',2,5,900000,1,1)")
  with sync_playwright() as p:
-  browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox']);ctx=browser.new_context();ctx.route('**/*',lambda r:r.continue_() if r.request.url.startswith(URL) else r.abort());page=ctx.new_page();page.set_default_timeout(12000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+  browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox']);ctx=browser.new_context(viewport={"width":int(os.environ.get("CUSTOMER_TEST_WIDTH","1280")),"height":900},reduced_motion="reduce");ctx.route('**/*',lambda r:r.continue_() if r.request.url.startswith(URL) else r.abort());page=ctx.new_page();page.set_default_timeout(12000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   page.goto(URL+'/auth/login.html',wait_until='domcontentloaded');page.locator('#email').fill(email);page.locator('#password').fill(pw);page.locator('button[type=submit]').click();page.wait_for_url('**/index1.html')
   prefix=urllib.parse.urlsplit(URL).path.rstrip('/')
   if prefix:
@@ -37,18 +37,18 @@ try:
   page.locator('[data-room=sql-only-room]').first.click();page.wait_for_url('**/hotel/Booking.html?*')
   page.locator('#booking-form').wait_for();assert page.locator('[name=phone]').input_value()=='0912345678' and page.locator('[data-f=note]').input_value()=='Keep my navigation draft'
   print('PASS explicit list/hotel return links preserve filters, dates and booking draft')
-  page.locator('#booking-form').wait_for();page.locator('[name=phone]').fill('0912345678');page.locator('#bkLeft [data-next]').click();page.locator('[name=pay][value=hotel]').check();page.locator('#bkLeft [data-next]').click();page.wait_for_url('**/payment/payment.html')
+  page.locator('#booking-form').wait_for();page.locator('[name=phone]').fill('0912345678');page.locator('#bkLeft [data-next]').click();page.wait_for_url('**/payment/payment.html')
   page.locator('[data-pay]:not([disabled])').wait_for();assert page.locator('#pPrice .price-lines').count()==1 and page.locator('#pSummary .summary-list').count()==1;assert page.locator('#pStepper li').count()==3;print('PASS original checkout stepper, price breakdown and sidebar retained');
   first_key=page.evaluate("JSON.parse(sessionStorage.getItem('threek_checkout')).requestKey")
   page.get_by_role('button',name='Sửa thông tin đặt phòng').click();page.wait_for_url('**/hotel/Booking.html?*');page.locator('#booking-form').wait_for()
   assert page.locator('[data-f=note]').input_value()=='Keep my navigation draft'
-  page.locator('#bkLeft [data-next]').click();page.locator('#bkLeft [data-next]').click();page.wait_for_url('**/payment/payment.html');page.locator('[data-pay]:not([disabled])').wait_for()
+  page.locator('#bkLeft [data-next]').click();page.wait_for_url('**/payment/payment.html');page.locator('[data-pay]:not([disabled])').wait_for()
   assert page.evaluate("JSON.parse(sessionStorage.getItem('threek_checkout')).requestKey")==first_key
   print('PASS edit-details navigation retains draft and stable request key')
   checkout_draft=page.evaluate("JSON.parse(sessionStorage.getItem('threek_checkout'))")
-  assert page.locator('[name=pay]').count()==4 and page.locator('[name=wallet][value=vnpay]').count()==0
-  if os.environ.get('CUSTOMER_TEST_OFFLINE')=='1':
-   assert not page.locator('[name=method][value=online]').is_visible();print('PASS operation-only mode shows no online-payment option')
+  assert page.locator('[name=pay]').count()==2 and page.locator('[name=wallet]').count()==0
+  assert set(page.locator('[name=pay]').evaluate_all('(els)=>els.map(e=>e.value)'))=={'hotel','online'}
+  page.locator('[name=pay][value=hotel]').check()
   page.locator('[data-pay]').click();page.wait_for_url('**/payment/payment.html?code=*');page.locator('#pLeft .done h2').filter(has_text='Đặt phòng thành công').wait_for();code=page.url.split('code=')[1]
   assert sql(f"SELECT COUNT(*) FROM bookings WHERE code='{code}' AND user_id={uid}")=='1';print('PASS SQL-only hotel → room → checkout → persistent success page')
   page.reload(wait_until='domcontentloaded');page.locator('.done__code').filter(has_text=code).wait_for();print('PASS original payment confirmation survives reload without localStorage booking')
@@ -57,19 +57,38 @@ try:
   assert sql(f"SELECT status FROM bookings WHERE code='{code}'")=='cancelled';print('PASS customer cancellation and server status')
   page.goto(URL+'/account/notifications.html',wait_until='domcontentloaded');page.get_by_text('Đã hủy đặt phòng',exact=True).wait_for();print('PASS customer notifications from SQL')
   page.goto(URL+'/account/taikhoan.html',wait_until='domcontentloaded');page.locator('#fullname').fill('Updated Browser Customer');page.locator('#displayname').fill('Updated');page.locator('button[form=profile-form]').click();page.wait_for_function("document.getElementById('toast').textContent.includes('Đã lưu')");assert page.locator('#fullname').input_value()=='Updated Browser Customer';print('PASS profile save retains fields')
+  # Old in-progress drafts must default to a supported method, with no card fields.
   checkout_draft['requestKey']=secrets.token_hex(16);checkout_draft['pay']='card'
   page.evaluate("draft=>sessionStorage.setItem('threek_checkout',JSON.stringify(draft))",checkout_draft)
   page.goto(URL+'/payment/payment.html',wait_until='domcontentloaded');page.locator('[data-pay]:not([disabled])').wait_for()
-  page.locator('[data-c=name]').fill('TEST CUSTOMER');page.locator('[data-c=number]').fill('4111111111111111');page.locator('[data-c=exp]').fill('12/99');page.locator('[data-c=cvv]').fill('123')
-  with page.expect_request('**/api/bookings/create.php') as sent:
-   page.locator('[data-pay]').click()
-  payload=sent.value.post_data_json
-  assert payload['payMethod']=='card_demo' and not any(k in payload for k in ['card','number','cvv','exp'])
-  page.wait_for_url('**/payment/payment.html?code=*');demo_code=page.url.split('code=')[1]
-  page.reload(wait_until='domcontentloaded');page.locator('.done__code').filter(has_text=demo_code).wait_for()
-  assert sql(f"SELECT payment_status FROM bookings WHERE code='{demo_code}'")=='unpaid'
-  assert sql(f"SELECT COUNT(*) FROM mail_outbox WHERE recipient='{email}'")=='0'
-  print('PASS original card demo UI saves unpaid SQL booking without card data or email')
+  assert page.locator('[name=pay][value=hotel]').is_checked()
+  assert page.locator('[data-c]').count()==0
+  # Simulate a failed VNPay start locally, then retry the same persisted booking.
+  if os.environ.get('CUSTOMER_TEST_OFFLINE')!='1':
+   page.locator('[name=pay][value=online]').check()
+   starts=[]
+   def start_gateway(route):
+    starts.append(route.request.post_data_json)
+    if len(starts)==1:
+     route.fulfill(status=503,content_type='application/json',body=json.dumps({'status':'error','message':'Test gateway temporarily unavailable'}))
+    else:route.continue_()
+   page.route('**/api/payments/start.php',start_gateway)
+   page.route('https://sandbox.vnpayment.vn/**',lambda r:r.fulfill(content_type='text/html',body='<h1>Local sandbox destination fixture</h1>'))
+   page.on('dialog',lambda d:d.dismiss())
+   with page.expect_request('**/api/bookings/create.php') as sent:
+    page.locator('[data-pay]').click()
+   payload=sent.value.post_data_json
+   assert payload['payMethod']=='online' and not any(k in payload for k in ['card','number','cvv','exp'])
+   page.wait_for_url('**/payment/payment.html?code=*');online_code=page.url.split('code=')[1]
+   page.locator('[data-pay]:not([disabled])').wait_for()
+   page.reload(wait_until='domcontentloaded');page.locator('[data-pay]:not([disabled])').wait_for()
+   assert page.locator('[name=pay][value=online]').is_checked()
+   assert page.locator('[name=pay][value=hotel]').is_disabled()
+   page.locator('[data-pay]').click();page.wait_for_url('https://sandbox.vnpayment.vn/**')
+   assert len(starts)==2 and starts[0]['code']==starts[1]['code']==online_code
+   assert sql(f"SELECT COUNT(*) FROM bookings WHERE user_id={uid} AND pay_method='online'")=='1'
+   assert sql(f"SELECT payment_status FROM bookings WHERE code='{online_code}'")=='unpaid'
+   print('PASS only hotel/VNPay options; legacy draft fallback; VNPay retry resumes one pending booking without provider calls')
   assert not errors,errors;browser.close();print('PASS no customer JavaScript errors')
 finally:
  if uid:

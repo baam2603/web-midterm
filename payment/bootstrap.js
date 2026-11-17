@@ -63,7 +63,7 @@
     window.paymentDraft = draft;
     window.paymentBooking = booking;
     const script = document.createElement("script");
-    script.src = "payment.js?v=20261117-vnpay";
+    script.src = "payment.js?v=20261117-checkout";
     document.body.append(script);
   } catch (error) {
     root.textContent = error.message;

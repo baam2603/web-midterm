@@ -77,21 +77,6 @@
     const f = (hotel.facts || []).find((x) => x.label === label);
     return f ? f.value : fb;
   };
-  const luhn = (num) => {
-    let sum = 0,
-      dbl = false;
-    for (let i = num.length - 1; i >= 0; i--) {
-      let d = Number(num[i]);
-      if (dbl) {
-        d *= 2;
-        if (d > 9) d -= 9;
-      }
-      sum += d;
-      dbl = !dbl;
-    }
-    return sum % 10 === 0;
-  };
-
   /* ---------- Giá (tính lại, không tin số từ trang trước) ---------- */
   const COUPONS = {
     THREEK10: { type: "percent", value: 10 },
@@ -126,18 +111,9 @@
   } catch (_) { }
 
   const METHODS = [
-    ["card", "credit_card", "Thẻ tín dụng / ghi nợ", "Chỉ dùng thẻ thử nghiệm"],
-    ["wallet", "account_balance_wallet", "Ví điện tử", "MoMo, ZaloPay"],
-    [
-      "bank",
-      "account_balance",
-      "Chuyển khoản ngân hàng",
-      "Mô phỏng · chưa chuyển tiền",
-    ],
     ["online", "payments", "VNPay Sandbox", "Thanh toán thử qua VNPay (không dùng thẻ thật)"],
     ["hotel", "storefront", "Thanh toán tại khách sạn", "Trả khi nhận phòng"],
   ];
-  const WALLETS = { momo: "MoMo", zalopay: "ZaloPay" };
   // A pending online booking is NOT a successful payment. Let the buyer retry
   // generating the VNPay link without creating a second booking.
   const resumedOnline = savedBooking?.status === "pending" &&
@@ -146,9 +122,8 @@
   const state = {
     phase: !savedBooking || resumedOnline ? "pay" : "done", // pay | done | expired
     method: resumedOnline ? "online" :
-      (METHODS.some((m) => m[0] === draft.pay) ? draft.pay : "card"),
-    wallet: "momo",
-    card: { name: "", number: "", exp: "", cvv: "" },
+      (savedBooking ? draft.pay :
+        (METHODS.some((m) => m[0] === draft.pay) ? draft.pay : "hotel")),
   };
   const back = new URL(draft.back || "../hotel/Booking.html", location.href);
   const backUrl =
@@ -164,7 +139,7 @@
       <a href="${esc(backUrl)}" data-back>Đặt phòng</a>${icon("chevron_right")}
       <span class="current">Thanh toán</span>
     </nav>
-    <h1 class="booking-title">Thanh toán mô phỏng</h1>
+    <h1 class="booking-title">Thanh toán</h1>
     <ol class="stepper" id="pStepper"></ol>
     <div class="booking-grid">
       <div class="booking-left" id="pLeft"></div>
@@ -223,80 +198,16 @@
   }
 
   /* ---------- Cột trái ---------- */
-  const cf = (label, key, ph, attrs = "", full = false) => `
-    <label class="field ${full ? "full" : ""}">
-      <span>${label} <b>*</b></span>
-      <input type="text" data-c="${key}" placeholder="${ph}" value="${esc(state.card[key])}" ${attrs} />
-      <em class="field__err" data-err="${key}"></em>
-    </label>`;
-  const bankRow = (k, v, copy) => `
-    <li><span>${k}</span><b>${esc(v)}</b>${copy
-      ? `<button type="button" class="copy" data-copy="${esc(copy)}" aria-label="Sao chép ${k}">${icon("content_copy")}</button>`
-      : ""
-    }</li>`;
-
   function detailHTML() {
-    if (state.method === "card") {
-      const c = state.card;
-      return `
-        <div class="cc" aria-hidden="true">
-          <div class="cc__chip"></div>
-          <div class="cc__num ${c.number ? "" : "is-empty"}" id="ccNum">${esc(c.number || "0000 0000 0000 0000")}</div>
-          <div class="cc__row">
-            <span class="${c.name ? "" : "is-empty"}" id="ccName">${esc(c.name || "Tên chủ thẻ")}</span>
-            <span class="${c.exp ? "" : "is-empty"}" id="ccExp">${esc(c.exp || "MM/YY")}</span>
-          </div>
-        </div>
-        <div class="form-grid">
-          ${cf("Tên chủ thẻ", "name", "NGUYEN VAN A", 'autocomplete="cc-name"', true)}
-          ${cf("Số thẻ", "number", "0000 0000 0000 0000", 'inputmode="numeric" autocomplete="cc-number" maxlength="23"', true)}
-          ${cf("Ngày hết hạn", "exp", "MM/YY", 'inputmode="numeric" autocomplete="cc-exp" maxlength="5"')}
-          ${cf("CVV", "cvv", "123", 'inputmode="numeric" autocomplete="cc-csc" maxlength="4"')}
-        </div>`;
-    }
-    if (state.method === "wallet") {
-      const icons = {
-        momo: "account_balance_wallet",
-        zalopay: "qr_code_2",
-      };
-      return `
-        <div class="wallets">
-          ${Object.entries(WALLETS)
-          .map(
-            ([k, n]) =>
-              `<label class="wallet"><input type="radio" name="wallet" value="${k}" ${state.wallet === k ? "checked" : ""} />${icon(icons[k])}${n}</label>`,
-          )
-          .join("")}
-        </div>
-        <div class="pay-note">Bản demo mô phỏng thanh toán qua ${WALLETS[state.wallet]} với số tiền ${money(total)}; không mở ứng dụng ví thực tế.</div>`;
-    }
-    if (state.method === "bank") {
-      return `
-        <ul class="bank-list">
-          ${bankRow("Ngân hàng", "NGÂN HÀNG DEMO")}
-          ${bankRow("Số tài khoản", "KHÔNG CÓ TÀI KHOẢN THẬT")}
-          ${bankRow("Chủ tài khoản", "THREEK DEMO")}
-          ${bankRow("Số tiền", money(total), String(total))}
-          ${bankRow("Nội dung", draft.code, draft.code)}
-        </ul>
-        <div class="pay-note">DỮ LIỆU MINH HỌA: Không chuyển tiền thật tới các thông tin này. Lựa chọn được lưu cùng đơn trên hệ thống; chưa ghi nhận giao dịch tiền thật.</div>`;
-    }
     if (state.method === "online") {
       return `<div class="pay-note">Bạn sẽ được chuyển sang cổng VNPay Sandbox. Chỉ sử dụng thông tin thanh toán thử nghiệm do VNPay cung cấp. Đơn chỉ được xác nhận khi hệ thống nhận được kết quả thanh toán hợp lệ.</div>`;
     }
     return `<div class="pay-note">Bạn thanh toán tại khách sạn khi nhận phòng. Đơn đặt phòng được lưu trên hệ thống sau khi xác nhận.</div>`;
   }
 
-  const payLabel = () =>
-    state.method === "online"
-      ? `Tiếp tục thanh toán VNPay ${money(total)}`
-      : state.method === "card"
-        ? `Thanh toán ${money(total)}`
-        : state.method === "wallet"
-          ? `Thanh toán bằng ${WALLETS[state.wallet]}`
-          : state.method === "bank"
-            ? "Xác nhận chuyển khoản demo"
-            : "Xác nhận đặt phòng";
+  const payLabel = () => state.method === "online"
+    ? `Tiếp tục thanh toán VNPay ${money(total)}`
+    : "Xác nhận đặt phòng";
 
   function payHTML() {
     const opts = METHODS.map(
@@ -317,7 +228,7 @@
         <button type="button" class="btn btn--ghost" data-back>${icon("arrow_back")} ${onlineBookingCode ? "Xem đơn của tôi" : "Sửa thông tin đặt phòng"}</button>
         <button type="button" class="btn btn--primary" data-pay>${icon("lock")} ${payLabel()}</button>
       </div>
-      <p class="secure">${icon("verified_user")} ${state.method === "online" ? "VNPay Sandbox: chỉ sử dụng thông tin thanh toán thử nghiệm, không nhập thẻ thật." : "THANH TOÁN DEMO — không trừ tiền. Chỉ dùng số thẻ thử nghiệm, không nhập thẻ thật."}</p>`;
+      <p class="secure">${icon("verified_user")} ${state.method === "online" ? "VNPay Sandbox: chỉ sử dụng thông tin thanh toán thử nghiệm, không nhập thẻ thật." : "Thanh toán tại khách sạn khi nhận phòng; website không thu tiền trực tuyến với lựa chọn này."}</p>`;
   }
 
   function doneHTML() {
@@ -389,48 +300,8 @@
     }
   }
 
-  /* ---------- Kiểm tra thẻ ---------- */
-  function validateCard() {
-    const e = {};
-    const { name, number, exp, cvv } = state.card;
-    const digits = number.replace(/\D/g, "");
-    if (digits !== "4111111111111111")
-      e.number =
-        "Chỉ dùng số thẻ thử nghiệm 4111 1111 1111 1111; không nhập thẻ thật.";
-    if (!name.trim()) e.name = "Vui lòng nhập tên chủ thẻ.";
-    if (digits.length < 13 || digits.length > 19 || !luhn(digits))
-      e.number = "Số thẻ không hợp lệ.";
-    const m = /^(\d{2})\/(\d{2})$/.exec(exp);
-    if (!m || Number(m[1]) < 1 || Number(m[1]) > 12)
-      e.exp = "Dùng định dạng MM/YY.";
-    else if (new Date(2000 + Number(m[2]), Number(m[1]), 1) <= new Date())
-      e.exp = "Thẻ đã hết hạn.";
-    if (!/^\d{3,4}$/.test(cvv)) e.cvv = "CVV gồm 3–4 chữ số.";
-    return e;
-  }
-
-  function showErrors(errs) {
-    const left = $("#pLeft");
-    left
-      .querySelectorAll(".field")
-      .forEach((f) => f.classList.remove("is-invalid"));
-    left.querySelectorAll("[data-err]").forEach((em) => (em.textContent = ""));
-    const keys = Object.keys(errs);
-    keys.forEach((k) => {
-      const em = left.querySelector(`[data-err="${k}"]`);
-      if (!em) return;
-      em.textContent = errs[k];
-      em.closest(".field").classList.add("is-invalid");
-    });
-    const first = left.querySelector(".field.is-invalid input");
-    if (first) first.focus();
-    return keys.length === 0;
-  }
-
   function selectedMethod() {
-    if (state.method === "hotel") return "hotel";
-    if (state.method === "online") return "online";
-    return (state.method === "wallet" ? state.wallet : state.method) + "_demo";
+    return state.method === "online" ? "online" : "hotel";
   }
   async function saveBooking() {
     const response = await fetch("../api/bookings/create.php", {
@@ -489,7 +360,6 @@
 
   async function pay(button) {
     if (saving || !quoteReady || state.phase !== "pay") return;
-    if (state.method === "card" && !showErrors(validateCard())) return;
     if (!onlineBookingCode && Date.now() >= draft.deadline) {
       tick();
       return;
@@ -535,7 +405,6 @@
       try {
         sessionStorage.removeItem(KEY);
       } catch { }
-      state.card = { name: "", number: "", exp: "", cvv: "" };
       state.phase = "done";
       clearInterval(timer);
       renderLeft();
@@ -555,41 +424,12 @@
   root.addEventListener("change", (e) => {
     const t = e.target;
     if (saving) return;
-    if (t.name === "pay") {
+    if (t.name === "pay" && METHODS.some((m) => m[0] === t.value)) {
       if (onlineBookingCode && t.value !== "online") return;
       state.method = t.value;
     }
-    else if (t.name === "wallet") state.wallet = t.value;
     else return;
     renderLeft();
-  });
-
-  root.addEventListener("input", (e) => {
-    const k = e.target.dataset.c;
-    if (!k) return;
-    let v = e.target.value;
-    if (k === "number")
-      v = v
-        .replace(/\D/g, "")
-        .slice(0, 19)
-        .replace(/(.{4})/g, "$1 ")
-        .trim();
-    else if (k === "exp") {
-      v = v.replace(/\D/g, "").slice(0, 4);
-      if (v.length > 2) v = v.slice(0, 2) + "/" + v.slice(2);
-    } else if (k === "cvv") v = v.replace(/\D/g, "").slice(0, 4);
-    e.target.value = v;
-    state.card[k] = v;
-    const map = {
-      number: ["#ccNum", "0000 0000 0000 0000"],
-      name: ["#ccName", "Tên chủ thẻ"],
-      exp: ["#ccExp", "MM/YY"],
-    };
-    if (map[k]) {
-      const el = $(map[k][0]);
-      el.textContent = v || map[k][1];
-      el.classList.toggle("is-empty", !v);
-    }
   });
 
   root.addEventListener("click", (e) => {
@@ -608,14 +448,6 @@
         }
       }
       location.href = onlineBookingCode ? "../booking/myBooking.html" : backUrl;
-      return;
-    }
-    const cp = e.target.closest("[data-copy]");
-    if (cp) {
-      if (navigator.clipboard)
-        navigator.clipboard.writeText(cp.dataset.copy).catch(() => { });
-      cp.classList.add("is-copied");
-      setTimeout(() => cp.classList.remove("is-copied"), 1200);
       return;
     }
     const btn = e.target.closest("[data-pay]");

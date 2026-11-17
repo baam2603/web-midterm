@@ -149,7 +149,6 @@
       : toISO(addDays(today, 2)),
     coupon: null, // { code, ...rule }
     pay: "hotel",
-    card: { name: "", number: "", exp: "", cvv: "" },
     code: "",
   };
   if (fromISO(state.checkin) < today) state.checkin = toISO(addDays(today, 1));
@@ -411,41 +410,7 @@
       ${policyCard()}
 
       <div class="actions">
-        <button type="button" class="btn btn--primary" data-next>Tiếp tục ${icon("arrow_forward")}</button>
-      </div>`;
-  }
-
-  /* ---------- Bước 2 ---------- */
-  function step2HTML() {
-    const opt = (v, ic, title, sub) => `
-      <label class="pay-opt">
-        <input type="radio" name="pay" value="${v}" data-f="pay" ${state.pay === v ? "checked" : ""} />
-        ${icon(ic)}<div>${title}<small>${sub}</small></div>
-      </label>`;
-    let detail = "";
-    if (state.pay === "card") {
-      detail = `<div class="pay-note">Bạn sẽ nhập dữ liệu thẻ kiểm thử ở bước tiếp theo (không xử lý giao dịch thật).</div>`;
-    } else if (state.pay === "bank") {
-      detail = `<div class="pay-note">Đây là luồng chuyển khoản mô phỏng. Đơn được lưu ở trạng thái chờ thanh toán, không gửi hướng dẫn qua email.</div>`;
-    } else {
-      detail = `<div class="pay-note">Bạn chọn trả tại khách sạn (mô phỏng). Website chưa gửi đơn đặt phòng tới khách sạn thật.</div>`;
-    }
-    return `
-      <div class="card">
-        <h2>Phương thức thanh toán</h2>
-        <div class="pay-options">
-          ${opt("card", "credit_card", "Thẻ tín dụng / ghi nợ", "Visa, Mastercard, JCB")}
-          ${opt("bank", "account_balance", "Chuyển khoản ngân hàng", "Xác nhận trong bản demo")}
-          ${opt("hotel", "storefront", "Thanh toán tại khách sạn", "Trả khi nhận phòng")}
-        </div>
-        ${detail}
-      </div>
-
-      ${policyCard()}
-
-      <div class="actions">
-        <button type="button" class="btn btn--ghost" data-back>${icon("arrow_back")} Quay lại</button>
-        <button type="button" class="btn btn--primary" data-next>${icon("lock")} Tiếp tục thanh toán</button>
+        <button type="button" class="btn btn--primary" data-next>Tiếp tục thanh toán ${icon("arrow_forward")}</button>
       </div>`;
   }
 
@@ -469,33 +434,14 @@
   }
 
   function renderLeft() {
-    elLeft.innerHTML =
-      state.step === 1
-        ? step1HTML()
-        : state.step === 2
-          ? step2HTML()
-          : step3HTML();
+    // Payment selection lives only on payment.html.
+    elLeft.innerHTML = step1HTML();
     renderStepper();
     renderPrice();
     renderSummary();
   }
 
   /* ---------- Validation ---------- */
-  const luhn = (num) => {
-    let sum = 0;
-    let dbl = false;
-    for (let i = num.length - 1; i >= 0; i--) {
-      let d = Number(num[i]);
-      if (dbl) {
-        d *= 2;
-        if (d > 9) d -= 9;
-      }
-      sum += d;
-      dbl = !dbl;
-    }
-    return sum % 10 === 0;
-  };
-
   function validate1() {
     const e = {};
     if (!state.lastName.trim()) e.lastName = "Vui lòng nhập họ.";
@@ -521,25 +467,6 @@
     if (getNights() > 30) e.checkout = "Chỉ hỗ trợ tối đa 30 đêm.";
     if (!Number.isInteger(state.rooms) || state.rooms < 1 || state.rooms > 30)
       e.rooms = "Chọn từ 1 đến 30 phòng.";
-    return e;
-  }
-
-  function validate2() {
-    const e = {};
-    if (state.pay !== "card") return e;
-    const { name, number, exp, cvv } = state.card;
-    const digits = number.replace(/\D/g, "");
-    if (!name.trim()) e.name = "Vui lòng nhập tên chủ thẻ.";
-    if (digits.length < 13 || digits.length > 19 || !luhn(digits))
-      e.number = "Số thẻ không hợp lệ.";
-    const m = /^(\d{2})\/(\d{2})$/.exec(exp);
-    if (!m || Number(m[1]) < 1 || Number(m[1]) > 12) {
-      e.exp = "Dùng định dạng MM/YY.";
-    } else {
-      const end = new Date(2000 + Number(m[2]), Number(m[1]), 1); // đầu tháng sau
-      if (end <= new Date()) e.exp = "Thẻ đã hết hạn.";
-    }
-    if (!/^\d{3,4}$/.test(cvv)) e.cvv = "CVV gồm 3–4 chữ số.";
     return e;
   }
 
@@ -755,8 +682,7 @@
     button.disabled = true;
     try {
       if (!(await updateQuote())) return;
-      if (state.step === 1) goStep(2);
-      else if (state.step === 2) goCheckout();
+      goCheckout();
     } catch (error) {
       showQuoteError(error.message);
     } finally {
