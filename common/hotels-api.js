@@ -6,8 +6,8 @@
   );
   function safePath(p) {
     const s = String(p || "");
-    return /^(sources|uploads)\/[\w./-]+$/.test(s) && !s.includes("..")
-      ? "../" + s
+    return /^(sources|uploads|hotel_images)\/[\w./ -]+$/.test(s) && !s.includes("..")
+      ? "../" + encodeURI(s)
       : "";
   }
   async function loadCity(cityKey, criteria = {}, signal) {

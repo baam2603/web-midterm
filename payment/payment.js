@@ -4,9 +4,9 @@
   const savedBooking = window.paymentBooking || null;
   const localImage = (path) =>
     typeof path === "string" &&
-      /^(sources|uploads)\/[A-Za-z0-9_./-]+$/.test(path) &&
+      /^(sources|uploads|hotel_images)\/[A-Za-z0-9_./ -]+$/.test(path) &&
       !path.includes("..")
-      ? "../" + path
+      ? "../" + encodeURI(path)
       : "";
   const city = draft && CITIES[draft.city];
   const hotel = savedBooking

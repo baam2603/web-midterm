@@ -2,9 +2,9 @@
   "use strict";
   const localPath = (p) => {
     const s = String(p || "").trim();
-    if (!/^(?:sources|uploads)\/[A-Za-z0-9_./-]+$/.test(s) || s.includes(".."))
+    if (!/^(?:sources|uploads|hotel_images)\/[A-Za-z0-9_./ -]+$/.test(s) || s.includes(".."))
       return "";
-    return "../" + s;
+    return "../" + encodeURI(s);
   };
   const toImagePath = (x) =>
     localPath(typeof x === "string" ? x : x?.image_path);
