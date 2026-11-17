@@ -532,7 +532,13 @@ function isNearSelectedCity(
     string $city,
 ): bool {
     $area = cityArea($city);
-    if ($area === null) {
+    if (
+        $area === null ||
+        !is_finite($latitude) ||
+        !is_finite($longitude) ||
+        abs($latitude) > 90 ||
+        abs($longitude) > 180
+    ) {
         return false;
     }
     return osmDistanceMeters($area[0], $area[1], $latitude, $longitude) <=

@@ -69,7 +69,7 @@ Tồn phòng là tổng phòng trừ mức chiếm dụng cao nhất trong từn
 Giá đã chốt ở đơn cũ giữ nguyên khi sửa giá phòng; giảm tồn/sức chứa bị chặn nếu ảnh hưởng đơn đang hoạt động.
 Các thao tác admin ghi audit trong DB cùng transaction. Nhật ký không có API sửa/xóa từ admin UI.
 Hỗ trợ yêu cầu đăng nhập để bảo vệ quyền xem phản hồi; chưa tích hợp gửi email.
-Đánh giá chỉ tạo từ đơn của chính khách đã hoàn tất và chỉ công khai sau khi duyệt.
+Đánh giá không cần đơn đặt phòng và công khai ngay. User xóa đánh giá của mình; admin xóa được mọi đánh giá.
 Xem docs/CUSTOMER_SETUP.md cho VNPay, Resend và đối soát hoàn tiền.
 
 ## Kiểm thử
@@ -87,3 +87,24 @@ Python browser test cần Playwright và Chromium ở `/usr/bin/chromium`.
 Integration test tạo tài khoản/dữ liệu riêng rồi dọn trong `finally`.
 Các test JS cũ `smoke.js`, `flows.js`, `render_check.py` mô phỏng admin/auth bằng localStorage;
 chúng chưa được chuyển sang mô hình API mới và không phải bộ nghiệm thu admin hiện tại.
+
+## Migration đăng ký OTP
+
+Nhánh đăng ký OTP cần thêm `database/registration_otp_migration.sql` sau các migration ở trên. File bổ sung, chạy lặp lại được; không nhập lại schema/seed lên DB đã có dữ liệu. Xem [hướng dẫn OTP](REGISTRATION_OTP_SETUP.md).
+
+
+## Đóng tài khoản có lịch sử đặt phòng
+
+Bản sửa `fix/account-closure-policy` cần import thêm `database/account_closure_migration.sql`
+(sau các migration hiện tại trên main), không xóa/import lại database.
+Xem [ACCOUNT_CLOSURE.md](ACCOUNT_CLOSURE.md) để biết quy tắc đơn/tiền, ẩn danh và kiểm thử.
+
+## Đánh giá công khai không cần đặt phòng
+
+Xem [PUBLIC_REVIEWS.md](PUBLIC_REVIEWS.md) để import migration bổ sung và kiểm thử quyền xóa. Admin không còn duyệt/từ chối đánh giá.
+
+## Cải tiến OSM không cần Google billing
+
+Nhánh `feat/osm-manual-location` hỗ trợ khách sạn chưa có trên OSM bằng vị trí thủ công,
+giữ dữ liệu và kiểm tra nguồn rõ ràng. Cần import thêm `database/osm_location_migration.sql`.
+Xem [OSM_MANUAL_LOCATION.md](OSM_MANUAL_LOCATION.md) để cài đặt và sử dụng.

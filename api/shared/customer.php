@@ -3,57 +3,8 @@ require_once __DIR__ . "/bootstrap.php";
 
 function guardCustomerWrite(): void
 {
-    $contentType = strtolower(trim(
-        explode(";", $_SERVER["CONTENT_TYPE"] ?? "")[0]
-    ));
-
-    if ($contentType !== "application/json") {
-        reply(415, [
-            "status" => "error",
-            "message" => "Yêu cầu JSON."
-        ]);
-    }
-
-    $origin = $_SERVER["HTTP_ORIGIN"] ?? "";
-
-    if ($origin === "") {
-        return;
-    }
-
-    $scheme = (
-        !empty($_SERVER["HTTPS"]) &&
-        $_SERVER["HTTPS"] !== "off"
-    ) ? "https" : "http";
-
-    $requestHost = $_SERVER["HTTP_HOST"] ?? "";
-
-    $allowedOrigins = [
-        strtolower($scheme . "://" . $requestHost)
-    ];
-
-    $publicUrl = rtrim(getenv("APP_BASE_URL") ?: "", "/");
-
-    if ($publicUrl !== "") {
-        $publicScheme = parse_url($publicUrl, PHP_URL_SCHEME);
-        $publicHost = parse_url($publicUrl, PHP_URL_HOST);
-
-        if (
-            $publicScheme === "https" &&
-            $publicHost &&
-            strcasecmp($requestHost, $publicHost) === 0
-        ) {
-            $allowedOrigins[] = strtolower($publicUrl);
-        }
-    }
-
-    $normalizedOrigin = strtolower(rtrim($origin, "/"));
-
-    if (!in_array($normalizedOrigin, $allowedOrigins, true)) {
-        reply(403, [
-            "status" => "error",
-            "message" => "Nguồn yêu cầu không hợp lệ."
-        ]);
-    }
+    $failure = securityWriteFailure();
+    if ($failure) reply($failure[0], ['status' => 'error', 'message' => $failure[1]]);
 }
 
 function notifyUser(
@@ -103,4 +54,26 @@ function expireCustomerBookings(PDO $db, int $uid): void
         "UPDATE bookings SET status='cancelled',payment_status='expired' WHERE user_id=? AND status='pending' AND pay_method='online' AND payment_expires_at IS NOT NULL AND payment_expires_at<=NOW() AND payment_status<>'paid'",
     );
     $q->execute([$uid]);
+}
+
+/** Serialize personal-data writes with account closure, including requests authenticated earlier. */
+function beginAccountWrite(PDO $db, int $uid): void
+{
+    $db->beginTransaction();
+    $q = $db->prepare(
+        "SELECT session_version FROM users WHERE id=? AND deleted_at IS NULL FOR UPDATE",
+    );
+    $q->execute([$uid]);
+    $version = $q->fetchColumn();
+    if (
+        $version === false ||
+        (int) $version !== (int) ($_SESSION["version"] ?? 1)
+    ) {
+        $db->rollBack();
+        endUserSession();
+        reply(401, [
+            "status" => "error",
+            "message" => "Phiên đăng nhập không còn hợp lệ.",
+        ]);
+    }
 }

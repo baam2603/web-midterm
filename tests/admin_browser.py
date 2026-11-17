@@ -1,3 +1,4 @@
+from registration_helpers import register_test_user, read_registration_otp
 """Real Chromium UI checks against the isolated admin test database."""
 import json,subprocess,urllib.request,urllib.error,http.cookiejar,secrets,os
 from playwright.sync_api import sync_playwright
@@ -8,7 +9,7 @@ def api(path,body):
  with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(r) as r:return json.load(r)
 run=secrets.token_hex(6);email=f'browser-{run}@example.invalid';password=secrets.token_urlsafe(18)+'A1';uid=None;hotel=None
 try:
- api('/api/auth/register.php',{'fullName':'Browser Test','email':email,'password':password})
+ register_test_user({'fullName':'Browser Test','email':email,'password':password},URL)
  uid=int(sql(f"SELECT id FROM users WHERE email='{email}';"));sql(f"UPDATE users SET role='admin' WHERE id={uid};")
  # Provider fixture exercises our real search/verification/create endpoints without depending on OSM availability.
  fixture='''<?php require '/app/api/admin/places-service.php';

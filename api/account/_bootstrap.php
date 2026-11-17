@@ -32,14 +32,16 @@ function authId(): int
     if ($id <= 0) {
         respond(401, "Vui lòng đăng nhập lại.");
     }
-    $q = connectDB()->prepare("SELECT session_version FROM users WHERE id=?");
+    $q = connectDB()->prepare(
+        "SELECT session_version FROM users WHERE id=? AND deleted_at IS NULL",
+    );
     $q->execute([$id]);
     $version = $q->fetchColumn();
     if (
         $version === false ||
         (int) $version !== (int) ($_SESSION["version"] ?? 1)
     ) {
-        $_SESSION = [];
+        endUserSession();
         respond(401, "Phiên đăng nhập đã hết hạn.");
     }
     return $id;
@@ -54,25 +56,8 @@ function body(): array
 }
 function guardWrite(): void
 {
-    $origin = $_SERVER["HTTP_ORIGIN"] ?? "";
-    if ($origin) {
-        $host = parse_url($origin, PHP_URL_HOST);
-        $port = parse_url($origin, PHP_URL_PORT);
-        $server = explode(":", $_SERVER["HTTP_HOST"] ?? "");
-        if (
-            strtolower((string) $host) !== strtolower($server[0]) ||
-            ($port !== null &&
-                (string) $port !==
-                    ($server[1] ??
-                        (($_SERVER["HTTPS"] ?? "") === "on" ? "443" : "80")))
-        ) {
-            respond(403, "Origin không hợp lệ.");
-        }
-    }
-    $type = strtolower(trim(explode(";", $_SERVER["CONTENT_TYPE"] ?? "")[0]));
-    if ($type !== "application/json") {
-        respond(415, "Yêu cầu application/json.");
-    }
+    $failure = securityWriteFailure();
+    if ($failure) respond($failure[0], $failure[1]);
 }
 function userData(array $u): array
 {

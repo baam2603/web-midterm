@@ -1,17 +1,5 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    $scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
-    $apiPosition = strrpos($scriptPath, '/api/');
-    $cookiePath = $apiPosition === false ? '/' : substr($scriptPath, 0, $apiPosition + 1);
-    session_name('THREEKSESSID');
-    ini_set('session.cookie_path', $cookiePath);
-    ini_set("session.use_strict_mode", "1");
-    ini_set("session.cookie_httponly", "1");
-    ini_set("session.cookie_samesite", "Lax");
-    if (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") {
-        ini_set("session.cookie_secure", "1");
-    }
-}
+require_once __DIR__ . "/session.php";
 function connectDB(): PDO
 {
     static $connection = null;

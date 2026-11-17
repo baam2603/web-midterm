@@ -68,8 +68,15 @@
       "Liên kết Google/Facebook yêu cầu hệ thống OAuth và backend thực tế.";
   });
   $("delete-account-btn").addEventListener("click", async () => {
-    if (!confirm("Bạn có chắc muốn xóa vĩnh viễn tài khoản?")) return;
-    const password = prompt("Nhập mật khẩu để xác nhận xóa tài khoản:");
+    if (
+      !confirm(
+        "Đóng tài khoản vĩnh viễn và ẩn danh thông tin cá nhân? Lịch sử đơn vẫn được giữ để đối soát; đánh giá và nội dung hỗ trợ sẽ được gỡ.",
+      )
+    )
+      return;
+    const password = prompt(
+      "Nhập mật khẩu hiện tại để xác nhận đóng tài khoản:",
+    );
     if (password === null) return;
     try {
       await deleteCurrentAccount(password);

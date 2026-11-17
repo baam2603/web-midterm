@@ -31,14 +31,16 @@ function requireUser(): int
     if (!$id) {
         reply(401, ["status" => "error", "message" => "Vui lòng đăng nhập."]);
     }
-    $q = connectDB()->prepare("SELECT session_version FROM users WHERE id=?");
+    $q = connectDB()->prepare(
+        "SELECT session_version FROM users WHERE id=? AND deleted_at IS NULL",
+    );
     $q->execute([$id]);
     $version = $q->fetchColumn();
     if (
         $version === false ||
         (int) $version !== (int) ($_SESSION["version"] ?? 1)
     ) {
-        $_SESSION = [];
+        endUserSession();
         reply(401, [
             "status" => "error",
             "message" => "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.",

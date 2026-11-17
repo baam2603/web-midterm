@@ -72,17 +72,31 @@ if (
 
 try {
     $pdo = connectDB();
-    $stmt = $pdo->prepare("SELECT id FROM hotels WHERE id = :id LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id,city FROM hotels WHERE id = :id LIMIT 1");
     $stmt->execute(["id" => $id]);
-    if (!$stmt->fetchColumn()) {
+    $existing = $stmt->fetch();
+    if (!$existing) {
         reply(404, [
             "status" => "error",
             "message" => "Không tìm thấy khách sạn.",
         ]);
     }
-    // Không nhận address, city, slug, google_place_id, is_active từ payload.
-    // Thay đổi vị trí cần dùng lại quy trình xác minh OSM;
-    // thay đổi hiển thị cần dùng hotels-visibility.php.
+    $location = null;
+    if (($data["location_mode"] ?? "keep") !== "keep") {
+        require_once __DIR__ . "/location-service.php";
+        if (
+            !is_string($data["address"] ?? null) ||
+            !is_string($data["google_place_id"] ?? "")
+        ) {
+            throw new InvalidArgumentException("Dữ liệu vị trí không hợp lệ.");
+        }
+        $location = resolveHotelLocation(
+            $data,
+            $existing["city"],
+            trim($data["address"]),
+            trim($data["google_place_id"] ?? ""),
+        );
+    }
     $pdo->beginTransaction();
     $update = $pdo->prepare(
         'UPDATE hotels
@@ -99,6 +113,18 @@ try {
         "description" => $description === "" ? null : $description,
     ]);
 
+    if ($location) {
+        $pdo->prepare(
+            "UPDATE hotels SET address=?,google_place_id=?,latitude=?,longitude=?,maps_provider=?,maps_verified_at=NOW() WHERE id=?",
+        )->execute([
+            $location["formattedAddress"],
+            $location["id"],
+            $location["location"]["latitude"],
+            $location["location"]["longitude"],
+            $location["provider"],
+            $id,
+        ]);
+    }
     auditLog($pdo, "hotel.update", "hotel", $id);
     $pdo->commit();
     reply(200, [
@@ -106,6 +132,11 @@ try {
         "message" => "Đã cập nhật thông tin khách sạn.",
         "data" => ["id" => (int) $id],
     ]);
+} catch (InvalidArgumentException $e) {
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    reply(422, ["status" => "error", "message" => $e->getMessage()]);
 } catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();

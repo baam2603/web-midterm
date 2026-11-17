@@ -1,3 +1,4 @@
+from registration_helpers import register_test_user, read_registration_otp
 """Upload/cover/delete integration test, isolated admin test server only."""
 import json,secrets,subprocess,urllib.request,http.cookiejar,base64
 URL='http://127.0.0.1:8001';DB='web-midterm-admin-db'
@@ -9,7 +10,7 @@ def call(path,body=None,token=None):
  with c.open(urllib.request.Request(URL+path,data=None if body is None else json.dumps(body).encode(),headers=h)) as r:return json.load(r)
 run=secrets.token_hex(6);email=f'media-{run}@example.invalid';pw=secrets.token_urlsafe(18)+'A1';uid=None;hotel=None
 try:
- call('/api/auth/register.php',{'fullName':'Media Test','email':email,'password':pw});uid=int(sql(f"SELECT id FROM users WHERE email='{email}';"));sql(f"UPDATE users SET role='admin' WHERE id={uid}")
+ register_test_user({'fullName':'Media Test','email':email,'password':pw},URL,c);uid=int(sql(f"SELECT id FROM users WHERE email='{email}';"));sql(f"UPDATE users SET role='admin' WHERE id={uid}")
  call('/api/auth/login.php',{'email':email,'password':pw});token=call('/api/admin/csrf.php')['data']['csrfToken']
  sql(f"INSERT INTO hotels(slug,name,city,type,stars,address,price_per_night,is_active) VALUES('media-{run}','Media Test','dalat','hotel',3,'Test Street',900000,1)");hotel=int(sql(f"SELECT id FROM hotels WHERE slug='media-{run}'"))
  images=[]

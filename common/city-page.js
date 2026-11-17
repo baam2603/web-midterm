@@ -45,7 +45,7 @@
           "'": "&#39;",
         })[c],
     );
-  const icon = (name) => `<i class="material-symbols-rounded">${name}</i>`;
+  const icon = (name) => `<i class="material-symbols-rounded">${esc(name)}</i>`;
 
   const MONTH_NAMES = [
     "Tháng 1",
@@ -122,24 +122,7 @@
   });
   window.addEventListener("resize", () => Popup.place());
 
-  /* ------------------------- Nạp Leaflet khi cần ------------------------- */
-  let leafletPromise = null;
-  function loadLeaflet() {
-    if (window.L) return Promise.resolve(window.L);
-    if (leafletPromise) return leafletPromise;
-    leafletPromise = new Promise((resolve, reject) => {
-      const css = document.createElement("link");
-      css.rel = "stylesheet";
-      css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-      document.head.appendChild(css);
-      const js = document.createElement("script");
-      js.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-      js.onload = () => resolve(window.L);
-      js.onerror = reject;
-      document.head.appendChild(js);
-    });
-    return leafletPromise;
-  }
+  const loadLeaflet = () => ThreeKOSM.load();
 
   /* ===================================================================
      initCityPage: chỉ khởi tạo một lần sau khi dữ liệu đã sẵn sàng.
@@ -395,12 +378,12 @@
             `<span>${icon(window.AMENITIES[k].icon)} ${esc(window.AMENITIES[k].label)}</span>`,
         )
         .join("");
-      const photoClass = h.photo ? ` hotel-card__photo--${h.photo}` : "";
+      const photoClass = h.photo ? ` hotel-card__photo--${esc(h.photo)}` : "";
       const cover = h.coverImage
         ? `<img src="${esc(h.coverImage)}" alt="${esc(h.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">`
         : "";
       return `
-        <article class="hotel-card tk-fade" data-id="${h.id}">
+        <article class="hotel-card tk-fade" data-id="${esc(h.id)}">
           <div class="hotel-card__photo${photoClass}">${cover}</div>
           <div class="hotel-card__body">
             <div class="hotel-card__top">
@@ -423,7 +406,7 @@
                 <span class="price__value">${fmtMoney(h.price)}</span>
                 <span class="price__unit">/ đêm</span>
               </div>
-              <button type="button" class="btn-solid btn-view" data-id="${h.id}">Xem phòng</button>
+              <button type="button" class="btn-solid btn-view" data-id="${esc(h.id)}">Xem phòng</button>
             </div>
           </div>
         </article>`;
@@ -565,7 +548,7 @@
 
     /* ============================ BẢN ĐỒ ============================ */
     let map = null;
-    let markers = {};
+    let markers = Object.create(null);
 
     async function initMap() {
       const box = $(".map-canvas");
@@ -579,29 +562,12 @@
           [city.lat, city.lng],
           city.zoom,
         );
-        L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
-          attribution: "&copy; Google Maps",
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
         }).addTo(map);
 
-        city.hotels
-          .filter((h) => Number.isFinite(h.lat) && Number.isFinite(h.lng))
-          .forEach((h) => {
-            const m = L.marker([h.lat, h.lng], {
-              icon: L.divIcon({
-                className: "",
-                html: `<span class="tk-pin">${icon("location_on")}</span>`,
-                iconSize: [34, 34],
-                iconAnchor: [17, 32],
-                popupAnchor: [0, -28],
-              }),
-            });
-            m.bindPopup(
-              `<div class="tk-map-pop"><strong>${esc(h.name)}</strong><span>${fmtMoney(h.price)} / đêm</span></div>`,
-            );
-            m.on("click", () => highlight(h.id, true));
-            markers[h.id] = m;
-          });
         setTimeout(() => map.invalidateSize(), 200);
         updateMap();
       } catch (err) {
@@ -615,6 +581,29 @@
       const mapped = visible.filter(
         (h) => Number.isFinite(h.lat) && Number.isFinite(h.lng),
       );
+      mapped.forEach((h) => {
+        let marker = markers[h.id];
+        const popup = `<div class="tk-map-pop"><strong>${esc(h.name)}</strong><span>${fmtMoney(h.price)} / đêm</span></div>`;
+        if (!marker) {
+          marker = L.marker([h.lat, h.lng], {
+            title: h.name,
+            icon: L.divIcon({
+              className: "",
+              html: `<span class="tk-pin">${icon("location_on")}</span>`,
+              iconSize: [34, 34],
+              iconAnchor: [17, 32],
+              popupAnchor: [0, -28],
+            }),
+          }).bindPopup(popup);
+          marker.on("click", () => highlight(h.id, true));
+          markers[h.id] = marker;
+        } else {
+          marker.setLatLng([h.lat, h.lng]);
+          marker.setPopupContent(popup);
+          marker.options.title = h.name;
+          marker.getElement()?.setAttribute("title", h.name);
+        }
+      });
       const ids = new Set(mapped.map((h) => h.id));
       Object.keys(markers).forEach((id) => {
         const m = markers[id];

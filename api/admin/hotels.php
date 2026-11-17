@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../shared/bootstrap.php';
+require_once __DIR__ . "/../shared/bootstrap.php";
 
-requireMethod('GET');
+requireMethod("GET");
 requireAdmin();
 
-header('Cache-Control: no-store, private');
+header("Cache-Control: no-store, private");
 
 try {
     $pdo = connectDB();
-
 
     $sql = "
         SELECT
@@ -22,7 +21,7 @@ try {
             h.type,
             h.stars,
             h.address,
-            h.price_per_night,
+            h.price_per_night, latitude, longitude, maps_provider,
             h.description,
             h.is_active,
             (
@@ -38,11 +37,11 @@ try {
     $hotels = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     reply(200, [
-        'status' => 'success',
-        'data' => [
-            'total' => count($hotels),
-            'hotels' => $hotels
-        ]
+        "status" => "success",
+        "data" => [
+            "total" => count($hotels),
+            "hotels" => $hotels,
+        ],
     ]);
 } catch (Throwable $e) {
     failServer($e);

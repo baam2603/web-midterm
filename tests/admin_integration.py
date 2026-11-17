@@ -1,3 +1,4 @@
+from registration_helpers import register_test_user, read_registration_otp
 """Run only against an isolated test DB/container. Creates and removes its own fixtures.
 ADMIN_TEST_URL=http://127.0.0.1:8001 ADMIN_TEST_DB_CONTAINER=web-midterm-admin-db python3 tests/admin_integration.py
 """
@@ -26,7 +27,7 @@ def passed(name):
     global count;count+=1;print('PASS',name)
 try:
     for c,email in [(admin,emails[0]),(customer,emails[1])]:
-        request(c,'/api/auth/register.php',{'fullName':'Integration Test','email':email,'password':password},expected=201)
+        register_test_user({'fullName':'Integration Test','email':email,'password':password},URL,c)
         uid=int(sql(f"SELECT id FROM users WHERE email='{email}';"));uids.append(uid)
     sql(f"UPDATE users SET role='admin' WHERE id={uids[0]};")
     for c,email in [(admin,emails[0]),(customer,emails[1])]:request(c,'/api/auth/login.php',{'email':email,'password':password})
@@ -61,11 +62,11 @@ try:
     past=int(sql(f"SELECT id FROM bookings WHERE code='test-{run}-past';"))
     request(admin,'/api/admin/operations.php?section=bookings',{'id':past,'status':'completed'},token)
     request(admin,'/api/bookings/complete.php',{'code':f'test-{run}-past'},token,409);passed('checkout completion persists and repeat request conflicts')
-    review=request(customer,'/api/reviews/create.php',{'code':f'test-{run}-past','score':5,'comment':'A sufficiently detailed test review.'},expected=201)['data']['id']
+    review=request(customer,'/api/reviews/create.php',{'city':'dalat','hotelId':f'test-{run}','score':5,'comment':'A sufficiently detailed test review.'},expected=201)['data']['id']
     query=f'/api/reviews/index.php?city=dalat&hotelId=test-{run}'
-    assert request(anon,query)['data']['count']==0
-    request(admin,'/api/admin/operations.php?section=reviews',{'id':int(review),'status':'approved'},token)
-    assert request(anon,query)['data']['count']==1;passed('review remains hidden until admin approval')
+    assert request(anon,query)['data']['count']==1
+    request(admin,'/api/admin/operations.php?section=reviews',{'id':int(review),'action':'delete'},token)
+    assert request(anon,query)['data']['count']==0;passed('review publishes immediately and admin can delete it')
     ticket=request(customer,'/api/support/tickets.php',{'topic':'Booking help','message':'Please help with my booking.'},expected=201)['data']['id']
     request(admin,'/api/admin/operations.php?section=support',{'id':ticket,'reply':'Your request is resolved.','status':'answered'},token)
     assert request(customer,'/api/support/tickets.php')['data'][0]['reply']=='Your request is resolved.';passed('support response is visible to its owner')

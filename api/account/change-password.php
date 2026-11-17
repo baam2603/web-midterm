@@ -18,16 +18,22 @@ if ($current === $next) {
     respond(400, "Mật khẩu mới phải khác mật khẩu cũ.");
 }
 run(function (PDO $pdo) use ($id, $current, $next) {
-    $s = $pdo->prepare("SELECT password_hash FROM users WHERE id=?");
+    $s = $pdo->prepare(
+        "SELECT password_hash FROM users WHERE id=? AND deleted_at IS NULL",
+    );
     $s->execute([$id]);
     $u = $s->fetch();
     if (!$u || !password_verify($current, $u["password_hash"])) {
         respond(400, "Mật khẩu hiện tại không đúng.");
     }
     $s = $pdo->prepare(
-        "UPDATE users SET password_hash=?,session_version=session_version+1 WHERE id=?",
+        "UPDATE users SET password_hash=?,session_version=session_version+1 WHERE id=? AND deleted_at IS NULL",
     );
     $s->execute([password_hash($next, PASSWORD_DEFAULT), $id]);
+    if ($s->rowCount() !== 1) {
+        endUserSession();
+        respond(401, "Phiên đăng nhập đã hết hạn.");
+    }
     $_SESSION["version"] = (int) ($_SESSION["version"] ?? 1) + 1;
     session_regenerate_id(true);
     respond(200, "Đổi mật khẩu thành công.");

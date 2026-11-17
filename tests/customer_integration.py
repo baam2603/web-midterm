@@ -1,3 +1,4 @@
+from registration_helpers import register_test_user, read_registration_otp
 """Customer and signed VNPay protocol tests. Isolated test DB only; no real payments or mail."""
 import os,json,subprocess,urllib.request,urllib.error,http.cookiejar,secrets,hashlib,hmac,urllib.parse,re
 URL=os.environ.get('ADMIN_TEST_URL','http://127.0.0.1:8001');DB='web-midterm-admin-db'
@@ -20,7 +21,7 @@ def signed(p):
  p={k:str(v) for k,v in p.items()};query=urllib.parse.urlencode(sorted(p.items()));p['vnp_SecureHash']=hmac.new(SECRET.encode(),query.encode(),hashlib.sha512).hexdigest();return urllib.parse.urlencode(p)
 try:
  for c,email in [(a,emails[0]),(b,emails[1])]:
-  request(c,'/api/auth/register.php',{'fullName':'Customer Test','email':email,'password':password,'phone':'0900000000'},201);users.append(int(sql(f"SELECT id FROM users WHERE email='{email}'")))
+  register_test_user({'fullName':'Customer Test','email':email,'password':password,'phone':'0900000000'},URL,c);users.append(int(sql(f"SELECT id FROM users WHERE email='{email}'")))
  sql(f"INSERT INTO hotels(slug,name,city,type,stars,address,price_per_night,is_active) VALUES('customer-{run}','Customer SQL Hotel','dalat','hotel',4,'Test address',900000,1)");hotel=int(sql(f"SELECT id FROM hotels WHERE slug='customer-{run}'"))
  sql(f"INSERT INTO room_types(hotel_id,code,name,capacity,total_rooms,price_per_night,free_cancellation,is_active) VALUES({hotel},'unique-room','SQL New Room',2,5,900000,1,1)");room=int(sql(f'SELECT id FROM room_types WHERE hotel_id={hotel}'))
  body={'city':'dalat','hotelId':f'customer-{run}','roomId':'unique-room','checkin':'2099-02-01','checkout':'2099-02-03','rooms':1,'guests':2,'guestName':'Actual Guest','email':emails[0],'phone':'0912345678','note':'Guest note','requestKey':secrets.token_hex(16),'payMethod':'hotel','coupon':'THREEK10'}
@@ -82,9 +83,19 @@ try:
  recovery=request(anon,'/api/auth/recovery.php',{'email':emails[0]});assert 'token' not in json.dumps(recovery).lower()
  html=sql(f"SELECT html_body FROM mail_outbox WHERE recipient='{emails[0]}' AND subject LIKE '%THREEK%' ORDER BY id DESC LIMIT 1")
  token=re.search(r'token=([a-f0-9]{64})',html).group(1);assert token!=sql(f'SELECT token_hash FROM password_resets WHERE user_id={users[0]} ORDER BY id DESC LIMIT 1')
+ assert 'hiệu lực 5 phút' in html
+ assert sql(f"SET time_zone='+07:00';SELECT TIMESTAMPDIFF(SECOND,created_at,expires_at) FROM password_resets WHERE user_id={users[0]} ORDER BY id DESC LIMIT 1")=='300';passed('recovery token expires five minutes after creation and email states the same limit')
  request(anon,'/api/auth/recovery.php',{'token':token,'password':newPassword});request(anon,'/api/auth/recovery.php',{'token':token,'password':newPassword},422)
  request(a,'/api/account/profile.php',status=401);request(a,'/api/auth/login.php',{'email':emails[0],'password':password},401);request(a,'/api/auth/login.php',{'email':emails[0],'password':newPassword});passed('hashed one-time recovery token and revocation of old sessions')
  assert request(b,'/api/account/profile.php')['data']['user']['email']==emails[1];passed('password reset does not affect another account')
+ # Only mutate the isolated fixture: expired tokens must not change the password/session.
+ request(anon,'/api/auth/recovery.php',{'email':emails[0]})
+ html=sql(f"SELECT html_body FROM mail_outbox WHERE recipient='{emails[0]}' AND subject LIKE '%THREEK%' ORDER BY id DESC LIMIT 1")
+ expiredToken=re.search(r'token=([a-f0-9]{64})',html).group(1)
+ sql(f"SET time_zone='+07:00';UPDATE password_resets SET expires_at=DATE_SUB(NOW(),INTERVAL 1 SECOND) WHERE user_id={users[0]} AND used_at IS NULL")
+ request(anon,'/api/auth/recovery.php',{'token':expiredToken,'password':password},422)
+ request(a,'/api/auth/login.php',{'email':emails[0],'password':newPassword})
+ passed('expired recovery link is rejected without changing the password')
  print(f'{count} customer checks passed; no live provider requests performed')
 finally:
  if users:

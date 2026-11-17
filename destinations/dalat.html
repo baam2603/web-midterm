@@ -31,6 +31,11 @@
   <body>
     <!-- ================= HEADER ================= -->
     <header id="site-header"></header>
+    <nav class="tk-city-navigation" aria-label="Điều hướng trang chủ">
+      <a class="tk-city-back" href="../index1.html">
+        <span aria-hidden="true">←</span> Về trang chủ
+      </a>
+    </nav>
     <!-- ================= HERO + SEARCH ================= -->
     <section class="hero">
       <img class="background-hero" src="../sources/dalatlake.jpg" alt="" />
@@ -401,7 +406,8 @@
     </main>
     <footer id="site-footer"></footer>
 
-    <script src="../common/auth-service.js?v=20261104-session2"></script>
+    <script src="../common/auth-service.js?v=20261106-closure"></script>
+    <script src="../common/osm-map.js?v=20261107-manual"></script>
     <script src="../common/header.js"></script>
     <script src="../common/footer.js"></script>
     <script src="../common/favorites.js"></script>
@@ -422,8 +428,8 @@
     </script>
 
     <!-- Logic hiển thị -->
-    <script src="../common/city-page.js?v=20261104-nav"></script>
-    <script src="../common/hotels-api.js?v=25"></script>
+    <script src="../common/city-page.js?v=20261107-manual"></script>
+    <script src="../common/hotels-api.js?v=20261107-manual"></script>
     <script src="../common/city-bootstrap.js?v=25" data-city="dalat"></script>
   </body>
 </html>

@@ -20,8 +20,6 @@
     checked_in: "Đang lưu trú",
     completed: "Hoàn tất",
     cancelled: "Đã hủy",
-    approved: "Đã duyệt",
-    rejected: "Từ chối",
     open: "Chờ phản hồi",
     answered: "Đã phản hồi",
     closed: "Đã đóng",
@@ -30,7 +28,7 @@
     bookings: "Quản lý đặt phòng",
     payments: "Đối soát thanh toán VNPay",
     calendar: "Tồn phòng theo ngày",
-    reviews: "Duyệt đánh giá",
+    reviews: "Quản lý bình luận và đánh giá",
     support: "Yêu cầu hỗ trợ",
     audit: "Nhật ký quản trị",
   };
@@ -153,22 +151,8 @@
       );
     if (section === "reviews")
       return table(
-        ["Khách / đơn", "Khách sạn", "Đánh giá", "Trạng thái / thao tác"],
-        items
-          .map(
-            (r) =>
-              `<tr><td>${esc(r.author)}<br>${esc(r.code)}</td><td>${esc(r.hotelName)}</td><td>${Number(r.score)}/5<p>${esc(r.comment)}</p></td><td>${esc(labels[r.status])}<div class="tk-actions">${[
-                "approved",
-                "rejected",
-              ]
-                .filter((s) => s !== r.status)
-                .map(
-                  (s) =>
-                    `<button class="tk-outline" data-op-id="${Number(r.id)}" data-op-status="${s}">${labels[s]}</button>`,
-                )
-                .join("")}</div></td></tr>`,
-          )
-          .join(""),
+        ["Người đánh giá", "Khách sạn", "Đánh giá", "Thao tác"],
+        items.map((r) => `<tr><td>${esc(r.author)}<br><small>${esc(r.created_at)}</small></td><td>${esc(r.hotelName)}</td><td>${Number(r.score)}/5<p>${esc(r.comment)}</p>${r.status === "rejected" ? "<small>Đã ẩn trước đây</small>" : ""}</td><td><button class="tk-outline" type="button" data-op-review-delete="${Number(r.id)}">Xóa đánh giá</button></td></tr>`).join(""),
       );
     if (section === "support")
       return (
@@ -217,7 +201,7 @@
         "completed",
         "cancelled",
       ],
-      reviews: ["pending", "approved", "rejected"],
+      reviews: [],
       support: ["open", "answered", "closed"],
       audit: [],
     };
@@ -289,6 +273,13 @@
           if (button.isConnected) button.disabled = false;
         }
       };
+      root.querySelectorAll("[data-op-review-delete]").forEach((button) => {
+        button.onclick = () => {
+          if (confirm("Xóa đánh giá này? Không thể khôi phục sau khi xóa.")) {
+            save(button, { id: Number(button.dataset.opReviewDelete), action: "delete" });
+          }
+        };
+      });
       root.querySelectorAll("[data-op-id]").forEach(
         (b) =>
           (b.onclick = () => {

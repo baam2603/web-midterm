@@ -84,7 +84,9 @@
     const placeId = ctx.form.elements.namedItem("google_place_id");
     const address = ctx.form.elements.namedItem("address");
     if (placeId) placeId.value = "";
-    if (address) address.value = "";
+    if (address && ctx.form.elements.location_mode.value !== "manual")
+      address.value = "";
+    ctx.form.elements.location_confirmed.checked = false;
     const mapLink = byId("tk-selected-maps", ctx.form);
     if (mapLink) {
       mapLink.hidden = true;
@@ -189,6 +191,8 @@
         mapLink.hidden = false;
       }
       ctx.map.setView([p.lat, p.lng], 16);
+      ctx.searchCenter = { lat: p.lat, lng: p.lng };
+      ctx.centerPin.setLatLng(ctx.searchCenter);
       showStatus(ctx, `Đã chọn “${name}”. Địa chỉ đã được xác minh từ OSM.`);
       // Không chỉnh giá, số sao, tiện nghi vì OSM không xác minh các thuộc tính thương mại này.
     } catch (error) {
@@ -201,7 +205,12 @@
   }
 
   async function queryNearby(ctx) {
-    if (!ctx.form.isConnected || ctx.busy) return;
+    if (
+      !ctx.form.isConnected ||
+      ctx.busy ||
+      ctx.form.elements.location_mode.value === "manual"
+    )
+      return;
     const button = byId("tk-map-find-nearby", ctx.shell);
     ctx.busy = true;
     button.disabled = true;
@@ -296,18 +305,95 @@
         queryId: 0,
       };
       current = ctx;
+      const isManual = () => form.elements.location_mode.value === "manual";
+      const setManualPoint = (point) => {
+        if (!isManual()) return;
+        form.elements.latitude.value = Number(point.lat).toFixed(7);
+        form.elements.longitude.value = Number(point.lng).toFixed(7);
+        form.elements.location_confirmed.checked = false;
+        const link = byId("tk-selected-maps", form);
+        link.href =
+          "https://www.openstreetmap.org/?mlat=" +
+          point.lat +
+          "&mlon=" +
+          point.lng +
+          "#map=17/" +
+          point.lat +
+          "/" +
+          point.lng;
+        link.hidden = false;
+      };
+      const updateMode = () => {
+        byId("tk-map-find-nearby", shell).disabled = isManual();
+        shell.querySelector(".tk-hotel-map-controls").style.display = isManual()
+          ? "none"
+          : "";
+        if (isManual())
+          showStatus(
+            ctx,
+            "Nhấn bản đồ hoặc kéo ghim đến khách sạn, nhập địa chỉ và xác nhận. Đây là vị trí do quản trị viên cung cấp.",
+          );
+        else showStatus(ctx, "Tìm và chọn cơ sở lưu trú có trong OSM.");
+      };
+      form.addEventListener("admin:location-mode", () => {
+        clearResults(ctx);
+        updateMode();
+      });
+      form.addEventListener("admin:location-point", (event) => {
+        const p = event.detail;
+        if (!Number.isFinite(p?.lat) || !Number.isFinite(p?.lng)) return;
+        ctx.searchCenter = { lat: p.lat, lng: p.lng };
+        centerPin.setLatLng(ctx.searchCenter);
+        map.setView([p.lat, p.lng], 16);
+        setManualPoint(p);
+      });
+      form.addEventListener("input", (event) => {
+        if (
+          !isManual() ||
+          !["latitude", "longitude"].includes(event.target.name)
+        )
+          return;
+        const a = form.elements.latitude.value,
+          b = form.elements.longitude.value,
+          lat = Number(a),
+          lng = Number(b);
+        if (
+          a === "" ||
+          b === "" ||
+          !Number.isFinite(lat) ||
+          !Number.isFinite(lng) ||
+          Math.abs(lat) > 90 ||
+          Math.abs(lng) > 180
+        )
+          return;
+        ctx.searchCenter = { lat, lng };
+        centerPin.setLatLng(ctx.searchCenter);
+        map.setView([lat, lng], 16);
+        form.elements.location_confirmed.checked = false;
+      });
+      updateMode();
+
       map.on("click", (event) => {
         ctx.searchCenter = event.latlng;
         centerPin.setLatLng(event.latlng);
         clearResults(ctx);
-        showStatus(ctx, "Đã chọn vị trí. Nhấn “Tìm khách sạn quanh vị trí”.");
+        setManualPoint(ctx.searchCenter);
+        showStatus(
+          ctx,
+          isManual()
+            ? "Đã đặt ghim thủ công. Hãy kiểm tra tên, địa chỉ và xác nhận."
+            : "Đã chọn vị trí. Nhấn “Tìm khách sạn quanh vị trí”.",
+        );
       });
       centerPin.on("dragend", () => {
         ctx.searchCenter = centerPin.getLatLng();
         clearResults(ctx);
+        setManualPoint(ctx.searchCenter);
         showStatus(
           ctx,
-          "Đã di chuyển ghim. Nhấn “Tìm khách sạn quanh vị trí”.",
+          isManual()
+            ? "Đã di chuyển ghim thủ công. Hãy kiểm tra và xác nhận lại."
+            : "Đã di chuyển ghim. Nhấn “Tìm khách sạn quanh vị trí”.",
         );
       });
       byId("tk-map-find-nearby", shell).addEventListener("click", () =>

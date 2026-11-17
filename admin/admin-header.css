@@ -93,3 +93,24 @@
   .tk-admin-topbar__logo { width: 30px; height: 30px; }
   .tk-admin-topbar__logout { padding: 8px; }
 }
+
+/* Inline room options in both create and edit forms. */
+.tk-form label.tk-room-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.tk-form .tk-room-checkbox input[type="checkbox"] {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin: 1px 0 0;
+  padding: 0;
+  accent-color: #416b4a;
+}
+.tk-room-checkbox span {
+  min-width: 0;
+}

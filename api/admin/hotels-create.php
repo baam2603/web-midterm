@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . "/../shared/bootstrap.php";
-require_once __DIR__ . "/places-service.php";
+require_once __DIR__ . "/location-service.php";
 
 requireMethod("POST");
 requireAdmin();
@@ -67,7 +67,6 @@ if (
     !in_array($type, ["hotel", "resort", "homestay", "villa"], true) ||
     $stars === false ||
     !$validLength($address, 5, 255) ||
-    !preg_match('/^osm-[NWR][0-9]{1,15}$/D', $placeRef) ||
     !$validLength($description, 0, 3000) ||
     $price === false
 ) {
@@ -80,22 +79,9 @@ if (
 
 session_write_close();
 try {
-    // Xác minh phía server; không tin vào ID/tên/địa chỉ do JavaScript gửi.
-    $place = getVerifiedHotelPlace($placeRef, $city);
-
-    // Only enforce matching hotel name when OSM identifies a lodging object.
-    // An exact house-number address verifies LOCATION, not that the hotel exists.
-    $verifiedKind = (string) ($place["kind"] ?? "");
-
-    $verifiedAddress = trim((string) ($place["formattedAddress"] ?? ""));
-    if ($address !== $verifiedAddress) {
-        reply(422, [
-            "status" => "error",
-            "message" =>
-                "Địa chỉ đã thay đổi. Vui lòng chọn lại khách sạn từ kết quả tìm kiếm.",
-        ]);
-    }
-
+    $place = resolveHotelLocation($data, $city, $address, $placeRef);
+    $placeRef = $place["id"];
+    $verifiedKind = $place["kind"];
     $lat = $place["location"]["latitude"] ?? null;
     $lon = $place["location"]["longitude"] ?? null;
     if (!is_numeric($lat) || !is_numeric($lon)) {
@@ -109,8 +95,8 @@ try {
     $pdo->beginTransaction();
     $stmt = $pdo->prepare(
         'INSERT INTO hotels
-         (slug, name, city, type, stars, address, google_place_id, price_per_night, description, latitude, longitude, is_active)
-         VALUES (:slug, :name, :city, :type, :stars, :address, :google_place_id, :price, :description, :lat, :lon, 0)',
+         (slug, name, city, type, stars, address, google_place_id, price_per_night, description, latitude, longitude, is_active, maps_provider, maps_verified_at)
+         VALUES (:slug, :name, :city, :type, :stars, :address, :google_place_id, :price, :description, :lat, :lon, 0, :provider, NOW())',
     );
     $stmt->execute([
         "slug" => $slug,
@@ -120,6 +106,7 @@ try {
         "stars" => $stars,
         "address" => $address,
         "google_place_id" => $placeRef,
+        "provider" => $place["provider"],
         "price" => $price,
         "description" => $description !== "" ? $description : null,
         "lat" => (float) $lat,

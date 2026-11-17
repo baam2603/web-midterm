@@ -130,6 +130,14 @@
       name: String(h.name || ""),
       stars: Number(h.stars || 0),
       address: String(h.address || ""),
+      lat:
+        h.maps_provider === "google" || h.latitude == null
+          ? null
+          : Number(h.latitude),
+      lng:
+        h.maps_provider === "google" || h.longitude == null
+          ? null
+          : Number(h.longitude),
       intro: String(h.description || ""),
       images,
       amenities: dbAmenities,
@@ -138,11 +146,10 @@
       nearby: legacy?.nearby || [],
       rooms,
       priceFrom: rooms.length ? Math.min(...rooms.map((r) => r.price)) : 0,
-      // Với khách sạn cũ, giữ điểm đánh giá DEMO cho tương thích giao diện.
-      // Khách sạn mới không nhận điểm giả. Cần API reviews MySQL riêng khi công khai thật.
-      rating: h.rating ?? null,
+      // Rating is computed from published community reviews in MySQL.
+      rating: h.rating == null ? null : Number(h.rating),
       ratingLabel:
-        h.rating == null ? "Chưa có đánh giá" : "Đánh giá từ khách đã lưu trú",
+        h.rating == null ? "Chưa có đánh giá" : "Đánh giá từ cộng đồng",
       reviewCount: Number(h.review_count || 0),
       hidden: false,
     };

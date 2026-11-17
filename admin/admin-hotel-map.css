@@ -13,3 +13,8 @@
 .tk-hotel-map-choice small{display:block;color:#64748b}
 .tk-map-hotel-status{font-size:13px;color:#334155;margin:8px 0;min-height:18px}
 @media(max-width:640px){.tk-admin-hotel-map{height:300px}.tk-hotel-map-picker{padding:10px}}
+
+/* Keep the confirmation checkbox beside its text in both hotel forms. */
+.tk-form label.tk-location-confirm{display:flex;align-items:flex-start;gap:8px;margin:10px 0;line-height:1.5;cursor:pointer}
+.tk-form .tk-location-confirm input[type="checkbox"]{flex:0 0 16px;width:16px;height:16px;margin:1px 0 0;padding:0;accent-color:#607c57}
+.tk-location-confirm span{min-width:0}
