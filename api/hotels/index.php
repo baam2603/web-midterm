@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . "/../shared/customer.php";
 require_once __DIR__ . "/../shared/inventory.php";
+require_once __DIR__ . "/../shared/hotel-filters.php";
 requireMethod("GET");
 header("Cache-Control: no-store, public");
 $city = trim((string) ($_GET["city"] ?? ""));
@@ -70,12 +71,12 @@ try {
     foreach (
         $db
             ->query(
-                "SELECT ha.hotel_id,a.code FROM hotel_amenities ha JOIN amenities a ON a.id=ha.amenity_id",
+                "SELECT ha.hotel_id,a.code,a.label FROM hotel_amenities ha JOIN amenities a ON a.id=ha.amenity_id",
             )
             ->fetchAll()
         as $a
     ) {
-        $amenities[$a["hotel_id"]][] = $a["code"];
+        $amenities[$a["hotel_id"]][] = $a;
     }
     $items = [];
     foreach ($hotels as $h) {
@@ -87,7 +88,9 @@ try {
             array_column($matching, "price_per_night"),
         );
         $h["max_capacity"] = (int) max(array_column($matching, "capacity"));
-        $h["amenities"] = $amenities[$h["id"]] ?? [];
+        $hotelAmenities = $amenities[$h["id"]] ?? [];
+        $h = array_merge($h, hotelFilterMetadata($h, $hotelAmenities, $matching));
+        $h["amenities"] = array_column($hotelAmenities, "code");
         $h["id"] = (int) $h["id"];
         $h["stars"] = (int) $h["stars"];
         $h["price_per_night"] = (float) $h["price_per_night"];

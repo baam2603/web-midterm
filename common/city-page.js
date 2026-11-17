@@ -63,16 +63,16 @@
   ];
   const DOW = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
   const CHIP_LABEL = {
-    breakfast: "Bữa sáng miễn phí",
+    breakfast: "Bữa sáng",
     parking: "Bãi đỗ xe ô tô",
     fireplace: "Lò sưởi / BBQ",
-    pool: "Hồ bơi vô cực",
+    pool: "Hồ bơi",
   };
 
   function scoreLabel(s) {
-    if (s >= 9) return "Tuyệt hảo";
-    if (s >= 8) return "Rất tốt";
-    if (s >= 7) return "Tốt";
+    if (s >= 4.5) return "Tuyệt hảo";
+    if (s >= 4) return "Rất tốt";
+    if (s >= 3) return "Tốt";
     return "Khá tốt";
   }
 
@@ -231,7 +231,7 @@
           return `<label class="chip"><input type="checkbox" data-group="amenities" value="${k}">${icon(a.icon)} ${esc(CHIP_LABEL[k] || a.label)}</label>`;
         })
         .join("");
-      const starHTML = [5, 4, 3, 2]
+      const starHTML = [5, 4, 3, 2, 1]
         .map(
           (n) =>
             `<label><input type="checkbox" data-group="stars" value="${n}"> ${icon("star").repeat(n)}</label>`,
@@ -249,7 +249,7 @@
         </div>
         <div class="filter-group"><span class="filter-label">Vị trí &amp; không khí</span><div class="check-list">${zoneHTML}</div></div>
         <div class="filter-group"><span class="filter-label">Tiện nghi nổi bật</span><div class="chip-filters">${chipHTML}</div></div>
-        <div class="filter-group"><span class="filter-label">Đánh giá sao</span><div class="star-filters">${starHTML}</div></div>
+        <div class="filter-group"><span class="filter-label">Hạng sao khách sạn</span><div class="star-filters">${starHTML}</div></div>
         <button type="button" class="tk-btn tk-btn--ghost tk-reset" id="tk-reset">Xóa bộ lọc</button>
       `;
 
@@ -259,7 +259,7 @@
           const set = state[t.dataset.group];
           const val = t.dataset.group === "stars" ? Number(t.value) : t.value;
           t.checked ? set.add(val) : set.delete(val);
-          renderResults();
+          scheduleResults();
         }
       });
       filterSection.addEventListener("input", (e) => {
@@ -274,9 +274,15 @@
           $("#tk-price-out").textContent =
             "Tối đa " + fmtMoney(state.maxPrice) + " / đêm";
         }
-        renderResults();
+        scheduleResults();
       });
       $("#tk-reset").addEventListener("click", resetFilters);
+    }
+
+    let renderFrame = null;
+    function scheduleResults() {
+      if (renderFrame !== null) return;
+      renderFrame = requestAnimationFrame(() => { renderFrame = null; renderResults(); });
     }
 
     function resetFilters() {
@@ -310,7 +316,7 @@
       if (sortEl)
         sortEl.addEventListener("change", () => {
           state.sort = sortEl.selectedIndex;
-          renderResults();
+          scheduleResults();
         });
 
       listEl.addEventListener("click", (e) => {
@@ -368,7 +374,7 @@
       return true;
     }
 
-    function cardHTML(h, i) {
+    function tagsHTML(h) {
       const picked = h.amenities.filter((a) => state.amenities.has(a));
       const rest = h.amenities.filter((a) => !state.amenities.has(a));
       const tags = [...picked, ...rest]
@@ -378,12 +384,16 @@
             `<span>${icon(window.AMENITIES[k].icon)} ${esc(window.AMENITIES[k].label)}</span>`,
         )
         .join("");
+      return tags;
+    }
+
+    function cardHTML(h, i) {
       const photoClass = h.photo ? ` hotel-card__photo--${esc(h.photo)}` : "";
       const cover = h.coverImage
         ? `<img src="${esc(h.coverImage)}" alt="${esc(h.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">`
         : "";
       return `
-        <article class="hotel-card tk-fade" data-id="${esc(h.id)}">
+        <article class="hotel-card" data-id="${esc(h.id)}">
           <div class="hotel-card__photo${photoClass}">${cover}</div>
           <div class="hotel-card__body">
             <div class="hotel-card__top">
@@ -399,7 +409,7 @@
                 }
               </div>
             </div>
-            <div class="hotel-card__tags">${tags}</div>
+            <div class="hotel-card__tags"></div>
             <div class="hotel-card__bottom">
               <div class="price">
                 <span class="price__from">Chỉ từ</span>
@@ -450,27 +460,50 @@
         }
         p.textContent = error.message;
       } finally {
-        if (button) button.disabled = false;
+        if (button && version === catalogVersion) button.disabled = false;
       }
     }
+    const cardCache = new Map();
+    let previousMapSignature = "";
     function renderResults() {
+      if (renderFrame !== null) { cancelAnimationFrame(renderFrame); renderFrame = null; }
       visible = city.hotels.filter(matches);
       if (state.sort === 1) visible.sort((a, b) => a.price - b.price);
       else if (state.sort === 2) visible.sort((a, b) => b.score - a.score);
 
       if (countEl) countEl.textContent = visible.length;
       if (listEl) {
-        listEl.innerHTML = visible.length
-          ? visible.map(cardHTML).join("")
-          : `<div class="tk-empty">${icon("search_off")}<p>Không có khách sạn nào phù hợp với yêu cầu của bạn.</p>
-             <button type="button" class="tk-btn" id="tk-empty-reset">Xóa bộ lọc</button></div>`;
-        const r = $("#tk-empty-reset");
-        if (r)
-          r.addEventListener("click", () => {
-            clearStreet();
-            resetFilters();
+        const retained = new Set(visible.map((h) => String(h.id)));
+        for (const node of [...listEl.children]) {
+          if (node.dataset.id ? !retained.has(node.dataset.id) : visible.length > 0) node.remove();
+        }
+        if (!visible.length) {
+          if (!listEl.firstElementChild) {
+            listEl.innerHTML = `<div class="tk-empty">${icon("search_off")}<p>Không có khách sạn nào phù hợp với yêu cầu của bạn.</p><button type="button" class="tk-btn" id="tk-empty-reset">Xóa bộ lọc</button></div>`;
+            $("#tk-empty-reset").onclick = () => { clearStreet(); resetFilters(); };
+          }
+        } else {
+          visible.forEach((hotel, index) => {
+            const markup = cardHTML(hotel, index);
+            let entry = cardCache.get(hotel.id);
+            if (!entry || entry.markup !== markup) {
+              const template = document.createElement("template");
+              template.innerHTML = markup.trim();
+              const node = template.content.firstElementChild;
+              if (entry?.node.parentNode === listEl) entry.node.replaceWith(node);
+              entry = { markup, node }; cardCache.set(hotel.id, entry);
+            }
+            const tagContainer = entry.node.querySelector(".hotel-card__tags");
+            const tags = tagsHTML(hotel);
+            if (tagContainer.innerHTML !== tags) tagContainer.innerHTML = tags;
+            const current = listEl.children[index];
+            if (current !== entry.node) listEl.insertBefore(entry.node, current || null);
           });
+        }
+        const ids = new Set(city.hotels.map((h) => h.id));
+        for (const id of cardCache.keys()) if (!ids.has(id)) cardCache.delete(id);
       }
+      if (highlightedId && !visible.some((hotel) => hotel.id === highlightedId)) highlight(null, false);
       updateMap();
     }
 
@@ -581,6 +614,9 @@
       const mapped = visible.filter(
         (h) => Number.isFinite(h.lat) && Number.isFinite(h.lng),
       );
+      const signature = JSON.stringify(mapped.map((h) => [h.id,h.lat,h.lng,h.name,h.price]).sort((a,b) => String(a[0]).localeCompare(String(b[0]))));
+      if (signature === previousMapSignature) return;
+      previousMapSignature = signature;
       mapped.forEach((h) => {
         let marker = markers[h.id];
         const popup = `<div class="tk-map-pop"><strong>${esc(h.name)}</strong><span>${fmtMoney(h.price)} / đêm</span></div>`;
@@ -611,16 +647,21 @@
           if (!map.hasLayer(m)) m.addTo(map);
         } else if (map.hasLayer(m)) map.removeLayer(m);
       });
-      if (mapped.length === 1) map.setView([mapped[0].lat, mapped[0].lng], 15);
+      if (mapped.length === 1) map.setView([mapped[0].lat, mapped[0].lng], 15, { animate: false });
       else if (mapped.length > 1)
         map.fitBounds(L.latLngBounds(mapped.map((h) => [h.lat, h.lng])), {
           padding: [24, 24],
+          animate: false,
           maxZoom: 15,
         });
-      else map.setView([city.lat, city.lng], city.zoom);
+      else map.setView([city.lat, city.lng], city.zoom, { animate: false });
     }
 
+    let highlightedId = null;
     function highlight(id, scroll) {
+      if (id === highlightedId && !scroll) return;
+      if (highlightedId) cardCache.get(highlightedId)?.node.classList.remove("hotel-card--active");
+      highlightedId = id;
       document
         .querySelectorAll(".hotel-card--active")
         .forEach((c) => c.classList.remove("hotel-card--active"));
@@ -712,7 +753,7 @@
         active = -1;
         state.street = streetInput.value;
         show();
-        renderResults();
+        scheduleResults();
       });
       streetInput.addEventListener("keydown", (e) => {
         const list = items();
@@ -943,7 +984,7 @@
           }
           updateGuestInput();
           render();
-          renderResults();
+          scheduleResults();
         });
         render();
         Popup.open("guests", field, root);

@@ -43,7 +43,7 @@
           ? Number(h.longitude)
           : null;
       const knownAmenityCodes = (
-        Array.isArray(h.amenities) ? h.amenities : []
+        Array.isArray(h.filter_amenities) ? h.filter_amenities : (Array.isArray(h.amenities) ? h.amenities : [])
       ).filter((x) =>
         Object.prototype.hasOwnProperty.call(window.AMENITIES || {}, x),
       );
@@ -57,8 +57,8 @@
         price: Number(h.min_room_price || h.price_per_night) || 0,
         capacity: Number(h.max_capacity) || 0,
         amenities: knownAmenityCodes,
-        streets: Array.isArray(prev.streets) ? prev.streets : [],
-        zones: Array.isArray(prev.zones) ? prev.zones : [],
+        streets: [],
+        zones: Array.isArray(h.zones) ? h.zones : [],
         lat: Number.isFinite(lat) ? lat : null,
         lng: Number.isFinite(lng) ? lng : null,
         photo: prev.photo || "",
@@ -68,6 +68,7 @@
         hidden: false,
       };
     });
+    if (signal?.aborted) throw new DOMException("Yêu cầu đã bị hủy", "AbortError");
     city.hotels = results;
     console.info(
       `[3K Customer] ${cityKey}: API trả ${json.data.length} khách sạn; đã đồng bộ ${results.length} vào danh sách`,
